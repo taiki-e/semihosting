@@ -253,7 +253,7 @@ run() {
                                 args+=(--features panic-unwind)
                                 target_rustflags+=" -C panic=unwind"
                                 case "${target}" in
-                                    # TODO: compiler_builtins overflow bug
+                                    # TODO: compiler_builtins overflow bug: https://github.com/rust-lang/compiler-builtins/pull/521
                                     riscv32i-* | riscv64i-*) ;;
                                     *)
                                         CARGO_TARGET_DIR="../../target/panic-unwind" \
