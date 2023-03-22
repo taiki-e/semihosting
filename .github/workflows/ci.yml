@@ -1,0 +1,187 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+      - staging
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUST_TEST_THREADS: 1
+  RUSTDOCFLAGS: -D warnings
+  RUSTFLAGS: -D warnings
+  RUSTUP_MAX_RETRIES: 10
+  TEST_FEATURES: alloc,stdio,fs,args,time
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  # TODO: check-external-types doesn't support --target flag
+  # check-external-types:
+  #   uses: taiki-e/workflows/.github/workflows/check-external-types.yml@main
+  #   with:
+  #     # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+  #     target: aarch64-unknown-linux-gnu
+  deny:
+    uses: taiki-e/workflows/.github/workflows/deny.yml@main
+  # TODO: taiki-e/workflows/.github/workflows/docs.yml passes --all-features to cargo doc
+  # docs:
+  #   uses: taiki-e/workflows/.github/workflows/docs.yml@main
+  #   with:
+  #     # Building documentation on any architectures that support ARM semihosting with
+  #     # docsrs cfg will show all APIs with proper doc(cfg).
+  #     target: aarch64-unknown-linux-gnu
+  msrv:
+    uses: taiki-e/workflows/.github/workflows/msrv.yml@main
+    with:
+      event_name: ${{ github.event_name }}
+      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+      target: aarch64-unknown-linux-gnu
+      # See env.TEST_FEATURES
+      args: --features alloc,stdio,fs,args,time
+  # TODO: taiki-e/workflows/.github/workflows/tidy.yml passes --all-features to clippy
+  # tidy:
+  #   uses: taiki-e/workflows/.github/workflows/tidy.yml@main
+  #   with:
+  #     # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+  #     target: aarch64-unknown-linux-gnu
+
+  # We have some platform-independent unsafe code, so test them.
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+          - rust: nightly
+            target: aarch64-unknown-linux-gnu
+          - rust: nightly
+            target: mips-unknown-linux-gnu
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain add ${{ matrix.rust }} --no-self-update --component rust-src && rustup default ${{ matrix.rust }}
+      - run: rustup toolchain add nightly --no-self-update
+      - uses: taiki-e/install-action@cargo-hack
+      - uses: taiki-e/install-action@cargo-minimal-versions
+      - uses: taiki-e/cache-cargo-install-action@v1
+        with:
+          tool: cargo-careful
+        if: startsWith(matrix.rust, 'nightly')
+      - uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: ${{ matrix.target }}
+      - run: cargo test --workspace --features $TEST_FEATURES
+      - run: cargo test --workspace --features $TEST_FEATURES --release
+      - run: cargo hack build --workspace --ignore-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace
+      - run: cargo minimal-versions build --workspace --features $TEST_FEATURES --ignore-private
+
+  no-std:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rust: '1.64'
+          - rust: stable
+          - rust: beta
+          - rust: nightly
+          # The behavior of semihosting somewhat depends on the behavior of the host system.
+          - rust: nightly
+            os: macos-latest
+          - rust: nightly
+            os: windows-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain add ${{ matrix.rust }} --no-self-update --component rust-src && rustup default ${{ matrix.rust }}
+      - run: |
+          set -euxo pipefail
+          sudo apt-get -o Acquire::Retries=10 -qq update && sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
+            binutils-arm-none-eabi \
+            qemu-system-arm \
+            qemu-system-mips \
+            qemu-system-misc
+          # APT's qemu package doesn't provide firmware for riscv32 and mips:
+          # https://packages.ubuntu.com/en/jammy/all/qemu-system-data/filelist
+          OPENSBI_VERSION=1.2
+          QEMU_VERSION=7.2.0
+          curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused "https://github.com/riscv-software-src/opensbi/releases/download/v${OPENSBI_VERSION}/opensbi-${OPENSBI_VERSION}-rv-bin.tar.xz" \
+            | tar xJf -
+          sudo mv "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
+          sudo mv "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
+          rm -rf "opensbi-${OPENSBI_VERSION}-rv-bin"
+          # TODO: use sparse-checkout
+          git clone https://github.com/qemu/qemu.git
+          cd qemu
+          git checkout v${QEMU_VERSION}
+          sudo mv pc-bios/{efi-pcnet.rom,vgabios-cirrus.bin} /usr/share/qemu/
+          cd ..
+          rm -rf qemu
+          # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
+          docker create --name qemu-user ghcr.io/taiki-e/qemu-user
+          mkdir -p qemu-user
+          docker cp qemu-user:/usr/bin qemu-user/bin
+          docker rm -f qemu-user >/dev/null
+          sudo mv qemu-user/bin/qemu-* /usr/bin/
+          rm -rf ./qemu-user
+          qemu-arm --version
+        if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
+      - run: brew install --cask gcc-arm-embedded
+        if: startsWith(matrix.os, 'macos')
+      - run: |
+          iwr -useb get.scoop.sh -outfile 'install-scoop.ps1'
+          .\install-scoop.ps1 -RunAsAdmin
+          scoop bucket add extras
+          scoop install qemu gcc-arm-none-eabi
+          echo $env:PATH >> $env:GITHUB_PATH
+        shell: powershell
+        if: startsWith(matrix.os, 'windows')
+      - run: tools/no-std.sh
+      - run: tools/no-std.sh
+        env:
+          TEST_RUNNER: qemu-user
+        if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
+
+  # We have some platform-independent unsafe code, so test them with Miri.
+  # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+  miri:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain add nightly --no-self-update --component miri && rustup default nightly
+      - run: cargo miri test --features $TEST_FEATURES --target aarch64-unknown-linux-gnu
+        env:
+          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-retag-fields -Zmiri-disable-isolation
+          RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
+          RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout

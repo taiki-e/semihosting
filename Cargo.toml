@@ -1,0 +1,83 @@
+[package]
+name = "semihosting"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.64"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/taiki-e/semihosting"
+keywords = ["qemu"]
+categories = ["embedded", "hardware-support", "no-std"]
+exclude = ["/.*", "/tools", "/target-specs"]
+description = """
+Semihosting for AArch64, ARM, RISC-V (RV32 & RV64), MIPS, and MIPS64.
+"""
+
+[package.metadata.docs.rs]
+features = ["alloc", "stdio", "fs", "args", "time"]
+rustdoc-args = ["--cfg", "docsrs"]
+# Building documentation on any architectures that support ARM semihosting with
+# docsrs cfg will show all APIs with proper doc(cfg).
+targets = ["aarch64-unknown-linux-gnu"]
+
+[workspace]
+resolver = "2"
+
+[lib]
+doc-scrape-examples = false
+
+[features]
+# Use `alloc`.
+alloc = []
+
+# Enable `semihosting::io::{stdin,stdout,stderr}` and `semihosting::{print*,eprint*,dbg}`.
+stdio = []
+
+# Enable `semihosting::fs`.
+fs = []
+
+# Enable `semihosting::experimental::env::args`.
+#
+# Note: This feature is experimental and outside of the normal semver guarantees and
+# minor or patch versions of semihosting may make breaking changes to them at any time.
+args = []
+
+# Enable `semihosting::experimental::time`.
+#
+# Note: This feature is experimental and outside of the normal semver guarantees and
+# minor or patch versions of semihosting may make breaking changes to them at any time.
+time = []
+
+# Provide panic handler based on `semihosting::process::exit`.
+#
+# If the `stdio` feature is enabled, this attempt to output panic message and
+# location to stderr.
+panic-handler = []
+
+# Provide `-C panic=unwind` support for panic handler and enable
+# `semihosting::experimental::panic::catch_unwind`.
+#
+# See readme for details.
+#
+# Note: This feature is experimental and outside of the normal semver guarantees and
+# minor or patch versions of semihosting may make breaking changes to them at any time.
+panic-unwind = ["alloc", "panic-handler", "unwinding", "unwinding/fde-static", "unwinding/panic", "unwinding/personality"]
+
+# Provide backtrace support for panic handler.
+#
+# See readme for details.
+#
+# Note: This feature is experimental and outside of the normal semver guarantees and
+# minor or patch versions of semihosting may make breaking changes to them at any time.
+backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
+
+[dependencies]
+# Use portable-atomic's atomic types.
+#
+# See readme for details.
+portable-atomic = { version = "1", optional = true, default-features = false }
+
+# Not public optional features.
+unwinding = { version = "0.1.5", optional = true, default-features = false, features = ["unwinder"] }
+
+[patch.crates-io]
+unwinding = { git = "https://github.com/taiki-e/unwinding.git", branch = "riscv32" } # RV32 support
