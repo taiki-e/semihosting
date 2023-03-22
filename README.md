@@ -27,10 +27,7 @@ APIs are categorized into the following four types:
 
 - `semihosting::sys` module, which provides low-level access to platform-specific semihosting interfaces.
 
-- `semihosting::experimental` module, which provides experimental APIs.
-  - `experimental::env::args` (requires `args` feature)
-  - `experimental::time::SystemTime` (requires `time` feature)
-  - `experimental::panic::catch_unwind` (requires `panic-unwind` feature and nightly compiler)
+- `semihosting::experimental` module, which provides experimental APIs. See [optional features](#optional-features) for more.
 
 Additionally, this library provides a panic handler for semihosting and `-C panic=unwind` support, via optional features.
 
@@ -92,25 +89,35 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 - **`fs`**<br>
   Enable `semihosting::fs`.
 
-- **`args`**<br>
-  Enable `semihosting::experimental::env::args`.
-
-  Note:
-  - This feature is experimental and outside of the normal semver guarantees and
-    minor or patch versions of semihosting may make breaking changes to them at any time.
-
-- **`time`**<br>
-  Enable `semihosting::experimental::time`.
-
-  Note:
-  - This feature is experimental and outside of the normal semver guarantees and
-    minor or patch versions of semihosting may make breaking changes to them at any time.
-
 - **`panic-handler`**<br>
   Provide panic handler based on `semihosting::process::exit`.
 
   If the `stdio` feature is also enabled, this attempt to output panic message and
   location to stderr.
+
+- **`portable-atomic`**<br>
+  Use [portable-atomic]'s atomic types.
+
+  portable-atomic provides atomic CAS on targets where the standard library does not provide atomic CAS.
+  To use the `panic-unwind` feature on such targets (e.g., RISC-V without A-extension), you need to enable this feature.
+
+  See [the documentation](https://github.com/taiki-e/portable-atomic#optional-cfg) for details.
+
+- **`args`**<br>
+  Enable `semihosting::experimental::env::args`.
+
+  Note:
+  - This feature is experimental (tracking issue: [#1](https://github.com/taiki-e/semihosting/issues/1))
+    and outside of the normal semver guarantees and minor or patch versions of semihosting may make
+    breaking changes to them at any time.
+
+- **`time`**<br>
+  Enable `semihosting::experimental::time`.
+
+  Note:
+  - This feature is experimental (tracking issue: [#2](https://github.com/taiki-e/semihosting/issues/2))
+    and outside of the normal semver guarantees and minor or patch versions of semihosting may make
+    breaking changes to them at any time.
 
 - **`panic-unwind`**<br>
   Provide `-C panic=unwind` support for panic handler and enable
@@ -120,8 +127,9 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   See its documentation for supported platforms and requirements.
 
   Note:
-  - This feature is experimental and outside of the normal semver guarantees and
-    minor or patch versions of semihosting may make breaking changes to them at any time.
+  - This feature is experimental (tracking issue: [#3](https://github.com/taiki-e/semihosting/issues/3))
+    and outside of the normal semver guarantees and minor or patch versions of semihosting may make
+    breaking changes to them at any time.
   - This requires nightly compiler.
   - This implicitly enables the `alloc` and `panic-handler` features.
   - This uses atomic CAS. You need to use `portable-atomic` feature together if your target doesn't support atomic CAS (e.g., RISC-V without A-extension).
@@ -136,8 +144,9 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   See its documentation for supported platforms and requirements.
 
   Note:
-  - This feature is experimental and outside of the normal semver guarantees and
-    minor or patch versions of semihosting may make breaking changes to them at any time.
+  - This feature is experimental (tracking issue: [#3](https://github.com/taiki-e/semihosting/issues/3))
+    and outside of the normal semver guarantees and minor or patch versions of semihosting may make
+    breaking changes to them at any time.
   - This requires nightly compiler.
   - This implicitly enables the `stdio` feature.
   - When enabling this, it is recommended to also enable the `panic-unwind` feature. Otherwise, a decent backtrace will not be displayed at this time. (Using [`-C force-unwind-tables`](https://doc.rust-lang.org/rustc/codegen-options/index.html#force-unwind-tables) may work, but has not been tested yet.)
@@ -162,14 +171,6 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     ```sh
     llvm-addr2line -fipe <path/to/binary> | rustfilt
     ```
-
-- **`portable-atomic`**<br>
-  Use [portable-atomic]'s atomic types.
-
-  portable-atomic provides atomic CAS on targets where the standard library does not provide atomic CAS.
-  To use the `panic-unwind` feature on such targets (e.g., RISC-V without A-extension), you need to enable this feature.
-
-  See [the documentation](https://github.com/taiki-e/portable-atomic#optional-cfg) for details.
 
 [portable-atomic]: https://github.com/taiki-e/portable-atomic
 [rustfilt]: https://github.com/luser/rustfilt
