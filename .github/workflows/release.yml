@@ -34,10 +34,14 @@ jobs:
           persist-credentials: false
       - name: Install Rust
         run: rustup update stable --no-self-update
-      - run: cargo package
+      - run: rustup target add aarch64-unknown-linux-gnu
+      - run: cargo package --target aarch64-unknown-linux-gnu
       - uses: taiki-e/create-gh-release-action@v1
         with:
           changelog: CHANGELOG.md
           title: $version
           branch: main
           token: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo publish --target aarch64-unknown-linux-gnu
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
