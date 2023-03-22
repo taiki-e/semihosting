@@ -67,7 +67,7 @@ pub unsafe fn _start_rust() -> ! {
 #[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[cfg(not(mclass))]
 #[no_mangle]
-unsafe fn _start() -> ! {
+unsafe fn _start(_: usize, _: usize) -> ! {
     #[cfg(all(any(target_arch = "riscv32", target_arch = "riscv64"), feature = "qemu-system"))]
     unsafe {
         core::arch::asm!("la sp, _stack");
@@ -95,7 +95,7 @@ fn run() {
 
     // TODO
     if cfg!(all(target_arch = "arm", thumbv8m)) && !cfg!(host_linux)
-        || cfg!(any(armv5te, armv4t)) && cfg!(feature = "qemu-system")
+        //|| cfg!(any(armv5te, armv4t)) && cfg!(feature = "qemu-system")
         || cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system")
     {
         if cfg!(target_arch = "aarch64") || cfg!(any(armv5te, armv4t)) {
