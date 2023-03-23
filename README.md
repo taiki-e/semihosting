@@ -49,7 +49,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | ------------------------------------ | ---- | --------------------------- | ------------------------- | ------------------------------- |
 | `aarch64-unknown-none{,-softfloat}`  | ✓    | ✓                           | ✓                         | ✓                               |
 | `{arm,thumb}v4t-none-eabi`           | ✓    |                             | ✓                         |                                 |
-| `{arm,thumb}v5te-none-eabi`          | ✓    |                             | ✓                         |                                 |
+| `{arm,thumb}v5te-none-eabi`          | ✓    | ✓                           | ✓                         |                                 |
 | `armv7a-none-eabi{,hf}`              | ✓    | ✓                           | ✓                         |                                 |
 | `armv7r-none-eabi{,hf}`              | ✓    | ✓                           | ✓                         |                                 |
 | `armebv7r-none-eabi{,hf}`            | ✓    |                             | ✓                         |                                 |

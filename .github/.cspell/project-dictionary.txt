@@ -6,7 +6,6 @@ blksize
 bytecount
 CMDLINE
 compat
-connex
 CREAT
 demangle
 ebreak
@@ -36,7 +35,6 @@ IXGRP
 IXOTH
 IXUSR
 lseek
-mainstone
 mbig
 musicpal
 nanos
@@ -67,18 +65,15 @@ subarch
 subcmd
 subcode
 subsec
-supermicrox
 syscall
 TDMI
 tickfreq
 timespec
 TMPNAM
-tosa
 TRUNC
 Uncategorized
 unseekable
 useb
-verdex
 versatileab
 versatilepb
 vgabios

@@ -94,20 +94,7 @@ case "${target}" in
         ;;
     # ARMv5TE
     armv5te* | thumbv5te*)
-        # qemu-system-arm -M help | grep -E 'ARM9|ARM10|PXA'
-        # all passed: N/A
-        # exit-only passed:
-        # - integratorcp, musicpal, realview-eb, versatileab, versatilepb (ARM926EJ-S)
-        # - tosa (PXA255)
-        # - akita, borzoi, spitz, terrier (PXA270)
-        # - mainstone, z2 (PXA27x)
-        # not worked:
-        # - canon-a1100 (ARM946)
-        # - imx25-pdk (ARM926)
-        # - palmetto-bmc, quanta-q71l-bmc, supermicrox11-bmc (ARM926EJ-S)
-        # - connex (PXA255)
-        # - verdex (PXA270)
-        qemu_system arm -M integratorcp
+        qemu_system arm -cpu arm926 -M versatilepb
         ;;
     # RISC-V
     riscv32*)

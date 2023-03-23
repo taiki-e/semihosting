@@ -55,8 +55,8 @@ fn main() -> ! {
     run();
     semihosting::process::exit(0)
 }
-#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
-#[cfg(not(mclass))]
+#[cfg(feature = "qemu-system")]
+#[cfg(any(target_arch = "aarch64"))]
 #[no_mangle]
 pub unsafe fn _start_rust() -> ! {
     #[cfg(feature = "panic-unwind")]
@@ -71,6 +71,18 @@ unsafe fn _start(_: usize, _: usize) -> ! {
     #[cfg(all(any(target_arch = "riscv32", target_arch = "riscv64"), feature = "qemu-system"))]
     unsafe {
         core::arch::asm!("la sp, _stack");
+    }
+    #[cfg(all(armv5te, feature = "qemu-system"))]
+    unsafe {
+        #[instruction_set(arm::a32)]
+        #[inline]
+        unsafe fn init() {
+            unsafe {
+                // For integratorcp, musicpal, realview-eb, versatileab, and versatilepb
+                core::arch::asm!("mov sp, #0x8000");
+            }
+        }
+        init();
     }
     #[cfg(feature = "panic-unwind")]
     init_global_allocator();
@@ -95,10 +107,10 @@ fn run() {
 
     // TODO
     if cfg!(all(target_arch = "arm", thumbv8m)) && !cfg!(host_linux)
-        //|| cfg!(any(armv5te, armv4t)) && cfg!(feature = "qemu-system")
+        || cfg!(armv4t) && cfg!(feature = "qemu-system")
         || cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system")
     {
-        if cfg!(target_arch = "aarch64") || cfg!(any(armv5te, armv4t)) {
+        if cfg!(armv4t) {
         } else {
             println!("this message does not print...");
             io::stdout().unwrap_err();
