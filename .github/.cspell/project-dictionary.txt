@@ -43,6 +43,7 @@ nonnull
 norvc
 nostartfiles
 nsec
+OMAP
 opensbi
 outfile
 pcnet

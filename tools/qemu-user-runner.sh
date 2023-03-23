@@ -83,13 +83,6 @@ case "${target}" in
         ;;
     # ARMv5TE
     armv5te* | thumbv5te*)
-        # qemu-system-arm -cpu help | grep -E 'arm9|arm10|pxa'
-        # all passed:
-        # - arm926, arm946 (ARM9E)
-        # - arm1026 (ARM10E)
-        # - pxa250, pxa255, pxa260, pxa261, pxa262, pxa270, pxa270-{a0,a1,b0,b1,c0,c5} (XScale)
-        # exit-only passed: N/A
-        # not worked: N/A
         qemu_user arm -cpu arm926
         ;;
     # RISC-V

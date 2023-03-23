@@ -163,8 +163,10 @@ run() {
                 return 0
             fi
             ;;
-        # lld doesn't support big-endian arm
-        armebv7r*) target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB" ;;
+        armebv7r*)
+            # lld doesn't support big-endian arm
+            target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+            ;;
         thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*)
             case "${runner}" in
                 # TODO: qemu-arm: ../../accel/tcg/translate-all.c:1381: page_set_flags: Assertion `end - 1 <= GUEST_ADDR_MAX' failed.
@@ -184,18 +186,6 @@ run() {
                     ;;
             esac
             ;;
-        mips*)
-            case "${runner}" in
-                # As of QEMU 7.2, QEMU doesn't support semihosting for MIPS with user-mode.
-                # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
-                qemu-user)
-                    info "QEMU doesn't support semihosting for MIPS (${target}) with user-mode (skipped)"
-                    return 0
-                    ;;
-            esac
-            linker=mips.ld
-            target_rustflags+=" -C link-arg=-T${linker}"
-            ;;
         riscv*)
             case "${runner}" in
                 qemu-system)
@@ -207,6 +197,18 @@ run() {
                     target_rustflags+=" -C link-arg=-T${linker}"
                     ;;
             esac
+            ;;
+        mips*)
+            case "${runner}" in
+                # As of QEMU 7.2, QEMU doesn't support semihosting for MIPS with user-mode.
+                # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
+                qemu-user)
+                    info "QEMU doesn't support semihosting for MIPS (${target}) with user-mode (skipped)"
+                    return 0
+                    ;;
+            esac
+            linker=mips.ld
+            target_rustflags+=" -C link-arg=-T${linker}"
             ;;
     esac
 

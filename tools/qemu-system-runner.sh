@@ -85,12 +85,13 @@ case "${target}" in
         ;;
     # ARMv4T
     armv4t* | thumbv4t*)
-        # qemu-system-arm -M help | grep -E '9.*T|SA-'
+        # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'
         # all passed: N/A
         # exit-only passed:
+        # - cheetah, sx1, sx1-v1 (OMAP310)
         # - collie (SA-1110)
         # not worked: N/A
-        qemu_system arm -M collie
+        qemu_system arm -M cheetah
         ;;
     # ARMv5TE
     armv5te* | thumbv5te*)
