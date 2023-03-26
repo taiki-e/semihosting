@@ -77,7 +77,4 @@ backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
 portable-atomic = { version = "1", optional = true, default-features = false }
 
 # Not public optional features.
-unwinding = { version = "0.1.5", optional = true, default-features = false, features = ["unwinder"] }
-
-[patch.crates-io]
-unwinding = { git = "https://github.com/taiki-e/unwinding.git", branch = "riscv32" } # RV32 support
+unwinding = { version = "0.1.6", optional = true, default-features = false, features = ["unwinder"] }

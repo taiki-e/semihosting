@@ -42,6 +42,3 @@ cortex-m-rt = "0.7"
 opt-level = "s"
 
 [profile.release]
-
-[patch.crates-io]
-unwinding = { git = "https://github.com/taiki-e/unwinding.git", branch = "riscv32" } # RV32 support
