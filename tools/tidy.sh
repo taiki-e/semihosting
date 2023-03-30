@@ -120,8 +120,8 @@ if [[ -n "$(git ls-files '*.yml')$(git ls-files '*.js')$(git ls-files '*.json')"
                 permissions=$(yq '.permissions' "${workflow}" | jq -c)
                 case "${permissions}" in
                     '{"contents":"read"}' | '{"contents":"none"}' | '{}') ;;
-                    null) warn "${workflow}: top level permissions not found; it must be 'contents: read' or weaker permissions" ;;
-                    *) warn "${workflow}: only 'contents: read' and weaker permissions are allowed at top level; if you want to use stronger permissions, please set job-level permissions" ;;
+                    null) error "${workflow}: top level permissions not found; it must be 'contents: read' or weaker permissions" ;;
+                    *) error "${workflow}: only 'contents: read' and weaker permissions are allowed at top level; if you want to use stronger permissions, please set job-level permissions" ;;
                 esac
                 # Make sure the 'needs' section is not out of date.
                 if grep -q '# tidy:needs' "${workflow}" && ! grep -Eq '# *needs: \[' "${workflow}"; then
@@ -134,7 +134,7 @@ if [[ -n "$(git ls-files '*.yml')$(git ls-files '*.js')$(git ls-files '*.json')"
                         printf -v jobs '%s, ' "${jobs_actual[@]}"
                         sed -i "s/needs: \[.*\] # tidy:needs/needs: [${jobs%, }] # tidy:needs/" "${workflow}"
                         check_diff "${workflow}"
-                        warn "${workflow}: please update 'needs' section in 'ci-success' job"
+                        error "${workflow}: please update 'needs' section in 'ci-success' job"
                     fi
                 fi
             done

@@ -3,7 +3,6 @@ argnlen
 balign
 bkpt
 blksize
-bytecount
 CMDLINE
 compat
 CREAT
