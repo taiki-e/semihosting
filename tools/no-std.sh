@@ -255,15 +255,9 @@ run() {
                                 build_std=(-Z build-std="core,alloc")
                                 args+=(--features panic-unwind)
                                 target_rustflags+=" -C panic=unwind"
-                                case "${target}" in
-                                    # TODO: compiler_builtins overflow bug: https://github.com/rust-lang/compiler-builtins/pull/521
-                                    riscv32i-* | riscv64i-*) ;;
-                                    *)
-                                        CARGO_TARGET_DIR="../../target/panic-unwind" \
-                                            RUSTFLAGS="${target_rustflags}" \
-                                            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
-                                        ;;
-                                esac
+                                CARGO_TARGET_DIR="../../target/panic-unwind" \
+                                    RUSTFLAGS="${target_rustflags}" \
+                                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
                                 CARGO_TARGET_DIR="../../target/panic-unwind" \
                                     RUSTFLAGS="${target_rustflags}" \
                                     x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
