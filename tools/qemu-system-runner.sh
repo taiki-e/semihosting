@@ -81,6 +81,7 @@ case "${target}" in
         ;;
     # Cortex-R (AArch32)
     armv7r* | armebv7r*)
+        # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
         qemu_system arm -M xilinx-zynq-a9
         ;;
     # ARMv4T
