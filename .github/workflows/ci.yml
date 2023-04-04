@@ -57,12 +57,13 @@ jobs:
       target: aarch64-unknown-linux-gnu
       # See env.TEST_FEATURES
       args: --features alloc,stdio,fs,args,time
-  # TODO: taiki-e/workflows/.github/workflows/tidy.yml passes --all-features to clippy
-  # tidy:
-  #   uses: taiki-e/workflows/.github/workflows/tidy.yml@main
-  #   with:
-  #     # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-  #     target: aarch64-unknown-linux-gnu
+  tidy:
+    uses: taiki-e/workflows/.github/workflows/tidy.yml@main
+    with:
+      # TODO: taiki-e/workflows/.github/workflows/tidy.yml passes --all-features to clippy
+      clippy: false
+      # # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+      # target: aarch64-unknown-linux-gnu
 
   # We have some platform-independent unsafe code, so test them.
   test:
