@@ -65,7 +65,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 
 \[1] `stdio`, `fs`, `time`, and `args`.<br>
 \[2] I'm not sure how to test panic-unwind on qemu-user.<br>
-\[3] It works if the host OS is Linux, but not if the host OS is any other OS. It is not clear whether the actual problem is in the host OS or the QEMU version.<br>
+\[3] Worked on QEMU 6.2 and QEMU 8.0, failed on QEMU 7.2.<br>
 \[5] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
 
 ## Optional features

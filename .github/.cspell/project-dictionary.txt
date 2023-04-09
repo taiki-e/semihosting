@@ -3,6 +3,7 @@ argnlen
 balign
 bkpt
 blksize
+choco
 CMDLINE
 compat
 CREAT
@@ -42,7 +43,6 @@ norvc
 nsec
 OMAP
 opensbi
-outfile
 pcnet
 plog
 pread
@@ -71,7 +71,6 @@ TMPNAM
 TRUNC
 Uncategorized
 unseekable
-useb
 versatileab
 versatilepb
 vgabios

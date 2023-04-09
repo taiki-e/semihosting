@@ -156,12 +156,10 @@ jobs:
       - run: brew install --cask gcc-arm-embedded
         if: startsWith(matrix.os, 'macos')
       - run: |
-          iwr -useb get.scoop.sh -outfile 'install-scoop.ps1'
-          .\install-scoop.ps1 -RunAsAdmin
-          scoop bucket add extras
-          scoop install qemu gcc-arm-none-eabi
-          echo $env:PATH >> $env:GITHUB_PATH
-        shell: powershell
+          set -euxo pipefail
+          choco install gcc-arm-embedded
+          choco install qemu --version=2022.12.30 # 7.2
+          echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
         if: startsWith(matrix.os, 'windows')
       - run: tools/no-std.sh
       - run: tools/no-std.sh
