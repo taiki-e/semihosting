@@ -32,9 +32,6 @@ fn main() {
         }
     };
 
-    if version.nightly && is_allowed_feature("panic_info_message") {
-        println!("cargo:rustc-cfg=semihosting_unstable_panic_info_message");
-    }
     if version.nightly && is_allowed_feature("rustc_attrs") {
         println!("cargo:rustc-cfg=semihosting_unstable_rustc_attrs");
     }

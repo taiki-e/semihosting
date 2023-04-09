@@ -4,29 +4,7 @@
 #[cfg_attr(not(test), panic_handler)]
 fn _panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     #[cfg(feature = "stdio")]
-    {
-        #[cfg(semihosting_unstable_panic_info_message)]
-        {
-            if let Some(m) = _info.message() {
-                eprint!("panicked at '{m:?}'");
-            } else {
-                eprint!("panic occurred (no message)");
-            }
-        }
-        #[cfg(not(semihosting_unstable_panic_info_message))]
-        {
-            if let Some(m) = _info.payload().downcast_ref::<&str>() {
-                eprint!("panicked at '{m:?}'");
-            } else {
-                eprint!("panic occurred (no static message)");
-            }
-        }
-        if let Some(l) = _info.location() {
-            eprintln!(", {l}");
-        } else {
-            eprintln!(" (no location info)");
-        }
-    }
+    eprintln!("{_info}");
     #[cfg(feature = "panic-unwind")]
     {
         use crate::atomic::Ordering;

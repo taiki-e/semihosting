@@ -65,10 +65,6 @@
     )),
     feature(asm_experimental_arch)
 )]
-#![cfg_attr(
-    all(feature = "panic-handler", semihosting_unstable_panic_info_message),
-    feature(panic_info_message)
-)]
 #![cfg_attr(semihosting_unstable_rustc_attrs, feature(rustc_attrs))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![allow(clippy::empty_loop)] // this crate is #![no_std]
