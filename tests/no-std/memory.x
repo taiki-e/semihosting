@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR MIT */
 /* Device specific memory layout for Cortex-M test */
 
 /* See https://docs.rs/cortex-m-rt for more. */

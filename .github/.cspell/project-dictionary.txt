@@ -34,13 +34,11 @@ IXGRP
 IXOTH
 IXUSR
 lseek
-mbig
 musicpal
 nanos
 nlink
 nonnull
 norvc
-nostartfiles
 nsec
 OMAP
 opensbi
