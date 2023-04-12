@@ -6,6 +6,7 @@
 [![rustc](https://img.shields.io/badge/rustc-1.64+-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![build status](https://img.shields.io/github/actions/workflow/status/taiki-e/semihosting/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/semihosting/actions)
 
+<!-- tidy:crate-doc:start -->
 Semihosting for AArch64, ARM, RISC-V (RV32 & RV64), MIPS, and MIPS64.
 
 This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [ARM documentation](https://github.com/ARM-software/abi-aa/blob/main/semihosting/semihosting.rst) for more information on semihosting.
@@ -174,6 +175,8 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 [portable-atomic]: https://github.com/taiki-e/portable-atomic
 [rustfilt]: https://github.com/luser/rustfilt
 [unwinding]: https://github.com/nbdd0121/unwinding
+
+<!-- tidy:crate-doc:end -->
 
 ## License
 
