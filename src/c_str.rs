@@ -56,7 +56,7 @@ macro_rules! c {
     }};
 }
 
-// Based on https://github.com/rust-lang/rust/blob/1.68.0/library/core/src/ffi/c_str.rs#L430-L440
+// Based on https://github.com/rust-lang/rust/blob/1.69.0/library/core/src/ffi/c_str.rs#L431
 // - bytes must be nul-terminated.
 // - bytes must not contain any interior nul bytes.
 #[doc(hidden)]

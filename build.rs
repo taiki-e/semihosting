@@ -54,7 +54,7 @@ fn main() {
             "v6m" | "v7em" | "v7m" | "v8m" => is_mclass = true,
             "v7r" | "v8r" => {} // rclass
             // arm-linux-androideabi is v5te
-            // https://github.com/rust-lang/rust/blob/1.68.0/compiler/rustc_target/src/spec/arm_linux_androideabi.rs#L11-L12
+            // https://github.com/rust-lang/rust/blob/1.69.0/compiler/rustc_target/src/spec/arm_linux_androideabi.rs#L11-L12
             _ if target == "arm-linux-androideabi" => subarch = "v5te",
             // v6 targets other than v6m don't have *class target feature.
             "" | "v6" | "v6k" => subarch = "v6",
@@ -166,7 +166,7 @@ mod version {
         // The known latest stable version. If we unable to determine
         // the rustc version, we assume this is the current version.
         // It is no problem if this is older than the actual latest stable.
-        pub(crate) const LATEST: Self = Self::stable(68);
+        pub(crate) const LATEST: Self = Self::stable(69);
 
         pub(crate) const fn stable(rustc_minor: u32) -> Self {
             Self {

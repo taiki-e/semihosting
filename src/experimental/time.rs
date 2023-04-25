@@ -87,7 +87,7 @@ impl fmt::Display for SystemTimeError {
     }
 }
 
-// Based on https://github.com/rust-lang/rust/blob/1.68.0/library/std/src/sys/unix/time.rs.
+// Based on https://github.com/rust-lang/rust/blob/1.69.0/library/std/src/sys/unix/time.rs.
 mod sys {
     use core::{fmt, time::Duration};
 
