@@ -224,7 +224,7 @@ pub enum SeekFrom {
     /// It is possible to seek beyond the end of an object, but it's an error to
     /// seek before byte 0.
     End(i64),
-    // It appears that SeekFrom::Current cannot be implemented with APIs provided by ARM semihosting...
+    // TODO: It appears that SeekFrom::Current cannot be implemented with APIs provided by ARM semihosting...
     // /// Sets the offset to the current position plus the specified number of
     // /// bytes.
     // ///

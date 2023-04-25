@@ -46,6 +46,7 @@ pub(crate) fn open(path: &CStr, options: &crate::fs::OpenOptions) -> Result<Owne
     mips_open(path, access_mode | creation_mode, options.mode as i32)
 }
 
+// TODO: UHI doesn't provide Large-file support (LFS).
 #[allow(clippy::cast_possible_wrap)]
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: io::SeekFrom) -> Result<u64> {
     let (whence, offset) = match pos {

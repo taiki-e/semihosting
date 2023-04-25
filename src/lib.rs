@@ -204,7 +204,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::default_union_representation,
     clippy::trailing_empty_array,
     clippy::transmute_undefined_repr,
-    // clippy::undocumented_unsafe_blocks,
+    // clippy::undocumented_unsafe_blocks, // TODO
     // misc
     clippy::inline_asm_x86_att_syntax,
     // clippy::missing_inline_in_public_items,
