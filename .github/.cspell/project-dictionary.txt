@@ -54,6 +54,7 @@ RDONLY
 RDWR
 readc
 realview
+requirechecksums
 rustfilt
 sdbbp
 Seekable

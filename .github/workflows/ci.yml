@@ -156,8 +156,8 @@ jobs:
         if: startsWith(matrix.os, 'macos')
       - run: |
           set -euxo pipefail
-          choco install gcc-arm-embedded
-          choco install qemu --version=2022.12.30 # 7.2
+          choco install --requirechecksums gcc-arm-embedded
+          choco install --requirechecksums qemu --version=2022.12.30 # 7.2
           echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
         if: startsWith(matrix.os, 'windows')
       - run: tools/no-std.sh
