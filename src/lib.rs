@@ -52,17 +52,18 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `thumbv6m-none-eabi`                 | ✓    | ✓                           | N/A                       |                                 |
 | `thumbv7m-none-eabi`                 | ✓    | ✓                           | N/A                       |                                 |
 | `thumbv7em-none-eabi{,hf}`           | ✓    | ✓                           | N/A                       |                                 |
-| `thumbv8m.base-none-eabi`            | ✓    | \* \[3]                     | N/A                       |                                 |
-| `thumbv8m.main-none-eabi{,hf}`       | ✓    | \* \[3]                     | N/A                       |                                 |
+| `thumbv8m.base-none-eabi`            | ✓    | ✓ \[3]                      | N/A                       |                                 |
+| `thumbv8m.main-none-eabi{,hf}`       | ✓    | ✓ \[3]                      | N/A                       |                                 |
 | `riscv32*-unknown-none-elf`          | ✓    | ✓                           | ✓                         | ✓                               |
 | `riscv64*-unknown-none-elf`          | ✓    | ✓                           | ✓                         | ✓                               |
-| `mips{,el}-unknown-none` \[5]        | ✓    | ✓                           | N/A                       |                                 |
-| `mips64{,el}-unknown-none` \[5]      | ✓    | ✓                           | N/A                       |                                 |
+| `mips{,el}-unknown-none` \[5]        | ✓    | ✓ \[6]                      | N/A                       |                                 |
+| `mips64{,el}-unknown-none` \[5]      | ✓    | ✓ \[6]                      | N/A                       |                                 |
 
 \[1] `stdio`, `fs`, `time`, and `args`.<br>
 \[2] I'm not sure how to test panic-unwind on qemu-user.<br>
-\[3] Worked on QEMU 6.2 and QEMU 8.0, failed on QEMU 7.2.<br>
+\[4] Worked on QEMU 6.2 and QEMU 8.0, failed on QEMU 7.2.<br>
 \[5] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
+\[6] It seems unsupported on QEMU 8.0.<br>
 
 ## Optional features
 

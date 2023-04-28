@@ -106,8 +106,7 @@ fn run() {
     }
 
     // TODO
-    if cfg!(all(target_arch = "arm", thumbv8m)) && !cfg!(host_linux)
-        || cfg!(armv4t) && cfg!(feature = "qemu-system")
+    if cfg!(armv4t) && cfg!(feature = "qemu-system")
         || cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system")
     {
         if cfg!(armv4t) {
@@ -209,7 +208,6 @@ fn run() {
     {
         print!("test fs ... ");
         let check_metadata = option_env!("CI").is_none()
-            || cfg!(not(host_macos))
             || cfg!(not(any(target_arch = "mips", target_arch = "mips64")));
         let path_a = c!("a.txt");
         let path_b = c!("b.txt");
