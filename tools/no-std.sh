@@ -107,7 +107,7 @@ runner="${TEST_RUNNER:-qemu-system}"
 
 rustup_target_list=''
 if [[ -z "${is_custom_toolchain}" ]]; then
-    rustup_target_list=$(rustup ${pre_args[@]+"${pre_args[@]}"} target list)
+    rustup_target_list=$(rustup ${pre_args[@]+"${pre_args[@]}"} target list | sed 's/ .*//g')
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -Vv | grep 'release: ' | sed 's/release: //')
@@ -134,15 +134,15 @@ run() {
             info "target '${target}' not available on ${rustc_version} (skipped)"
             return 0
         fi
-        target_flags=(--target "$(pwd)/target-specs/${target}.json")
+        local target_flags=(--target "$(pwd)/target-specs/${target}.json")
     else
-        target_flags=(--target "${target}")
+        local target_flags=(--target "${target}")
     fi
     local subcmd=run
     args+=("${subcmd}" "${target_flags[@]}")
     build_std=()
-    if grep <<<"${rustup_target_list}" -Eq "^${target}( |$)"; then
-        x rustup ${pre_args[@]+"${pre_args[@]}"} target add "${target}" &>/dev/null
+    if grep <<<"${rustup_target_list}" -Eq "^${target}$"; then
+        rustup ${pre_args[@]+"${pre_args[@]}"} target add "${target}" &>/dev/null
     elif [[ -n "${nightly}" ]]; then
         build_std=(-Z build-std="core")
     else
