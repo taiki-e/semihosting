@@ -23,6 +23,7 @@ env:
   RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
+  # NB: sync with msrv job's --features opton and package.metadata.docs.rs.features field in Cargo.toml.
   TEST_FEATURES: alloc,stdio,fs,args,time
 
 defaults:
@@ -54,7 +55,7 @@ jobs:
       event_name: ${{ github.event_name }}
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       target: aarch64-unknown-linux-gnu
-      # See env.TEST_FEATURES
+      # NB: sync with env.TEST_FEATURES
       args: --features alloc,stdio,fs,args,time
   tidy:
     uses: taiki-e/workflows/.github/workflows/tidy.yml@main

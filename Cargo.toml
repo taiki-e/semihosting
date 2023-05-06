@@ -13,6 +13,7 @@ Semihosting for AArch64, ARM, RISC-V (RV32 & RV64), MIPS, and MIPS64.
 """
 
 [package.metadata.docs.rs]
+# NB: sync with env.TEST_FEATURES in .github/workflows/ci.yml
 features = ["alloc", "stdio", "fs", "args", "time"]
 rustdoc-args = ["--cfg", "docsrs"]
 # Building documentation on any architectures that support ARM semihosting with
