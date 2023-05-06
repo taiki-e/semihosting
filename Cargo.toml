@@ -74,7 +74,7 @@ backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
 # Use portable-atomic's atomic types.
 #
 # See readme for details.
-portable-atomic = { version = "1", optional = true, default-features = false }
+portable-atomic = { version = "1.3", optional = true, default-features = false, features = ["require-cas"] }
 
 # Not public optional features.
 unwinding = { version = "0.1.6", optional = true, default-features = false, features = ["unwinder"] }
