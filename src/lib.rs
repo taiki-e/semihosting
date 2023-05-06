@@ -214,7 +214,6 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::borrow_as_ptr, // https://github.com/rust-lang/rust-clippy/issues/8286
     clippy::cast_lossless,
     clippy::doc_markdown,
-    clippy::let_underscore_untyped, // https://github.com/rust-lang/rust-clippy/issues/10410
     clippy::missing_errors_doc,
     clippy::missing_panics_doc,
     clippy::module_inception,
