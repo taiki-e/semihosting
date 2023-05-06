@@ -23,7 +23,7 @@ env:
   RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
-  # NB: sync with msrv job's --features opton and package.metadata.docs.rs.features field in Cargo.toml.
+  # NB: sync with msrv job's --features option and package.metadata.docs.rs.features field in Cargo.toml.
   TEST_FEATURES: alloc,stdio,fs,args,time
 
 defaults:
