@@ -61,7 +61,6 @@ Seekable
 slli
 srai
 subarch
-subcmd
 subcode
 subsec
 syscall
