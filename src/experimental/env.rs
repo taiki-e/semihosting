@@ -90,7 +90,6 @@ mod sys {
             sys::arm_compat::{sys_get_cmdline, CommandLine},
         };
 
-        #[allow(missing_debug_implementations)] // false positive: should not warn private types
         pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
             pub(super) buf: [u8; BUF_SIZE],
             pub(super) next: Cell<u8>,
@@ -128,7 +127,6 @@ mod sys {
             sys::mips::{mips_argc, mips_argn, mips_argnlen},
         };
 
-        #[allow(missing_debug_implementations)] // false positive: should not warn private types
         pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
             pub(super) buf: [u8; BUF_SIZE],
             pub(super) next: Cell<u8>,
