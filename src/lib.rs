@@ -4,7 +4,7 @@
 <!-- tidy:crate-doc:start -->
 Semihosting for AArch64, ARM, RISC-V (RV32 & RV64), MIPS, and MIPS64.
 
-This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [ARM documentation](https://github.com/ARM-software/abi-aa/blob/main/semihosting/semihosting.rst) for more information on semihosting.
+This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [ARM documentation](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) for more information on semihosting.
 
 APIs are categorized into the following four types:
 
@@ -33,8 +33,8 @@ The following target architectures are supported:
 
 | target_arch | Specification | `semihosting::sys` module |
 | ----------- | ------------- | ------------------------- |
-| arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/main/semihosting/semihosting.rst) | `sys::arm_compat` |
-| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-software-src/riscv-semihosting/blob/main/riscv-semihosting-spec.adoc) | `sys::arm_compat` |
+| arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` |
+| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc) | `sys::arm_compat` |
 | mips/mips64 | Unified Hosting Interface (MD01069) | `sys::mips` |
 
 The host must be running an emulator or a debugger attached to the target.

@@ -38,7 +38,7 @@ pub(crate) fn open(path: &CStr, options: &crate::fs::OpenOptions) -> Result<Owne
             }
         }
     }
-    // Refs: https://github.com/openocd-org/openocd/blob/master/src/target/semihosting_common.c
+    // Refs: https://github.com/openocd-org/openocd/blob/HEAD/src/target/semihosting_common.c
     let mode = match (options.read, options.write, options.append, options.create, options.truncate)
     {
         (true, false, false, false, false) => OpenMode::RDONLY,
