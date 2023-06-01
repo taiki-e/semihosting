@@ -65,7 +65,7 @@ jobs:
       # # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       # target: aarch64-unknown-linux-gnu
 
-  # We have some platform-independent unsafe code, so test them.
+  # We have some platform-independent code, so test them.
   test:
     strategy:
       fail-fast: false
@@ -167,7 +167,7 @@ jobs:
           TEST_RUNNER: qemu-user
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
 
-  # We have some platform-independent unsafe code, so test them with Miri.
+  # We have some platform-independent code, so test them with Miri.
   # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
   miri:
     runs-on: ubuntu-latest
