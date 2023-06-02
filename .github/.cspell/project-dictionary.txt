@@ -36,7 +36,6 @@ IXOTH
 IXUSR
 lseek
 musicpal
-nanos
 nlink
 nonnull
 norvc
@@ -62,7 +61,6 @@ slli
 srai
 subarch
 subcode
-subsec
 syscall
 TDMI
 tickfreq
