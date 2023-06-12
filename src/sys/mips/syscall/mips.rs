@@ -7,8 +7,8 @@ use super::{OperationCode, ParamRegR, ParamRegW, RetReg};
 #[inline]
 pub(crate) unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -25,8 +25,8 @@ pub(crate) unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
 // #[inline]
 // pub(crate) unsafe fn syscall1(op: OperationCode, arg1: ParamRegW<'_>) -> (RetReg, RetReg) {
 //     unsafe {
-//         let r1: usize;
-//         let r2: usize;
+//         let r1;
+//         let r2;
 //         asm!(
 //             "sdbbp 1",
 //             inout("$2") 1_usize => r1,
@@ -42,8 +42,8 @@ pub(crate) unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
 #[inline]
 pub(crate) unsafe fn syscall1_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -64,8 +64,8 @@ pub(crate) unsafe fn syscall2(
     arg2: ParamRegW<'_>,
 ) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -85,8 +85,8 @@ pub(crate) unsafe fn syscall2_readonly(
     arg2: ParamRegR<'_>,
 ) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -108,8 +108,8 @@ pub(crate) unsafe fn syscall3(
     arg3: ParamRegW<'_>,
 ) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -131,8 +131,8 @@ pub(crate) unsafe fn syscall3_readonly(
     arg3: ParamRegR<'_>,
 ) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -156,8 +156,8 @@ pub(crate) unsafe fn syscall4(
     arg4: ParamRegW<'_>,
 ) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,
@@ -181,8 +181,8 @@ pub(crate) unsafe fn syscall4_readonly(
     arg4: ParamRegR<'_>,
 ) -> (RetReg, RetReg) {
     unsafe {
-        let r1: usize;
-        let r2: usize;
+        let r1;
+        let r2;
         asm!(
             "sdbbp 1",
             inout("$2") 1_usize => r1,

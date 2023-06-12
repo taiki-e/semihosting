@@ -16,31 +16,34 @@ use crate::{
 #[repr(transparent)]
 pub(crate) struct ParamRegW<'a>(pub(crate) *mut c_void, PhantomData<&'a mut ()>);
 impl<'a> ParamRegW<'a> {
-    #[allow(clippy::cast_sign_loss)]
     #[inline]
     pub(crate) fn fd(fd: BorrowedFd<'a>) -> Self {
         Self::raw_fd(fd.as_raw_fd())
     }
-    #[allow(clippy::cast_sign_loss)]
     #[inline]
     pub(crate) fn raw_fd(fd: RawFd) -> Self {
-        Self(fd as usize as *mut c_void, PhantomData)
+        Self::isize(fd as isize)
     }
     #[inline]
     pub(crate) fn usize(n: usize) -> Self {
         Self(n as *mut c_void, PhantomData)
     }
-    // #[inline]
-    // pub(crate) fn isize(n: isize) -> Self {
-    //     Self(n as usize as *mut c_void, PhantomData)
-    // }
+    #[allow(clippy::cast_sign_loss)]
+    #[inline]
+    pub(crate) fn isize(n: isize) -> Self {
+        Self::usize(n as usize)
+    }
+    #[inline]
+    pub(crate) fn ptr<T>(ptr: *mut T) -> Self {
+        Self(ptr.cast::<c_void>(), PhantomData)
+    }
     #[inline]
     pub(crate) fn ref_<T>(r: &'a mut T) -> Self {
-        Self((r as *mut T).cast::<c_void>(), PhantomData)
+        Self::ptr(r)
     }
     #[inline]
     pub(crate) fn buf<T>(buf: &'a mut [T]) -> Self {
-        Self(buf.as_mut_ptr().cast::<c_void>(), PhantomData)
+        Self::ptr(buf.as_mut_ptr())
     }
 }
 #[cfg(any(
@@ -52,14 +55,7 @@ impl<'a> ParamRegW<'a> {
 impl<'a> ParamRegW<'a> {
     #[inline]
     pub(crate) fn block(b: &'a mut [ParamRegW<'_>]) -> Self {
-        Self(b.as_mut_ptr().cast::<c_void>(), PhantomData)
-    }
-}
-#[cfg(any(target_arch = "mips", target_arch = "mips64"))]
-impl<'a> ParamRegW<'a> {
-    #[inline]
-    pub(crate) fn ptr<T>(ptr: *mut T) -> Self {
-        Self(ptr.cast::<c_void>(), PhantomData)
+        Self::ptr(b.as_mut_ptr())
     }
 }
 
@@ -67,15 +63,13 @@ impl<'a> ParamRegW<'a> {
 #[repr(transparent)]
 pub(crate) struct ParamRegR<'a>(pub(crate) *const c_void, PhantomData<&'a ()>);
 impl<'a> ParamRegR<'a> {
-    #[allow(clippy::cast_sign_loss)]
     #[inline]
     pub(crate) fn fd(fd: BorrowedFd<'a>) -> Self {
         Self::raw_fd(fd.as_raw_fd())
     }
-    #[allow(clippy::cast_sign_loss)]
     #[inline]
     pub(crate) fn raw_fd(fd: RawFd) -> Self {
-        Self(fd as usize as *const c_void, PhantomData)
+        Self::isize(fd as isize)
     }
     #[inline]
     pub(crate) fn usize(n: usize) -> Self {
@@ -84,19 +78,19 @@ impl<'a> ParamRegR<'a> {
     #[allow(clippy::cast_sign_loss)]
     #[inline]
     pub(crate) fn isize(n: isize) -> Self {
-        Self(n as usize as *const c_void, PhantomData)
+        Self::usize(n as usize)
     }
-    // #[inline]
-    // pub(crate) fn ptr<T>(ptr: *const T) -> Self {
-    //     Self(ptr.cast::<c_void>(), PhantomData)
-    // }
+    #[inline]
+    pub(crate) fn ptr<T>(ptr: *const T) -> Self {
+        Self(ptr.cast::<c_void>(), PhantomData)
+    }
     #[inline]
     pub(crate) fn buf<T>(buf: &'a [T]) -> Self {
-        Self(buf.as_ptr().cast::<c_void>(), PhantomData)
+        Self::ptr(buf.as_ptr())
     }
     #[inline]
     pub(crate) fn c_str(s: &'a CStr) -> Self {
-        Self(s.as_ptr().cast::<c_void>(), PhantomData)
+        Self::ptr(s.as_ptr())
     }
 }
 #[cfg(any(
@@ -108,27 +102,27 @@ impl<'a> ParamRegR<'a> {
 impl<'a> ParamRegR<'a> {
     #[inline]
     pub(crate) fn block(b: &'a [ParamRegR<'_>]) -> Self {
-        Self(b.as_ptr().cast::<c_void>(), PhantomData)
+        Self::ptr(b.as_ptr())
     }
     #[inline]
     pub(crate) fn ref_<T>(r: &'a T) -> Self {
-        Self((r as *const T).cast::<c_void>(), PhantomData)
+        Self::ptr(r)
     }
 }
 
 /// RETURN REGISTER
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-pub(crate) struct RetReg(pub(crate) usize);
+pub(crate) struct RetReg(pub(crate) *mut c_void);
 impl RetReg {
     #[inline]
     pub(crate) fn usize(self) -> usize {
-        self.0
+        self.0 as usize
     }
     #[allow(clippy::cast_possible_wrap, clippy::cast_sign_loss)]
     #[inline]
     fn isize(self) -> isize {
-        self.0 as isize
+        self.usize() as isize
     }
     #[allow(clippy::cast_possible_truncation)]
     #[inline]

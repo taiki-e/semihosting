@@ -14,7 +14,7 @@ macro_rules! trap {
 #[inline]
 pub(crate) unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetReg {
     unsafe {
-        let r: usize;
+        let r;
         asm!(
             trap!(),
             in("w0") number as u32, // OPERATION NUMBER REGISTER
@@ -30,7 +30,7 @@ pub(crate) unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) 
 #[inline]
 pub(crate) unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>) -> RetReg {
     unsafe {
-        let r: usize;
+        let r;
         asm!(
             trap!(),
             in("w0") number as u32, // OPERATION NUMBER REGISTER

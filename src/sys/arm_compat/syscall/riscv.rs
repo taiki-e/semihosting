@@ -7,7 +7,7 @@ use super::{OperationNumber, ParamRegR, ParamRegW, RetReg};
 #[inline]
 pub(crate) unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetReg {
     unsafe {
-        let r: usize;
+        let r;
         asm!(
             ".balign 16",
             ".option push",
@@ -28,7 +28,7 @@ pub(crate) unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) 
 #[inline]
 pub(crate) unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>) -> RetReg {
     unsafe {
-        let r: usize;
+        let r;
         asm!(
             ".balign 16",
             ".option push",
