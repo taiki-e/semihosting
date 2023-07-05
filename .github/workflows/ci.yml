@@ -71,7 +71,7 @@ jobs:
           - rust: nightly
             target: aarch64-unknown-linux-gnu
           - rust: nightly
-            target: mips-unknown-linux-gnu
+            target: mips64-unknown-linux-gnuabi64
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -90,10 +90,10 @@ jobs:
       - uses: taiki-e/setup-cross-toolchain-action@v1
         with:
           target: ${{ matrix.target }}
-      - run: cargo test --workspace --features $TEST_FEATURES
-      - run: cargo test --workspace --features $TEST_FEATURES --release
-      - run: cargo hack build --workspace --ignore-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace
-      - run: cargo minimal-versions build --workspace --features $TEST_FEATURES --ignore-private
+      - run: cargo test --workspace --features $TEST_FEATURES            --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
+      - run: cargo test --workspace --features $TEST_FEATURES --release  --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
+      - run: cargo hack build --workspace --ignore-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace --target ${{ matrix.target }} $BUILD_STD
+      - run: cargo minimal-versions build --workspace --features $TEST_FEATURES --ignore-private --target ${{ matrix.target }} $BUILD_STD
 
   no-std:
     strategy:
