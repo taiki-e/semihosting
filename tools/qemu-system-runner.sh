@@ -69,7 +69,7 @@ case "${target}" in
         qemu_system arm -cpu cortex-m4 -M lm3s6965evb
         ;;
     thumbv8m.base-*)
-        # TODO: As of QEMU 7.2, QEMU doesn't support -cpu cortex-m23
+        # TODO: As of QEMU 8.0, QEMU doesn't support -cpu cortex-m23
         qemu_system arm -cpu cortex-m33 -M lm3s6965evb
         ;;
     thumbv8m.main-*)
