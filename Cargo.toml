@@ -6,7 +6,7 @@ rust-version = "1.64"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/semihosting"
 keywords = ["qemu"]
-categories = ["embedded", "hardware-support", "no-std"]
+categories = ["embedded", "hardware-support", "no-std", "no-std::no-alloc"]
 exclude = ["/.*", "/tools", "/target-specs"]
 description = """
 Semihosting for AArch64, ARM, RISC-V (RV32 & RV64), MIPS, and MIPS64.
