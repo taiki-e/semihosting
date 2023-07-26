@@ -37,7 +37,6 @@ IXUSR
 lseek
 musicpal
 nlink
-nonnull
 norvc
 nsec
 OMAP

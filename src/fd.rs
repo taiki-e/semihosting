@@ -36,16 +36,6 @@ static_assert!(core::mem::size_of::<RawFd>() == core::mem::size_of::<u16>());
 /// value `-1`.
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-#[cfg_attr(semihosting_unstable_rustc_attrs, rustc_layout_scalar_valid_range_start(0))]
-#[cfg_attr(
-    all(semihosting_unstable_rustc_attrs, not(target_pointer_width = "16")),
-    rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE)
-)]
-#[cfg_attr(
-    all(semihosting_unstable_rustc_attrs, target_pointer_width = "16"),
-    rustc_layout_scalar_valid_range_end(0xFF_FE)
-)]
-#[cfg_attr(semihosting_unstable_rustc_attrs, rustc_nonnull_optimization_guaranteed)]
 pub struct BorrowedFd<'fd> {
     fd: RawFd,
     _phantom: PhantomData<&'fd OwnedFd>,
@@ -60,16 +50,6 @@ pub struct BorrowedFd<'fd> {
 /// passed as a consumed argument or returned as an owned value, and it never
 /// has the value `-1`.
 #[repr(transparent)]
-#[cfg_attr(semihosting_unstable_rustc_attrs, rustc_layout_scalar_valid_range_start(0))]
-#[cfg_attr(
-    all(semihosting_unstable_rustc_attrs, not(target_pointer_width = "16")),
-    rustc_layout_scalar_valid_range_end(0xFF_FF_FF_FE)
-)]
-#[cfg_attr(
-    all(semihosting_unstable_rustc_attrs, target_pointer_width = "16"),
-    rustc_layout_scalar_valid_range_end(0xFF_FE)
-)]
-#[cfg_attr(semihosting_unstable_rustc_attrs, rustc_nonnull_optimization_guaranteed)]
 pub struct OwnedFd {
     fd: RawFd,
 }

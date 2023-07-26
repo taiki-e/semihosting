@@ -238,11 +238,11 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     )),
     feature(asm_experimental_arch)
 )]
-#![cfg_attr(semihosting_unstable_rustc_attrs, feature(rustc_attrs))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![allow(clippy::empty_loop)] // this crate is #![no_std]
 #![allow(clippy::len_without_is_empty, clippy::new_without_default)]
 
+// TODO: mips32r6, mips64r6?
 #[cfg(not(any(
     target_arch = "aarch64",
     target_arch = "arm",

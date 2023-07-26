@@ -32,10 +32,6 @@ fn main() {
         }
     };
 
-    if version.nightly && is_allowed_feature("rustc_attrs") {
-        println!("cargo:rustc-cfg=semihosting_unstable_rustc_attrs");
-    }
-
     if target_arch == "arm" {
         if target.starts_with("thumb") {
             target_feature_if("thumb-mode", true, &version, None, true)
@@ -127,21 +123,6 @@ fn target_feature_if(
     if has_target_feature {
         println!("cargo:rustc-cfg=semihosting_target_feature=\"{}\"", name);
     }
-}
-
-fn is_allowed_feature(name: &str) -> bool {
-    // allowed by default
-    let mut allowed = true;
-    if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
-        for mut flag in rustflags.to_string_lossy().split('\x1f') {
-            flag = flag.strip_prefix("-Z").unwrap_or(flag);
-            if let Some(flag) = flag.strip_prefix("allow-features=") {
-                // If it is specified multiple times, the last value will be preferred.
-                allowed = flag.split(',').any(|allowed| allowed == name);
-            }
-        }
-    }
-    allowed
 }
 
 mod version {
