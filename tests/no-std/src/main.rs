@@ -4,14 +4,12 @@
 #![no_std]
 #![warn(rust_2018_idioms, single_use_lifetimes, unsafe_op_in_unsafe_fn)]
 #![cfg_attr(
-    not(any(
-        target_arch = "x86",
-        target_arch = "x86_64",
-        target_arch = "arm",
-        target_arch = "aarch64",
-        target_arch = "riscv32",
-        target_arch = "riscv64",
-    )),
+    any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    ),
     feature(asm_experimental_arch)
 )]
 
@@ -30,7 +28,12 @@ use core::str;
     target_arch = "riscv64",
 ))]
 use semihosting::sys::arm_compat::*;
-#[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+#[cfg(any(
+    target_arch = "mips",
+    target_arch = "mips32r6",
+    target_arch = "mips64",
+    target_arch = "mips64r6",
+))]
 use semihosting::sys::mips::*;
 use semihosting::{
     c, dbg, experimental,
@@ -50,19 +53,13 @@ core::arch::global_asm!(include_str!("../raspi/boot.s"));
 #[cfg(mclass)]
 #[cortex_m_rt::entry]
 fn main() -> ! {
-    #[cfg(feature = "panic-unwind")]
-    init_global_allocator();
-    run();
-    semihosting::process::exit(0)
+    run_main()
 }
 #[cfg(feature = "qemu-system")]
 #[cfg(any(target_arch = "aarch64"))]
 #[no_mangle]
 pub unsafe fn _start_rust() -> ! {
-    #[cfg(feature = "panic-unwind")]
-    init_global_allocator();
-    run();
-    semihosting::process::exit(0)
+    run_main()
 }
 #[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[cfg(not(mclass))]
@@ -84,8 +81,19 @@ unsafe fn _start(_: usize, _: usize) -> ! {
         }
         init();
     }
-    #[cfg(feature = "panic-unwind")]
+    run_main()
+}
+#[cfg(feature = "panic-unwind")]
+fn run_main() -> ! {
     init_global_allocator();
+    let code = match experimental::panic::catch_unwind(run) {
+        Ok(()) => 0,
+        Err(_) => 101,
+    };
+    semihosting::process::exit(code)
+}
+#[cfg(not(feature = "panic-unwind"))]
+fn run_main() -> ! {
     run();
     semihosting::process::exit(0)
 }
@@ -119,8 +127,18 @@ fn run() {
     }
 
     let stdio_is_terminal = option_env!("CI").is_none()
-        || cfg!(any(target_arch = "mips", target_arch = "mips64")) && !cfg!(host_linux);
-    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+        || cfg!(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )) && !cfg!(host_linux);
+    #[cfg(not(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    )))]
     let now = experimental::time::SystemTime::now();
     {
         print!("test io ... ");
@@ -139,7 +157,12 @@ fn run() {
         println!("stdout2: {}", stdout2.as_fd().as_raw_fd());
         println!("stderr1: {}", stderr1.as_fd().as_raw_fd());
         println!("stderr2: {}", stderr2.as_fd().as_raw_fd());
-        #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))]
         {
             assert_eq!(stdout1.as_fd().as_raw_fd(), 1);
             assert_eq!(stdout2.as_fd().as_raw_fd(), 1);
@@ -162,7 +185,12 @@ fn run() {
                 mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
             );
         }
-        #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+        #[cfg(not(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )))]
         {
             assert_ne!(stdout1.as_fd().as_raw_fd(), stdout2.as_fd().as_raw_fd());
             assert_ne!(stderr1.as_fd().as_raw_fd(), stderr2.as_fd().as_raw_fd());
@@ -180,13 +208,23 @@ fn run() {
         let f1 = io::stdout().unwrap().as_fd().as_raw_fd();
         assert_eq!(io::stdout().unwrap().as_fd().as_raw_fd(), f1);
 
-        #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))]
         {
             let stdin = io::stdin().unwrap();
             assert_eq!(stdin.as_fd().as_raw_fd(), 0);
             assert_eq!(stdin.is_terminal(), stdio_is_terminal);
         }
-        #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+        #[cfg(not(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )))]
         {
             let mut stdin = io::stdin().unwrap();
             // in tests, we use <<< to input stdin, so stdin is not tty.
@@ -208,7 +246,12 @@ fn run() {
     {
         print!("test fs ... ");
         let check_metadata = option_env!("CI").is_none()
-            || cfg!(not(any(target_arch = "mips", target_arch = "mips64")));
+            || cfg!(not(any(
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "mips64",
+                target_arch = "mips64r6",
+            )));
         let path_a = c!("a.txt");
         let path_b = c!("b.txt");
         // create/write/seek
@@ -243,7 +286,12 @@ fn run() {
             assert_eq!(file.metadata().unwrap().len(), 5);
         }
         let mut buf = [0; 4];
-        if cfg!(any(target_arch = "mips", target_arch = "mips64")) {
+        if cfg!(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )) {
             let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
             assert!(errno == 22 || errno == 9, "{}", errno);
         } else {
@@ -281,7 +329,12 @@ fn run() {
         drop(file);
 
         // rename
-        if cfg!(any(target_arch = "mips", target_arch = "mips64")) {
+        if cfg!(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )) {
             assert_eq!(fs::rename(path_a, path_b).unwrap_err().kind(), io::ErrorKind::Unsupported);
         } else {
             fs::rename(path_a, path_b).unwrap();
@@ -303,7 +356,12 @@ fn run() {
     {
         println!("test env::args ... ");
         const BUF_SIZE: usize = 128;
-        #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+        #[cfg(not(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )))]
         {
             let mut buf = [0; BUF_SIZE];
             let mut cmdline_block = CommandLine { ptr: buf.as_mut_ptr(), size: BUF_SIZE - 1 };
@@ -320,7 +378,12 @@ fn run() {
         assert_eq!((&args).next(), None);
         println!("ok");
     }
-    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+    #[cfg(not(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    )))]
     {
         // sys_*
         println!("sys_clock: {}", sys_clock().unwrap());
@@ -343,10 +406,20 @@ fn run() {
         print!("sys_write0: ");
         sys_write0(c!("bc\n"));
     }
-    #[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+    #[cfg(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    ))]
     {}
 
-    #[cfg(not(any(target_arch = "mips", target_arch = "mips64")))]
+    #[cfg(not(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    )))]
     println!("elapsed: {:?}", now.elapsed().unwrap());
 }
 

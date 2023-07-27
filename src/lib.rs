@@ -228,28 +228,27 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::used_underscore_binding,
 )]
 #![cfg_attr(
-    not(any(
-        target_arch = "x86",
-        target_arch = "x86_64",
-        target_arch = "arm",
-        target_arch = "aarch64",
-        target_arch = "riscv32",
-        target_arch = "riscv64",
-    )),
+    any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    ),
     feature(asm_experimental_arch)
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![allow(clippy::empty_loop)] // this crate is #![no_std]
 #![allow(clippy::len_without_is_empty, clippy::new_without_default)]
 
-// TODO: mips32r6, mips64r6?
 #[cfg(not(any(
     target_arch = "aarch64",
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
     target_arch = "mips",
+    target_arch = "mips32r6",
     target_arch = "mips64",
+    target_arch = "mips64r6",
 )))]
 compile_error!("unsupported target");
 

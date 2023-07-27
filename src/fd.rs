@@ -64,10 +64,7 @@ impl BorrowedFd<'_> {
     #[inline]
     pub const unsafe fn borrow_raw(fd: RawFd) -> Self {
         assert!(fd != -1);
-        #[allow(unused_unsafe)]
-        unsafe {
-            Self { fd, _phantom: PhantomData }
-        }
+        Self { fd, _phantom: PhantomData }
     }
 
     /// Extracts the raw file descriptor.
@@ -88,10 +85,7 @@ impl OwnedFd {
     #[inline]
     pub const unsafe fn from_raw_fd(fd: RawFd) -> Self {
         assert!(fd != -1);
-        #[allow(unused_unsafe)]
-        unsafe {
-            Self { fd }
-        }
+        Self { fd }
     }
 
     /// Extracts the raw file descriptor.

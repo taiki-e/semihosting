@@ -112,11 +112,23 @@ case "${target}" in
     mipsel-*)
         qemu_system mipsel -M malta
         ;;
+    mipsisa32r6-*)
+        qemu_system mips -cpu mips32r6-generic -M malta
+        ;;
+    mipsisa32r6el-*)
+        qemu_system mipsel -cpu mips32r6-generic -M malta
+        ;;
     mips64-*)
         qemu_system mips64 -cpu MIPS64R2-generic -M malta
         ;;
     mips64el-*)
         qemu_system mips64el -cpu MIPS64R2-generic -M malta
+        ;;
+    mipsisa64r6-*)
+        qemu_system mips64 -cpu I6400 -M malta
+        ;;
+    mipsisa64r6el-*)
+        qemu_system mips64el -cpu I6400 -M malta
         ;;
     *) echo "unrecognized target ${target}" && exit 1 ;;
 esac

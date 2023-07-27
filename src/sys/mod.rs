@@ -34,10 +34,29 @@ use arm_compat as arch;
 )]
 pub mod arm_compat;
 
-#[cfg(any(target_arch = "mips", target_arch = "mips64"))]
+#[cfg(any(
+    target_arch = "mips",
+    target_arch = "mips32r6",
+    target_arch = "mips64",
+    target_arch = "mips64r6",
+))]
 use mips as arch;
-#[cfg(any(all(doc, docsrs), target_arch = "mips", target_arch = "mips64"))]
-#[cfg_attr(docsrs, doc(cfg(any(target_arch = "mips", target_arch = "mips64"))))]
+#[cfg(any(
+    all(doc, docsrs),
+    target_arch = "mips",
+    target_arch = "mips32r6",
+    target_arch = "mips64",
+    target_arch = "mips64r6",
+))]
+#[cfg_attr(
+    docsrs,
+    doc(cfg(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    )))
+)]
 pub mod mips;
 
 mod errno;

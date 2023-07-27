@@ -205,10 +205,7 @@ impl OpenOptions {
     // }
 
     pub fn open(&self, path: impl AsRef<CStr>) -> io::Result<File> {
-        self._open(path.as_ref())
-    }
-    fn _open(&self, path: &CStr) -> io::Result<File> {
-        sys::fs::open(path, self).map(File)
+        sys::fs::open(path.as_ref(), self).map(File)
     }
 }
 

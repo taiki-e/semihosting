@@ -7,78 +7,46 @@ fn main() {
 
     let target = &*env::var("TARGET").expect("TARGET not set");
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
-    // HACK: If --target is specified, rustflags is not applied to the build
-    // script itself, so the build script will not be rerun when these are changed.
-    //
-    // Ideally, the build script should be rebuilt when CARGO_ENCODED_RUSTFLAGS
-    // is changed, but since it is an environment variable set by cargo,
-    // as of 1.62.0-nightly, specifying it as rerun-if-env-changed does not work.
-    println!("cargo:rerun-if-env-changed=CARGO_ENCODED_RUSTFLAGS");
-    println!("cargo:rerun-if-env-changed=RUSTFLAGS");
-    println!("cargo:rerun-if-env-changed=CARGO_BUILD_RUSTFLAGS");
-    let mut target_upper = target.replace(['-', '.'], "_");
-    target_upper.make_ascii_uppercase();
-    println!("cargo:rerun-if-env-changed=CARGO_TARGET_{target_upper}_RUSTFLAGS");
-
-    let version = match rustc_version() {
-        Some(version) => version,
-        None => {
-            println!(
-                "cargo:warning={}: unable to determine rustc version; assuming latest stable rustc (1.{})",
-                env!("CARGO_PKG_NAME"),
-                Version::LATEST.minor
-            );
-            Version::LATEST
-        }
-    };
-
     if target_arch == "arm" {
+        // HACK: If --target is specified, rustflags is not applied to the build
+        // script itself, so the build script will not be rerun when these are changed.
+        //
+        // Ideally, the build script should be rebuilt when CARGO_ENCODED_RUSTFLAGS
+        // is changed, but since it is an environment variable set by cargo,
+        // as of 1.62.0-nightly, specifying it as rerun-if-env-changed does not work.
+        println!("cargo:rerun-if-env-changed=CARGO_ENCODED_RUSTFLAGS");
+        println!("cargo:rerun-if-env-changed=RUSTFLAGS");
+        println!("cargo:rerun-if-env-changed=CARGO_BUILD_RUSTFLAGS");
+        let mut target_upper = target.replace(['-', '.'], "_");
+        target_upper.make_ascii_uppercase();
+        println!("cargo:rerun-if-env-changed=CARGO_TARGET_{target_upper}_RUSTFLAGS");
+
+        let version = match rustc_version() {
+            Some(version) => version,
+            None => {
+                println!(
+                    "cargo:warning={}: unable to determine rustc version; assuming latest stable rustc",
+                    env!("CARGO_PKG_NAME"),
+                );
+                Version::LATEST
+            }
+        };
+
         if target.starts_with("thumb") {
-            target_feature_if("thumb-mode", true, &version, None, true)
+            target_feature_if("thumb-mode", true, &version, true)
         }
-        // See portable-atomic's build.rs for more
+        // See portable-atomic and atomic-maybe-uninit's build.rs for more
         let mut subarch =
             target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
         subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
         subarch = subarch.split('-').next().unwrap(); // ignore vender/os/env
         subarch = subarch.split('.').next().unwrap(); // ignore .base/.main suffix
-        let mut known = true;
-        // See https://github.com/taiki-e/atomic-maybe-uninit/blob/HEAD/build.rs for details
         let mut is_mclass = false;
         match subarch {
-            "v7" | "v7a" | "v7neon" | "v7s" | "v7k" | "v8a" => {} // aclass
             "v6m" | "v7em" | "v7m" | "v8m" => is_mclass = true,
-            "v7r" | "v8r" => {} // rclass
-            // arm-linux-androideabi is v5te
-            // https://github.com/rust-lang/rust/blob/1.70.0/compiler/rustc_target/src/spec/arm_linux_androideabi.rs#L11-L12
-            _ if target == "arm-linux-androideabi" => subarch = "v5te",
-            // v6 targets other than v6m don't have *class target feature.
-            "" | "v6" | "v6k" => subarch = "v6",
-            // Other targets don't have *class target feature.
-            "v4t" | "v5te" => {}
-            _ => {
-                known = false;
-                println!(
-                    "cargo:warning={}: unrecognized arm subarch: {}",
-                    env!("CARGO_PKG_NAME"),
-                    target
-                );
-            }
+            _ => {}
         }
-        let (v8, v8m) = if known && subarch.starts_with("v8") {
-            // ARMv8-M Mainline/Baseline are not considered as v8 by rustc.
-            // https://github.com/rust-lang/stdarch/blob/a0c30f3e3c75adcd6ee7efc94014ebcead61c507/crates/core_arch/src/arm_shared/mod.rs
-            if subarch.starts_with("v8m") {
-                (false, true)
-            } else {
-                (true, false)
-            }
-        } else {
-            (false, false)
-        };
-        target_feature_if("mclass", is_mclass, &version, None, true);
-        target_feature_if("v8", v8, &version, None, true);
-        target_feature_if("v8m", v8m, &version, None, false);
+        target_feature_if("mclass", is_mclass, &version, true);
     }
 }
 
@@ -86,7 +54,6 @@ fn target_feature_if(
     name: &str,
     mut has_target_feature: bool,
     version: &Version,
-    stabilized: Option<u32>,
     is_rustc_target_feature: bool,
 ) {
     // HACK: Currently, it seems that the only way to handle unstable target
@@ -99,9 +66,7 @@ fn target_feature_if(
     // (e.g., https://godbolt.org/z/8Eh3z5Wzb), so this hack works properly on stable.
     //
     // [RFC2045]: https://rust-lang.github.io/rfcs/2045-target-feature.html#backend-compilation-options
-    if is_rustc_target_feature
-        && (version.nightly || stabilized.map_or(false, |stabilized| version.minor >= stabilized))
-    {
+    if is_rustc_target_feature && version.nightly {
         // In this case, cfg(target_feature = "...") would work, so skip emitting our own target_feature cfg.
         return;
     } else if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
@@ -132,96 +97,36 @@ mod version {
         let rustc = env::var_os("RUSTC")?;
         // Use verbose version output because the packagers add extra strings to the normal version output.
         let output = Command::new(rustc).args(["--version", "--verbose"]).output().ok()?;
-        let output = str::from_utf8(&output.stdout).ok()?;
-        Version::parse(output)
+        let verbose_version = str::from_utf8(&output.stdout).ok()?;
+        Version::parse(verbose_version)
     }
 
-    #[cfg_attr(test, derive(Debug, PartialEq))]
     pub(crate) struct Version {
-        pub(crate) minor: u32,
         pub(crate) nightly: bool,
-        // commit_date: Date,
     }
 
     impl Version {
         // The known latest stable version. If we unable to determine
         // the rustc version, we assume this is the current version.
         // It is no problem if this is older than the actual latest stable.
-        pub(crate) const LATEST: Self = Self::stable(71);
+        pub(crate) const LATEST: Self = Self::stable();
 
-        pub(crate) const fn stable(rustc_minor: u32) -> Self {
-            Self {
-                minor: rustc_minor,
-                nightly: false,
-                // commit_date: Date::UNKNOWN,
-            }
+        const fn stable() -> Self {
+            Self { nightly: false }
         }
 
-        // pub(crate) fn probe(&self, minor: u32, year: u16, month: u8, day: u8) -> bool {
-        //     if self.nightly {
-        //         self.minor > minor || self.commit_date >= Date::new(year, month, day)
-        //     } else {
-        //         self.minor >= minor
-        //     }
-        // }
-
-        pub(crate) fn parse(text: &str) -> Option<Self> {
-            let mut release = text
+        pub(crate) fn parse(verbose_version: &str) -> Option<Self> {
+            let mut release = verbose_version
                 .lines()
                 .find(|line| line.starts_with("release: "))
                 .map(|line| &line["release: ".len()..])?
                 .splitn(2, '-');
-            let version = release.next().unwrap();
+            let _version = release.next().unwrap();
             let channel = release.next().unwrap_or_default();
-            let mut digits = version.splitn(3, '.');
-            let major = digits.next()?.parse::<u32>().ok()?;
-            if major != 1 {
-                return None;
-            }
-            let minor = digits.next()?.parse::<u32>().ok()?;
-            let _patch = digits.next().unwrap_or("0").parse::<u32>().ok()?;
             let nightly = channel == "nightly" || channel == "dev";
 
-            // we don't refer commit date on stable/beta.
-            if nightly {
-                // let commit_date = (|| {
-                //     let mut commit_date = text
-                //         .lines()
-                //         .find(|line| line.starts_with("commit-date: "))
-                //         .map(|line| &line["commit-date: ".len()..])?
-                //         .splitn(3, '-');
-                //     let year = commit_date.next()?.parse::<u16>().ok()?;
-                //     let month = commit_date.next()?.parse::<u8>().ok()?;
-                //     let day = commit_date.next()?.parse::<u8>().ok()?;
-                //     if month > 12 || day > 31 {
-                //         return None;
-                //     }
-                //     Some(Date::new(year, month, day))
-                // })();
-                Some(Version {
-                    minor,
-                    nightly,
-                    // commit_date: commit_date.unwrap_or(Date::UNKNOWN),
-                })
-            } else {
-                Some(Version::stable(minor))
-            }
+            Some(Version { nightly })
         }
     }
-
-    // #[derive(PartialEq, PartialOrd)]
-    // pub(crate) struct Date {
-    //     pub(crate) year: u16,
-    //     pub(crate) month: u8,
-    //     pub(crate) day: u8,
-    // }
-
-    // impl Date {
-    //     const UNKNOWN: Self = Self::new(0, 0, 0);
-
-    //     const fn new(year: u16, month: u8, day: u8) -> Self {
-    //         Self { year, month, day }
-    //     }
-    // }
 }
 use version::{rustc_version, Version};

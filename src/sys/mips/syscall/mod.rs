@@ -10,7 +10,16 @@ pub(crate) use arch::{
     syscall0, syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly,
     syscall4, syscall4_readonly,
 };
-#[cfg_attr(any(doc, target_arch = "mips", target_arch = "mips64"), path = "mips.rs")]
+#[cfg_attr(
+    any(
+        doc,
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    ),
+    path = "mips.rs"
+)]
 mod arch;
 
 pub(crate) use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};
