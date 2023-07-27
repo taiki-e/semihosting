@@ -34,6 +34,7 @@ mod sys {
 
     const NUL: u8 = b'\0';
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn next_from_cmdline<'a, const BUF_SIZE: usize>(
         args: &mut &'a ArgsBytes<BUF_SIZE>,
     ) -> Option<&'a [u8]> {
