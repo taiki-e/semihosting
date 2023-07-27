@@ -40,7 +40,7 @@ The following target architectures are supported:
 | ----------- | ------------- | ------------------------- |
 | arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` |
 | riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc) | `sys::arm_compat` |
-| mips/mips64 | Unified Hosting Interface (MD01069) | `sys::mips` |
+| mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` |
 
 The host must be running an emulator or a debugger attached to the target.
 
@@ -63,6 +63,8 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `riscv64*-unknown-none-elf`          | ✓    | ✓                           | ✓                         | ✓                               |
 | `mips{,el}-unknown-none` \[5]        | ✓    | ✓ \[6]                      | N/A                       |                                 |
 | `mips64{,el}-unknown-none` \[5]      | ✓    | ✓ \[6]                      | N/A                       |                                 |
+| `mipsisa32r6{,el}-unknown-none` \[5] | ✓    | ✓ \[6]                      | N/A                       |                                 |
+| `mipsisa64r6{,el}-unknown-none` \[5] | ✓    | ✓ \[6]                      | N/A                       |                                 |
 
 \[1] `stdio`, `fs`, `time`, and `args`.<br>
 \[2] I'm not sure how to test panic-unwind on qemu-user.<br>
