@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.3] - 2023-07-27
+
 - Fix build error on MIPS32r6 and MIPS64r6 since [nightly-2023-07-19's target_arch change](https://github.com/rust-lang/rust/pull/112374).
 
 ## [0.1.2] - 2023-05-06
@@ -24,7 +26,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/taiki-e/semihosting/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/taiki-e/semihosting/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/taiki-e/semihosting/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/taiki-e/semihosting/releases/tag/v0.1.0
