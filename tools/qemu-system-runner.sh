@@ -53,6 +53,8 @@ qemu_system() {
     "qemu-system-${qemu_arch}" "$@" "${args[@]}"
 }
 
+export QEMU_AUDIO_DRV=none
+
 case "${target}" in
     # AArch64
     aarch64* | arm64*)
