@@ -85,7 +85,7 @@ unsafe fn _start(_: usize, _: usize) -> ! {
 }
 #[cfg(feature = "panic-unwind")]
 fn run_main() -> ! {
-    init_global_allocator();
+    unsafe { allocator::init_global_allocator() }
     let code = match experimental::panic::catch_unwind(run) {
         Ok(()) => 0,
         Err(_) => 101,
@@ -423,32 +423,49 @@ fn run() {
     println!("elapsed: {:?}", now.elapsed().unwrap());
 }
 
-// linked_list_allocator's LockedHeap uses spinning_top, but it doesn't compatible
-// with targets without atomic CAS. Implement our own LockedHeap by using spin,
-// which supports portable-atomic.
 #[cfg(feature = "panic-unwind")]
-#[global_allocator]
-static ALLOCATOR: LockedHeap = LockedHeap(spin::Mutex::new(linked_list_allocator::Heap::empty()));
-#[cfg(feature = "panic-unwind")]
-#[inline(always)]
-fn init_global_allocator() {
-    use core::mem::MaybeUninit;
-    const HEAP_SIZE: usize = 1024;
-    static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
-    unsafe { ALLOCATOR.0.lock().init(HEAP_MEM.as_mut_ptr().cast::<u8>(), HEAP_SIZE) }
-}
-#[cfg(feature = "panic-unwind")]
-struct LockedHeap(spin::Mutex<linked_list_allocator::Heap>);
-#[cfg(feature = "panic-unwind")]
-unsafe impl core::alloc::GlobalAlloc for LockedHeap {
-    unsafe fn alloc(&self, layout: core::alloc::Layout) -> *mut u8 {
-        self.0
-            .lock()
-            .allocate_first_fit(layout)
-            .ok()
-            .map_or(core::ptr::null_mut(), |allocation| allocation.as_ptr())
+mod allocator {
+    use core::{cell::UnsafeCell, mem::MaybeUninit};
+    // linked_list_allocator's LockedHeap uses spinning_top, but it doesn't compatible
+    // with targets without atomic CAS. Implement our own LockedHeap by using spin,
+    // which supports portable-atomic.
+    #[global_allocator]
+    static ALLOCATOR: LockedHeap =
+        LockedHeap(spin::Mutex::new(linked_list_allocator::Heap::empty()));
+    #[inline(always)]
+    pub unsafe fn init_global_allocator() {
+        const HEAP_SIZE: usize = 1024;
+        static HEAP_MEM: SyncUnsafeCell<[MaybeUninit<u8>; HEAP_SIZE]> =
+            SyncUnsafeCell::new([MaybeUninit::uninit(); HEAP_SIZE]);
+        unsafe { ALLOCATOR.0.lock().init(HEAP_MEM.get().cast::<u8>(), HEAP_SIZE) }
     }
-    unsafe fn dealloc(&self, ptr: *mut u8, layout: core::alloc::Layout) {
-        unsafe { self.0.lock().deallocate(core::ptr::NonNull::new_unchecked(ptr), layout) }
+    struct LockedHeap(spin::Mutex<linked_list_allocator::Heap>);
+    unsafe impl core::alloc::GlobalAlloc for LockedHeap {
+        unsafe fn alloc(&self, layout: core::alloc::Layout) -> *mut u8 {
+            self.0
+                .lock()
+                .allocate_first_fit(layout)
+                .ok()
+                .map_or(core::ptr::null_mut(), |allocation| allocation.as_ptr())
+        }
+        unsafe fn dealloc(&self, ptr: *mut u8, layout: core::alloc::Layout) {
+            unsafe { self.0.lock().deallocate(core::ptr::NonNull::new_unchecked(ptr), layout) }
+        }
+    }
+    // See https://github.com/rust-lang/rust/issues/53639
+    #[repr(transparent)]
+    struct SyncUnsafeCell<T: ?Sized> {
+        value: UnsafeCell<T>,
+    }
+    unsafe impl<T: ?Sized> Sync for SyncUnsafeCell<T> {}
+    impl<T> SyncUnsafeCell<T> {
+        #[inline]
+        const fn new(value: T) -> Self {
+            Self { value: UnsafeCell::new(value) }
+        }
+        #[inline]
+        const fn get(&self) -> *mut T {
+            self.value.get()
+        }
     }
 }
