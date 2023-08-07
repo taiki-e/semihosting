@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update `unwinding` to 0.2.
+
 ## [0.1.3] - 2023-07-27
 
 - Fix build error on MIPS32r6 and MIPS64r6 since [nightly-2023-07-19's target_arch change](https://github.com/rust-lang/rust/pull/112374).

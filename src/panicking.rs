@@ -36,10 +36,7 @@ fn stack_trace() {
 
     use unwinding::abi::{UnwindContext, UnwindReasonCode, _Unwind_Backtrace, _Unwind_GetIP};
 
-    extern "C" fn callback(
-        unwind_ctx: &mut UnwindContext<'_>,
-        _arg: *mut c_void,
-    ) -> UnwindReasonCode {
+    extern "C" fn callback(unwind_ctx: &UnwindContext<'_>, _arg: *mut c_void) -> UnwindReasonCode {
         let ip = _Unwind_GetIP(unwind_ctx);
         if ip == 0 {
             UnwindReasonCode::NORMAL_STOP
