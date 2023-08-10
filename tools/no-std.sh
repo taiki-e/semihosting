@@ -125,7 +125,7 @@ if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]
         rustup ${pre_args[@]+"${pre_args[@]}"} component add rust-src &>/dev/null
     fi
 fi
-workspace_root="$(pwd)"
+workspace_root=$(pwd)
 
 run() {
     local target="$1"
@@ -133,7 +133,7 @@ run() {
     local target_lower="${target//-/_}"
     local target_lower="${target_lower//./_}"
     local target_upper
-    target_upper="$(tr '[:lower:]' '[:upper:]' <<<"${target_lower}")"
+    target_upper=$(tr '[:lower:]' '[:upper:]' <<<"${target_lower}")
     local args=(${pre_args[@]+"${pre_args[@]}"})
     local target_rustflags="${RUSTFLAGS:-}"
     if ! grep <<<"${rustc_target_list}" -Eq "^${target}$" || [[ -f "target-specs/${target}.json" ]]; then
