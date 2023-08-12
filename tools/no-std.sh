@@ -177,31 +177,21 @@ run() {
             ;;
         thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*)
             case "${runner}" in
+                qemu-system)
+                    linker=link.x
+                    target_rustflags+=" -C link-arg=-T${linker}"
+                    ;;
                 # TODO: qemu-arm: ../../accel/tcg/translate-all.c:1381: page_set_flags: Assertion `end - 1 <= GUEST_ADDR_MAX' failed.
                 qemu-user)
                     info "QEMU doesn't support Cortex-M (${target}) with user-mode (skipped)"
                     return 0
                     ;;
             esac
-            linker=link.x
-            target_rustflags+=" -C link-arg=-T${linker}"
             ;;
-        aarch64*)
+        aarch64* | riscv*)
             case "${runner}" in
                 qemu-system)
-                    linker=raspi/kernel.ld
-                    target_rustflags+=" -C link-arg=-T${linker}"
-                    ;;
-            esac
-            ;;
-        riscv*)
-            case "${runner}" in
-                qemu-system)
-                    case "${target}" in
-                        riscv32*) linker=riscv32.ld ;;
-                        riscv64*) linker=riscv64.ld ;;
-                        *) bail "unrecognized target '${target}'" ;;
-                    esac
+                    linker=link.x
                     target_rustflags+=" -C link-arg=-T${linker}"
                     ;;
             esac
@@ -214,6 +204,8 @@ run() {
                         info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0 (skipped)"
                         return 0
                     fi
+                    linker=link.x
+                    target_rustflags+=" -C link-arg=-T${linker}"
                     ;;
                 # As of QEMU 7.2, QEMU doesn't support semihosting for MIPS with user-mode.
                 # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
@@ -222,8 +214,6 @@ run() {
                     return 0
                     ;;
             esac
-            linker=mips.ld
-            target_rustflags+=" -C link-arg=-T${linker}"
             ;;
     esac
 

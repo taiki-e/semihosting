@@ -8,13 +8,14 @@ publish = false
 resolver = "2"
 
 [features]
-qemu-system = []
-qemu-user = []
+qemu-system = ["semihosting-no-std-test-rt/qemu-system"]
+qemu-user = ["semihosting-no-std-test-rt/qemu-user"]
 panic-unwind = ["semihosting/panic-unwind", "semihosting/backtrace", "linked_list_allocator", "spin"]
 portable-atomic = ["semihosting/portable-atomic", "spin/portable_atomic"]
 
 [dependencies]
 semihosting = { path = "../..", features = ["stdio", "fs", "time", "args", "panic-handler"] }
+semihosting-no-std-test-rt = { path = "../no-std-rt" }
 
 # linked_list_allocator's LockedHeap uses spinning_top, but it doesn't compatible
 # with targets without atomic CAS. Implement our own LockedHeap by using spin,

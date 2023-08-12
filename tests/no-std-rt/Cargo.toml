@@ -1,0 +1,12 @@
+[package]
+name = "semihosting-no-std-test-rt"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+resolver = "2"
+
+[features]
+qemu-system = []
+qemu-user = []

@@ -13,12 +13,6 @@
     feature(asm_experimental_arch)
 )]
 
-#[cfg(any(
-    not(any(feature = "qemu-user", feature = "qemu-system")),
-    all(feature = "qemu-user", feature = "qemu-system"),
-))]
-compile_error!("no-std-test: exactly one of 'qemu-user' or 'qemu-system' feature must be enabled");
-
 use core::str;
 
 #[cfg(any(
@@ -43,60 +37,17 @@ use semihosting::{
     print, println,
 };
 
-#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
-#[no_mangle]
-#[link_section = ".text._start_arguments"]
-pub static BOOT_CORE_ID: u64 = 0;
-#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
-core::arch::global_asm!(include_str!("../raspi/boot.s"));
-
-#[cfg(mclass)]
-#[cortex_m_rt::entry]
-fn main() -> ! {
-    run_main()
-}
-#[cfg(feature = "qemu-system")]
-#[cfg(any(target_arch = "aarch64"))]
-#[no_mangle]
-pub unsafe fn _start_rust() -> ! {
-    run_main()
-}
-#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
-#[cfg(not(mclass))]
-#[no_mangle]
-unsafe fn _start(_: usize, _: usize) -> ! {
-    #[cfg(all(any(target_arch = "riscv32", target_arch = "riscv64"), feature = "qemu-system"))]
-    unsafe {
-        core::arch::asm!("la sp, _stack");
-    }
-    #[cfg(all(armv5te, feature = "qemu-system"))]
-    unsafe {
-        #[instruction_set(arm::a32)]
-        #[inline]
-        unsafe fn init() {
-            unsafe {
-                // For integratorcp, musicpal, realview-eb, versatileab, and versatilepb
-                core::arch::asm!("mov sp, #0x8000");
-            }
-        }
-        init();
-    }
-    run_main()
-}
+semihosting_no_std_test_rt::entry!(run_main);
 #[cfg(feature = "panic-unwind")]
-fn run_main() -> ! {
+fn run_main() -> i32 {
     unsafe { allocator::init_global_allocator() }
-    let code = match experimental::panic::catch_unwind(run) {
+    match experimental::panic::catch_unwind(run) {
         Ok(()) => 0,
         Err(_) => 101,
-    };
-    semihosting::process::exit(code)
+    }
 }
 #[cfg(not(feature = "panic-unwind"))]
-fn run_main() -> ! {
-    run();
-    semihosting::process::exit(0)
-}
+use run as run_main;
 
 fn run() {
     #[cfg(feature = "panic-unwind")]
