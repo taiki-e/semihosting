@@ -125,7 +125,7 @@ mod version {
             let channel = release.next().unwrap_or_default();
             let nightly = channel == "nightly" || channel == "dev";
 
-            Some(Version { nightly })
+            Some(Self { nightly })
         }
     }
 }
