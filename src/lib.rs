@@ -99,7 +99,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   portable-atomic provides atomic CAS on targets where the standard library does not provide atomic CAS.
   To use the `panic-unwind` feature on such targets (e.g., RISC-V without A-extension), you need to enable this feature.
 
-  See [the documentation](https://github.com/taiki-e/portable-atomic#optional-cfg) for details.
+  See [the documentation](https://github.com/taiki-e/portable-atomic#optional-features-critical-section) for details.
 
 - **`args`**<br>
   Enable `semihosting::experimental::env::args`.
