@@ -300,6 +300,7 @@ mod sealed {
 // Not public API.
 #[doc(hidden)]
 pub mod __private {
+    #[doc(hidden)]
     pub use core::{
         ffi::CStr,
         file, line,
@@ -307,5 +308,6 @@ pub mod __private {
         stringify, write, writeln,
     };
 
+    #[doc(hidden)]
     pub use crate::c_str::const_c_str_check;
 }
