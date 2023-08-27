@@ -2,7 +2,7 @@
 
 /*!
 <!-- tidy:crate-doc:start -->
-Semihosting for AArch64, ARM, RISC-V (RV32 & RV64), MIPS, and MIPS64.
+Semihosting for AArch64, ARM, RISC-V, MIPS, and MIPS64.
 
 This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [ARM documentation](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) for more information on semihosting.
 
