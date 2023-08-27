@@ -70,6 +70,18 @@ pub unsafe fn init_start() {
         }
         _init();
     }
+    #[cfg(all(armv4t, feature = "qemu-system"))]
+    unsafe {
+        #[instruction_set(arm::a32)]
+        #[inline]
+        unsafe fn _init() {
+            unsafe {
+                // For integratorcp, musicpal, realview-eb, versatileab, and versatilepb
+                core::arch::asm!("movs sp, #0x8000");
+            }
+        }
+        _init();
+    }
 }
 
 #[doc(hidden)]

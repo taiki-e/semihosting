@@ -166,10 +166,8 @@ run() {
     local test_dir=tests/no-std
     case "${target}" in
         armv4t* | thumbv4t*)
-            if [[ -n "${CI:-}" ]] && [[ "${runner}" == "qemu-system" ]] && [[ "${OSTYPE}" == "linux"* ]]; then
-                # Old QEMU we used in CI doesn't work on this case
-                return 0
-            fi
+            linker=armv4t.ld
+            target_rustflags+=" -C link-arg=-T${linker}"
             ;;
         armebv7r*)
             # lld doesn't support big-endian arm

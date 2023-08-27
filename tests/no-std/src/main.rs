@@ -68,12 +68,9 @@ fn run() {
     if cfg!(armv4t) && cfg!(feature = "qemu-system")
         || cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system")
     {
-        if cfg!(armv4t) {
-        } else {
-            println!("this message does not print...");
-            io::stdout().unwrap_err();
-            io::stderr().unwrap_err();
-        }
+        println!("this message does not print...");
+        io::stdout().unwrap_err();
+        io::stderr().unwrap_err();
         return;
     }
 
