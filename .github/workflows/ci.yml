@@ -126,15 +126,18 @@ jobs:
             qemu-system-misc
           # APT's qemu package doesn't provide firmware for riscv32 and mips:
           # https://packages.ubuntu.com/en/jammy/all/qemu-system-data/filelist
-          OPENSBI_VERSION=1.2
+          OPENSBI_VERSION=1.3.1 # https://github.com/riscv-software-src/opensbi/releases
           curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused "https://github.com/riscv-software-src/opensbi/releases/download/v${OPENSBI_VERSION}/opensbi-${OPENSBI_VERSION}-rv-bin.tar.xz" \
             | tar xJf -
           sudo mv "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
           sudo mv "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
           rm -rf "opensbi-${OPENSBI_VERSION}-rv-bin"
-          # TODO: use sparse-checkout
-          git clone --depth 1 https://github.com/qemu/qemu.git
+          git clone --depth 1 --filter=tree:0 --no-checkout https://github.com/qemu/qemu.git
           cd qemu
+          git sparse-checkout init
+          echo '!/*' >> .git/info/sparse-checkout
+          echo '/pc-bios/' >> .git/info/sparse-checkout
+          git checkout
           sudo mv pc-bios/{efi-pcnet.rom,vgabios-cirrus.bin} /usr/share/qemu/
           cd ..
           rm -rf qemu
@@ -145,15 +148,20 @@ jobs:
           docker rm -f qemu-user >/dev/null
           sudo mv qemu-user/bin/qemu-* /usr/bin/
           rm -rf ./qemu-user
+          qemu-system-arm --version
           qemu-arm --version
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
-      - run: brew install --cask gcc-arm-embedded
+      - run: |
+          set -euxo pipefail
+          brew install --cask gcc-arm-embedded
+          qemu-system-arm --version
         if: startsWith(matrix.os, 'macos')
       - run: |
           set -euxo pipefail
           choco install --no-progress --requirechecksums gcc-arm-embedded
-          choco install --no-progress --requirechecksums qemu --version=2023.4.24 # 8.0
+          choco install --no-progress --requirechecksums qemu --version=2023.8.22 # 8.1 https://community.chocolatey.org/packages/Qemu#versionhistory
           echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
+          "C:\Program Files\qemu\qemu-system-arm" --version
         if: startsWith(matrix.os, 'windows')
       - run: tools/no-std.sh
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
