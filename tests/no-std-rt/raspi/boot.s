@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 //
 // Copyright (c) 2021-2022 Andre Richter <andre.o.richter@gmail.com>
 

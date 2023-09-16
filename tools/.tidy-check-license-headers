@@ -1,1 +1,1 @@
-git ls-files '*.sh' '*.rs' '*.c' '*.h' '*.cpp' '*.hpp' '*.s' '*.S' '*.ld' '*.x' # TODO: check more files
+git ls-files
