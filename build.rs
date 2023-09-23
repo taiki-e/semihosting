@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+// The rustc-cfg emitted by the build script are *not* public API.
+
+#![warn(rust_2018_idioms, single_use_lifetimes, clippy::pedantic)]
+#![allow(clippy::single_match_else)]
+
 use std::env;
 
 fn main() {
@@ -33,7 +38,7 @@ fn main() {
         };
 
         if target.starts_with("thumb") {
-            target_feature_if("thumb-mode", true, &version, true)
+            target_feature_if("thumb-mode", true, &version, true);
         }
         // See portable-atomic and atomic-maybe-uninit's build.rs for more
         let mut subarch =
@@ -86,7 +91,7 @@ fn target_feature_if(
         }
     }
     if has_target_feature {
-        println!("cargo:rustc-cfg=semihosting_target_feature=\"{}\"", name);
+        println!("cargo:rustc-cfg=semihosting_target_feature=\"{name}\"");
     }
 }
 

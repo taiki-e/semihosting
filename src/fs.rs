@@ -37,7 +37,7 @@ use crate::{
 /// See [`std::fs::write` documentation][std] for details.
 ///
 /// [std]: https://doc.rust-lang.org/std/fs/fn.write.html
-pub fn write(path: impl AsRef<CStr>, contents: impl AsRef<[u8]>) -> io::Result<()> {
+pub fn write<P: AsRef<CStr>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result<()> {
     fn inner(path: &CStr, contents: &[u8]) -> io::Result<()> {
         File::create(path)?.write_all(contents)
     }
@@ -49,7 +49,7 @@ pub fn write(path: impl AsRef<CStr>, contents: impl AsRef<[u8]>) -> io::Result<(
 /// See [`std::fs::remove_file` documentation][std] for details.
 ///
 /// [std]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
-pub fn remove_file(path: impl AsRef<CStr>) -> io::Result<()> {
+pub fn remove_file<P: AsRef<CStr>>(path: P) -> io::Result<()> {
     sys::fs::unlink(path.as_ref())
 }
 
@@ -63,7 +63,7 @@ pub fn remove_file(path: impl AsRef<CStr>) -> io::Result<()> {
 /// # Platform-specific behavior
 ///
 /// Currently, this function is not supported on MIPS/MIPS64.
-pub fn rename(from: impl AsRef<CStr>, to: impl AsRef<CStr>) -> io::Result<()> {
+pub fn rename<P: AsRef<CStr>, Q: AsRef<CStr>>(from: P, to: Q) -> io::Result<()> {
     sys::fs::rename(from.as_ref(), to.as_ref())
 }
 
@@ -76,11 +76,11 @@ pub struct File(OwnedFd);
 
 impl File {
     /// Attempts to open a file in read-only mode.
-    pub fn open(path: impl AsRef<CStr>) -> io::Result<Self> {
+    pub fn open<P: AsRef<CStr>>(path: P) -> io::Result<Self> {
         OpenOptions::new().read(true).open(path.as_ref())
     }
     /// Opens a file in write-only mode.
-    pub fn create(path: impl AsRef<CStr>) -> io::Result<Self> {
+    pub fn create<P: AsRef<CStr>>(path: P) -> io::Result<Self> {
         OpenOptions::new().write(true).create(true).truncate(true).open(path.as_ref())
     }
     /// Returns a new OpenOptions object.
@@ -204,7 +204,7 @@ impl OpenOptions {
     //     self.mode = mode as mode_t;
     // }
 
-    pub fn open(&self, path: impl AsRef<CStr>) -> io::Result<File> {
+    pub fn open<P: AsRef<CStr>>(&self, path: P) -> io::Result<File> {
         sys::fs::open(path.as_ref(), self).map(File)
     }
 }
