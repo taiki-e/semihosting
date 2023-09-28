@@ -372,6 +372,19 @@ fn run() {
         target_arch = "mips64r6",
     )))]
     println!("elapsed: {:?}", now.elapsed().unwrap());
+
+    let mut writer =
+        Writer(fs::File::create(c!("target/llvm-cov-target/default.profraw")).unwrap());
+    unsafe {
+        minicov::capture_coverage(&mut writer).unwrap();
+    }
+}
+
+struct Writer(fs::File);
+impl minicov::CoverageWriter for Writer {
+    fn write(&mut self, data: &[u8]) -> Result<(), minicov::CoverageWriteError> {
+        self.0.write_all(data).map_err(|_| minicov::CoverageWriteError)
+    }
 }
 
 #[cfg(feature = "panic-unwind")]

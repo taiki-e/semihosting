@@ -135,7 +135,7 @@ run() {
     local target_upper
     target_upper=$(tr '[:lower:]' '[:upper:]' <<<"${target_lower}")
     local args=(${pre_args[@]+"${pre_args[@]}"})
-    local target_rustflags="${RUSTFLAGS:-}"
+    local target_rustflags="${RUSTFLAGS:-} -Zno-profiler-runtime"
     if ! grep <<<"${rustc_target_list}" -Eq "^${target}$" || [[ -f "target-specs/${target}.json" ]]; then
         if [[ ! -f "target-specs/${target}.json" ]]; then
             info "target '${target}' not available on ${rustc_version} (skipped)"
@@ -146,7 +146,7 @@ run() {
         local target_flags=(--target "${target}")
     fi
     local subcmd=run
-    args+=("${subcmd}" "${target_flags[@]}")
+    args+=(llvm-cov "${subcmd}" "${target_flags[@]}")
     build_std=()
     if grep <<<"${rustup_target_list}" -Eq "^${target}$"; then
         rustup ${pre_args[@]+"${pre_args[@]}"} target add "${target}" &>/dev/null
@@ -162,6 +162,21 @@ run() {
     elif [[ "${target_rustflags}" == *"force-unwind-tables"* ]]; then
         build_std=(-Z build-std="core")
     fi
+
+    case "${target}" in
+        aarch64*)
+            export TARGET_CC=aarch64-none-elf-gcc
+            target_rustflags+=" -C linker=${TARGET_CC} -C link-arg=-nostartfiles"
+            ;;
+        riscv64*)
+            export TARGET_CC=riscv64-unknown-elf-gcc
+            target_rustflags+=" -C linker=${TARGET_CC} -C link-arg=-nostartfiles"
+            ;;
+        arm* | thumb*)
+            export TARGET_CC=arm-none-eabi-gcc
+            target_rustflags+=" -C linker=${TARGET_CC} -C link-arg=-nostartfiles"
+            ;;
+    esac
 
     local test_dir=tests/no-std
     case "${target}" in
@@ -220,9 +235,10 @@ run() {
     args+=(--features "${runner}")
     (
         cd "${test_dir}"
+        runner_path="${workspace_root}/tools/${runner}-runner.sh"
         case "${OSTYPE}" in
-            cygwin* | msys*) export "CARGO_TARGET_${target_upper}_RUNNER"="bash ${workspace_root}/tools/${runner}-runner.sh ${target}" ;;
-            *) export "CARGO_TARGET_${target_upper}_RUNNER"="${workspace_root}/tools/${runner}-runner.sh ${target}" ;;
+            cygwin* | msys*) export "CARGO_TARGET_${target_upper}_RUNNER"="bash ${runner_path} ${target}" ;;
+            *) export "CARGO_TARGET_${target_upper}_RUNNER"="${runner_path} ${target}" ;;
         esac
         test_args=(a '' "c d")
 
