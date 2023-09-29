@@ -118,7 +118,7 @@ jobs:
       - name: Install Rust
         run: rustup toolchain add ${{ matrix.rust }} --no-self-update --component rust-src && rustup default ${{ matrix.rust }}
       - run: |
-          set -euxo pipefail
+          set -eEuxo pipefail
           sudo apt-get -o Acquire::Retries=10 -qq update && sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
             binutils-arm-none-eabi \
             qemu-system-arm \
@@ -152,12 +152,12 @@ jobs:
           qemu-arm --version
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
-          set -euxo pipefail
+          set -eEuxo pipefail
           brew install --cask gcc-arm-embedded
           qemu-system-arm --version
         if: startsWith(matrix.os, 'macos')
       - run: |
-          set -euxo pipefail
+          set -eEuxo pipefail
           choco install --no-progress --requirechecksums gcc-arm-embedded
           choco install --no-progress --requirechecksums qemu --version=2023.8.22 # 8.1 https://community.chocolatey.org/packages/Qemu#versionhistory
           echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
