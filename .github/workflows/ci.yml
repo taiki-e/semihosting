@@ -37,16 +37,16 @@ concurrency:
 jobs:
   # TODO: check-external-types doesn't support --target flag
   # check-external-types:
-  #   uses: taiki-e/workflows/.github/workflows/check-external-types.yml@main
+  #   uses: taiki-e/github-actions/.github/workflows/check-external-types.yml@main
   #   with:
   #     # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
   #     target: aarch64-unknown-linux-gnu
   deny:
-    uses: taiki-e/workflows/.github/workflows/deny.yml@main
+    uses: taiki-e/github-actions/.github/workflows/deny.yml@main
   docs:
-    uses: taiki-e/workflows/.github/workflows/docs.yml@main
+    uses: taiki-e/github-actions/.github/workflows/docs.yml@main
   msrv:
-    uses: taiki-e/workflows/.github/workflows/msrv.yml@main
+    uses: taiki-e/github-actions/.github/workflows/msrv.yml@main
     with:
       event_name: ${{ github.event_name }}
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
@@ -54,9 +54,9 @@ jobs:
       # NB: sync with env.TEST_FEATURES
       args: --features alloc,stdio,fs,args,time
   tidy:
-    uses: taiki-e/workflows/.github/workflows/tidy.yml@main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
     with:
-      # TODO: taiki-e/workflows/.github/workflows/tidy.yml passes --all-features to clippy
+      # TODO: taiki-e/github-actions/.github/workflows/tidy.yml passes --all-features to clippy
       clippy: false
       # # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       # target: aarch64-unknown-linux-gnu
