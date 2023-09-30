@@ -41,13 +41,13 @@ mod sys {
         if args.next.get() >= args.size {
             return None;
         }
-        let mut start = args.next.get() as usize;
+        let mut start = args.next.get();
         let mut end = None;
         let is_blank = |b: u8| b == b' ' || b == b'\t';
         let mut delim = NUL;
         let mut in_argument = false;
         while args.next.get() < args.size {
-            let b = args.buf[args.next.get() as usize];
+            let b = args.buf[args.next.get()];
             if !in_argument {
                 if is_blank(b) {
                     end = Some(args.next.get());
@@ -73,7 +73,7 @@ mod sys {
 
             args.next.set(args.next.get() + 1);
         }
-        Some(&args.buf[start..end.unwrap_or(args.next.get()) as usize])
+        Some(&args.buf[start..end.unwrap_or(args.next.get())])
     }
 
     #[cfg(any(
@@ -93,8 +93,8 @@ mod sys {
 
         pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
             pub(super) buf: [u8; BUF_SIZE],
-            pub(super) next: Cell<u8>,
-            pub(super) size: u8,
+            pub(super) next: Cell<usize>,
+            pub(super) size: usize,
         }
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             let mut buf = [0; BUF_SIZE];
@@ -107,7 +107,7 @@ mod sys {
                 return Err(io::ErrorKind::__ArgumentListTooLong.into());
             }
             #[allow(clippy::cast_possible_truncation)]
-            Ok(ArgsBytes { buf, next: Cell::new(0), size: cmdline_block.size as u8 })
+            Ok(ArgsBytes { buf, next: Cell::new(0), size: cmdline_block.size })
         }
         #[allow(clippy::copy_iterator)] // TODO
         impl<'a, const BUF_SIZE: usize> Iterator for &'a ArgsBytes<BUF_SIZE> {
@@ -135,8 +135,8 @@ mod sys {
 
         pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
             pub(super) buf: [u8; BUF_SIZE],
-            pub(super) next: Cell<u8>,
-            pub(super) size: u8,
+            pub(super) next: Cell<usize>,
+            pub(super) size: usize,
             next_fn: for<'a> fn(&mut &'a ArgsBytes<BUF_SIZE>) -> Option<&'a [u8]>,
         }
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
@@ -156,7 +156,7 @@ mod sys {
             Ok(ArgsBytes {
                 buf,
                 next: Cell::new(0),
-                size: start as u8,
+                size: start,
                 next_fn: if argc == 1 { next_from_cmdline } else { next_from_args },
             })
         }
@@ -166,10 +166,10 @@ mod sys {
             if args.next.get() >= args.size {
                 return None;
             }
-            let start = args.next.get() as usize;
+            let start = args.next.get();
             let mut end = None;
             while args.next.get() < args.size {
-                let b = args.buf[args.next.get() as usize];
+                let b = args.buf[args.next.get()];
                 if b == NUL {
                     end = Some(args.next.get());
                     args.next.set(args.next.get() + 1);
@@ -177,7 +177,7 @@ mod sys {
                 }
                 args.next.set(args.next.get() + 1);
             }
-            let end = end.unwrap_or(args.next.get()) as usize;
+            let end = end.unwrap_or(args.next.get());
             let last = end.saturating_sub(1);
             if start != last
                 && (args.buf[start] == b'"' && args.buf[last] == b'"'

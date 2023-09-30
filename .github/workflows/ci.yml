@@ -56,10 +56,9 @@ jobs:
   tidy:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
     with:
-      # TODO: taiki-e/github-actions/.github/workflows/tidy.yml passes --all-features to clippy
-      clippy: false
-      # # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      # target: aarch64-unknown-linux-gnu
+      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+      target: aarch64-unknown-linux-gnu,mips64-unknown-linux-muslabi64
+      args: --features alloc,stdio,fs,args,time
 
   # We have some platform-independent code, so test them.
   test:
