@@ -73,7 +73,7 @@ mod sys {
 
             args.next.set(args.next.get() + 1);
         }
-        Some(&args.buf[start..end.unwrap_or(args.next.get())])
+        Some(&args.buf[start..end.unwrap_or_else(|| args.next.get())])
     }
 
     #[cfg(any(
@@ -177,7 +177,7 @@ mod sys {
                 }
                 args.next.set(args.next.get() + 1);
             }
-            let end = end.unwrap_or(args.next.get());
+            let end = end.unwrap_or_else(|| args.next.get());
             let last = end.saturating_sub(1);
             if start != last
                 && (args.buf[start] == b'"' && args.buf[last] == b'"'
