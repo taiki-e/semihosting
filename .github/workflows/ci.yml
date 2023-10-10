@@ -10,7 +10,7 @@ on:
       - main
       - dev
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 env:
@@ -57,7 +57,7 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      target: aarch64-unknown-linux-gnu,mips64-unknown-linux-muslabi64
+      target: aarch64-unknown-linux-gnu #,mips64-unknown-linux-muslabi64 # TODO: there is no tier 2 MIPS targets
       args: --features alloc,stdio,fs,args,time
 
   # We have some platform-independent code, so test them.
