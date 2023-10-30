@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![no_std]
-#![warn(rust_2018_idioms, single_use_lifetimes, unsafe_op_in_unsafe_fn)]
+#![warn(unsafe_op_in_unsafe_fn)]
 
 #[cfg(any(
     not(any(feature = "qemu-user", feature = "qemu-system")),
