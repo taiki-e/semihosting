@@ -2,9 +2,6 @@
 
 // The rustc-cfg emitted by the build script are *not* public API.
 
-#![warn(rust_2018_idioms, single_use_lifetimes, clippy::pedantic)]
-#![allow(clippy::single_match_else)]
-
 use std::env;
 
 fn main() {

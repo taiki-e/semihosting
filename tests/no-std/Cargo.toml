@@ -4,9 +4,6 @@ version = "0.0.0"
 edition = "2021"
 publish = false
 
-[workspace]
-resolver = "2"
-
 [features]
 qemu-system = ["semihosting-no-std-test-rt/qemu-system"]
 qemu-user = ["semihosting-no-std-test-rt/qemu-user"]
@@ -38,6 +35,9 @@ cortex-m-rt = "0.7"
 cortex-m-rt = "0.7"
 [target.'thumbv8m.main-none-eabihf'.dependencies]
 cortex-m-rt = "0.7"
+
+[workspace]
+resolver = "2"
 
 [profile.dev]
 opt-level = "s"

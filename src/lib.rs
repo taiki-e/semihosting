@@ -184,11 +184,8 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
         allow(dead_code, unused_variables)
     )
 ))]
+#![warn(unsafe_op_in_unsafe_fn)]
 #![warn(
-    rust_2018_idioms,
-    single_use_lifetimes,
-    unreachable_pub,
-    clippy::pedantic,
     // Lints that may help when writing public library.
     missing_debug_implementations,
     // missing_docs,
@@ -199,31 +196,17 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     // clippy::missing_inline_in_public_items,
     clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
-    // Lints that may help when writing unsafe code.
-    improper_ctypes,
-    improper_ctypes_definitions,
-    unsafe_op_in_unsafe_fn,
-    clippy::as_ptr_cast_mut,
-    clippy::default_union_representation,
-    clippy::inline_asm_x86_att_syntax,
-    clippy::trailing_empty_array,
-    clippy::transmute_undefined_repr,
-    // clippy::undocumented_unsafe_blocks, // TODO
 )]
 #![allow(
-    clippy::borrow_as_ptr, // https://github.com/rust-lang/rust-clippy/issues/8286
     clippy::cast_lossless,
-    clippy::doc_markdown,
-    clippy::missing_errors_doc,
+    clippy::empty_loop, // this crate is #![no_std]
+    clippy::len_without_is_empty,
     clippy::missing_panics_doc,
-    clippy::module_inception,
-    clippy::module_name_repetitions,
     clippy::must_use_candidate,
     clippy::naive_bytecount,
-    clippy::similar_names,
-    clippy::single_match,
-    clippy::struct_excessive_bools,
-    clippy::type_complexity,
+    clippy::new_without_default,
+    clippy::struct_field_names,
+    clippy::undocumented_unsafe_blocks, // TODO
     clippy::unreadable_literal,
     clippy::used_underscore_binding,
 )]
@@ -237,8 +220,6 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     feature(asm_experimental_arch)
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![allow(clippy::empty_loop)] // this crate is #![no_std]
-#![allow(clippy::len_without_is_empty, clippy::new_without_default)]
 
 #[cfg(not(any(
     target_arch = "aarch64",

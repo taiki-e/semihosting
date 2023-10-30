@@ -106,7 +106,6 @@ mod sys {
             if cmdline_block.size > BUF_SIZE - 1 || buf[BUF_SIZE - 1] != NUL {
                 return Err(io::ErrorKind::__ArgumentListTooLong.into());
             }
-            #[allow(clippy::cast_possible_truncation)]
             Ok(ArgsBytes { buf, next: Cell::new(0), size: cmdline_block.size })
         }
         #[allow(clippy::copy_iterator)] // TODO

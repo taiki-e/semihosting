@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(single_use_lifetimes)] // false positive
-
 use core::{
     ffi::{c_int, c_void, CStr},
     marker::PhantomData,
