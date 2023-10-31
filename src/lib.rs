@@ -198,7 +198,6 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::std_instead_of_core,
 )]
 #![allow(
-    clippy::cast_lossless,
     clippy::empty_loop, // this crate is #![no_std]
     clippy::len_without_is_empty,
     clippy::missing_panics_doc,

@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::cast_sign_loss)]
-
 // TODO: re-export Duration?
 
 use sys as time;
@@ -89,6 +87,13 @@ impl fmt::Display for SystemTimeError {
 
 // Based on https://github.com/rust-lang/rust/blob/1.70.0/library/std/src/sys/unix/time.rs.
 mod sys {
+    #![allow(
+        clippy::cast_lossless,
+        clippy::cast_possible_truncation,
+        clippy::cast_possible_wrap,
+        clippy::cast_sign_loss
+    )]
+
     use core::{fmt, time::Duration};
 
     const NSEC_PER_SEC: u64 = 1_000_000_000;
