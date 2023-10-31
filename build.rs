@@ -35,7 +35,7 @@ fn main() {
         };
 
         if target.starts_with("thumb") {
-            target_feature_if("thumb-mode", true, &version, true);
+            target_feature_if("thumb-mode", true, &version);
         }
         // See portable-atomic and atomic-maybe-uninit's build.rs for more
         let mut subarch =
@@ -48,16 +48,11 @@ fn main() {
             "v6m" | "v7em" | "v7m" | "v8m" => is_mclass = true,
             _ => {}
         }
-        target_feature_if("mclass", is_mclass, &version, true);
+        target_feature_if("mclass", is_mclass, &version);
     }
 }
 
-fn target_feature_if(
-    name: &str,
-    mut has_target_feature: bool,
-    version: &Version,
-    is_rustc_target_feature: bool,
-) {
+fn target_feature_if(name: &str, mut has_target_feature: bool, version: &Version) {
     // HACK: Currently, it seems that the only way to handle unstable target
     // features on the stable is to parse the `-C target-feature` in RUSTFLAGS.
     //
@@ -68,10 +63,11 @@ fn target_feature_if(
     // (e.g., https://godbolt.org/z/TfaEx95jc), so this hack works properly on stable.
     //
     // [RFC2045]: https://rust-lang.github.io/rfcs/2045-target-feature.html#backend-compilation-options
-    if is_rustc_target_feature && version.nightly {
+    if version.nightly {
         // In this case, cfg(target_feature = "...") would work, so skip emitting our own target_feature cfg.
         return;
-    } else if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
+    }
+    if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
         for mut flag in rustflags.to_string_lossy().split('\x1f') {
             flag = flag.strip_prefix("-C").unwrap_or(flag);
             if let Some(flag) = flag.strip_prefix("target-feature=") {
