@@ -15,9 +15,9 @@ Semihosting for AArch64, ARM, RISC-V, MIPS, and MIPS64.
 [package.metadata.docs.rs]
 # NB: sync with env.TEST_FEATURES in .github/workflows/ci.yml
 features = ["alloc", "stdio", "fs", "args", "time"]
-rustdoc-args = ["--cfg", "docsrs"]
+rustdoc-args = ["--cfg", "semihosting_doc_cfg"]
 # Building documentation on any architectures that support ARM semihosting with
-# docsrs cfg will show all APIs with proper doc(cfg).
+# the above cfg will show all APIs with proper doc(cfg).
 targets = ["aarch64-unknown-linux-gnu"]
 
 [package.metadata.cargo_check_external_types]

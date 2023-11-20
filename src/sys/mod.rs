@@ -24,7 +24,7 @@ use arm_compat as arch;
     target_arch = "riscv64",
 ))]
 #[cfg_attr(
-    docsrs,
+    semihosting_doc_cfg,
     doc(cfg(any(
         target_arch = "aarch64",
         target_arch = "arm",
@@ -42,14 +42,14 @@ pub mod arm_compat;
 ))]
 use mips as arch;
 #[cfg(any(
-    all(doc, docsrs),
+    all(doc, semihosting_doc_cfg),
     target_arch = "mips",
     target_arch = "mips32r6",
     target_arch = "mips64",
     target_arch = "mips64r6",
 ))]
 #[cfg_attr(
-    docsrs,
+    semihosting_doc_cfg,
     doc(cfg(any(
         target_arch = "mips",
         target_arch = "mips32r6",
