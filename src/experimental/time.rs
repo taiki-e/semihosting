@@ -41,7 +41,7 @@ impl SystemTime {
 impl ops::Add<Duration> for SystemTime {
     type Output = SystemTime;
 
-    fn add(self, dur: Duration) -> SystemTime {
+    fn add(self, dur: Duration) -> Self::Output {
         self.checked_add(dur).expect("overflow when adding duration to instant")
     }
 }
@@ -55,7 +55,7 @@ impl ops::AddAssign<Duration> for SystemTime {
 impl ops::Sub<Duration> for SystemTime {
     type Output = SystemTime;
 
-    fn sub(self, dur: Duration) -> SystemTime {
+    fn sub(self, dur: Duration) -> Self::Output {
         self.checked_sub(dur).expect("overflow when subtracting duration from instant")
     }
 }
