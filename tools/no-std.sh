@@ -188,7 +188,7 @@ run() {
                     ;;
             esac
             ;;
-        aarch64* | riscv*)
+        aarch64* | arm64* | riscv*)
             case "${runner}" in
                 qemu-system)
                     linker=link.x
