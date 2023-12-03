@@ -48,7 +48,7 @@ pub const S_IWUSR: i32 = 0o200;
 pub const S_IRUSR: i32 = 0o400;
 pub const S_IRWXU: i32 = 0o700;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(i32)]
 #[non_exhaustive]
 pub enum SeekWhence {
@@ -63,7 +63,7 @@ pub enum SeekWhence {
 }
 
 #[allow(clippy::exhaustive_structs)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct uhi_stat {
     pub st_dev: i16,

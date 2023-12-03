@@ -3,7 +3,6 @@
 //! Low-level access to platform-specific semihosting interfaces.
 
 #![allow(
-    missing_debug_implementations,
     non_camel_case_types,
     non_upper_case_globals,
     clippy::unnecessary_wraps,

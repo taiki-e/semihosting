@@ -34,7 +34,7 @@ use crate::{
     io::{Error, RawOsError, Result},
 };
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 #[non_exhaustive]
 pub enum ExitReason {
@@ -62,7 +62,7 @@ pub enum ExitReason {
 }
 
 // Refs: https://github.com/openocd-org/openocd/blob/HEAD/src/target/semihosting_common.c
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 #[non_exhaustive]
 pub enum OpenMode {
@@ -105,7 +105,7 @@ pub enum OpenMode {
 }
 
 #[allow(clippy::exhaustive_structs)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct HeapInfo {
     pub heap_base: *mut c_void,
@@ -115,7 +115,7 @@ pub struct HeapInfo {
 }
 
 #[allow(clippy::exhaustive_structs)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct CommandLine {
     pub ptr: *mut u8,
