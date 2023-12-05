@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 // Provide safe abstraction (c! macro) for creating static C strings without runtime checks.
-// (c"..." is unavailable on Rust 1.64)
+// (c"..." requires Rust 1.76)
 
 /// [`CStr`] literal macro.
 ///
