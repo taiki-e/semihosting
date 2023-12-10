@@ -81,7 +81,7 @@ impl SystemTimeError {
 
 impl fmt::Display for SystemTimeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "second time provided was later than self")
+        f.write_str("second time provided was later than self")
     }
 }
 
