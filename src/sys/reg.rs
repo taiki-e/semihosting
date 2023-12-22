@@ -11,36 +11,38 @@ use crate::{
 };
 
 /// PARAMETER REGISTER (read-write)
+#[allow(missing_debug_implementations)]
+#[allow(clippy::exhaustive_structs)]
 #[repr(transparent)]
-pub(crate) struct ParamRegW<'a>(pub(crate) *mut c_void, PhantomData<&'a mut ()>);
+pub struct ParamRegW<'a>(pub(crate) *mut c_void, PhantomData<&'a mut ()>);
 impl<'a> ParamRegW<'a> {
     #[inline]
-    pub(crate) fn fd(fd: BorrowedFd<'a>) -> Self {
+    pub fn fd(fd: BorrowedFd<'a>) -> Self {
         Self::raw_fd(fd.as_raw_fd())
     }
     #[inline]
-    pub(crate) fn raw_fd(fd: RawFd) -> Self {
+    pub fn raw_fd(fd: RawFd) -> Self {
         Self::isize(fd as isize)
     }
     #[inline]
-    pub(crate) fn usize(n: usize) -> Self {
+    pub fn usize(n: usize) -> Self {
         Self(n as *mut c_void, PhantomData)
     }
     #[allow(clippy::cast_sign_loss)]
     #[inline]
-    pub(crate) fn isize(n: isize) -> Self {
+    pub fn isize(n: isize) -> Self {
         Self::usize(n as usize)
     }
     #[inline]
-    pub(crate) fn ptr<T>(ptr: *mut T) -> Self {
+    pub fn ptr<T>(ptr: *mut T) -> Self {
         Self(ptr.cast::<c_void>(), PhantomData)
     }
     #[inline]
-    pub(crate) fn ref_<T>(r: &'a mut T) -> Self {
+    pub fn ref_<T>(r: &'a mut T) -> Self {
         Self::ptr(r)
     }
     #[inline]
-    pub(crate) fn buf<T>(buf: &'a mut [T]) -> Self {
+    pub fn buf<T>(buf: &'a mut [T]) -> Self {
         Self::ptr(buf.as_mut_ptr())
     }
 }
@@ -52,42 +54,44 @@ impl<'a> ParamRegW<'a> {
 ))]
 impl<'a> ParamRegW<'a> {
     #[inline]
-    pub(crate) fn block(b: &'a mut [ParamRegW<'_>]) -> Self {
+    pub fn block(b: &'a mut [ParamRegW<'_>]) -> Self {
         Self::ptr(b.as_mut_ptr())
     }
 }
 
 /// PARAMETER REGISTER (read-only)
+#[allow(missing_debug_implementations)]
+#[allow(clippy::exhaustive_structs)]
 #[repr(transparent)]
-pub(crate) struct ParamRegR<'a>(pub(crate) *const c_void, PhantomData<&'a ()>);
+pub struct ParamRegR<'a>(pub(crate) *const c_void, PhantomData<&'a ()>);
 impl<'a> ParamRegR<'a> {
     #[inline]
-    pub(crate) fn fd(fd: BorrowedFd<'a>) -> Self {
+    pub fn fd(fd: BorrowedFd<'a>) -> Self {
         Self::raw_fd(fd.as_raw_fd())
     }
     #[inline]
-    pub(crate) fn raw_fd(fd: RawFd) -> Self {
+    pub fn raw_fd(fd: RawFd) -> Self {
         Self::isize(fd as isize)
     }
     #[inline]
-    pub(crate) fn usize(n: usize) -> Self {
+    pub fn usize(n: usize) -> Self {
         Self(n as *const c_void, PhantomData)
     }
     #[allow(clippy::cast_sign_loss)]
     #[inline]
-    pub(crate) fn isize(n: isize) -> Self {
+    pub fn isize(n: isize) -> Self {
         Self::usize(n as usize)
     }
     #[inline]
-    pub(crate) fn ptr<T>(ptr: *const T) -> Self {
+    pub fn ptr<T>(ptr: *const T) -> Self {
         Self(ptr.cast::<c_void>(), PhantomData)
     }
     #[inline]
-    pub(crate) fn buf<T>(buf: &'a [T]) -> Self {
+    pub fn buf<T>(buf: &'a [T]) -> Self {
         Self::ptr(buf.as_ptr())
     }
     #[inline]
-    pub(crate) fn c_str(s: &'a CStr) -> Self {
+    pub fn c_str(s: &'a CStr) -> Self {
         Self::ptr(s.as_ptr())
     }
 }
@@ -99,22 +103,24 @@ impl<'a> ParamRegR<'a> {
 ))]
 impl<'a> ParamRegR<'a> {
     #[inline]
-    pub(crate) fn block(b: &'a [ParamRegR<'_>]) -> Self {
+    pub fn block(b: &'a [ParamRegR<'_>]) -> Self {
         Self::ptr(b.as_ptr())
     }
     #[inline]
-    pub(crate) fn ref_<T>(r: &'a T) -> Self {
+    pub fn ref_<T>(r: &'a T) -> Self {
         Self::ptr(r)
     }
 }
 
 /// RETURN REGISTER
 #[derive(Clone, Copy)]
+#[allow(missing_debug_implementations)]
+#[allow(clippy::exhaustive_structs)]
 #[repr(transparent)]
-pub(crate) struct RetReg(pub(crate) *mut c_void);
+pub struct RetReg(pub(crate) *mut c_void);
 impl RetReg {
     #[inline]
-    pub(crate) fn usize(self) -> usize {
+    pub fn usize(self) -> usize {
         self.0 as usize
     }
     #[allow(clippy::cast_possible_wrap, clippy::cast_sign_loss)]
@@ -124,11 +130,11 @@ impl RetReg {
     }
     #[allow(clippy::cast_possible_truncation)]
     #[inline]
-    pub(crate) fn int(self) -> c_int {
+    pub fn int(self) -> c_int {
         self.isize() as c_int
     }
     #[inline]
-    pub(crate) fn raw_fd(self) -> Option<RawFd> {
+    pub fn raw_fd(self) -> Option<RawFd> {
         let fd = self.int();
         if fd == -1 {
             None
@@ -139,7 +145,7 @@ impl RetReg {
         }
     }
     #[inline]
-    pub(crate) fn errno(self) -> RawOsError {
+    pub fn errno(self) -> RawOsError {
         let err = self.int();
         debug_assert!(!err.is_negative(), "{}", err);
         debug_assert_eq!(err as isize, self.isize());
@@ -155,7 +161,7 @@ impl RetReg {
 impl RetReg {
     #[allow(clippy::cast_possible_truncation)]
     #[inline]
-    pub(crate) fn u8(self) -> u8 {
+    pub fn u8(self) -> u8 {
         let b = self.usize() as u8;
         debug_assert_eq!(b as usize, self.usize());
         b
