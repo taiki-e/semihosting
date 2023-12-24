@@ -137,7 +137,7 @@ jobs:
           cd ..
           rm -rf qemu
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
-          docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1
+          docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1 # TODO: "qemu-armeb: Error mapping file: Operation not permitted" error in 8.2
           mkdir -p qemu-user
           docker cp qemu-user:/usr/bin qemu-user/bin
           docker rm -f qemu-user >/dev/null
