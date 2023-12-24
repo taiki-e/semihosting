@@ -242,6 +242,7 @@ extern crate std;
 #[cfg(feature = "panic-unwind")]
 #[cfg(not(feature = "portable-atomic"))]
 use core::sync::atomic;
+
 #[cfg(feature = "panic-unwind")]
 #[cfg(feature = "portable-atomic")]
 use portable_atomic as atomic;

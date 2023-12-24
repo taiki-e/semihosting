@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use core::any::Any;
-
 use alloc::boxed::Box;
+use core::any::Any;
 
 use crate::atomic::{AtomicUsize, Ordering};
 

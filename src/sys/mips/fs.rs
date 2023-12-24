@@ -2,16 +2,15 @@
 
 use core::ffi::CStr;
 
-use crate::{
-    fd::{BorrowedFd, OwnedFd},
-    io::{self, Error, Result},
-};
-
 use super::{
     errno, mips_fstat, mips_lseek, mips_open, SeekWhence::SEEK_SET, O_APPEND, O_CREAT, O_EXCL,
     O_RDONLY, O_RDWR, O_TRUNC, O_WRONLY,
 };
 pub(crate) use super::{mips_fstat as metadata, mips_unlink as unlink, uhi_stat as Metadata};
+use crate::{
+    fd::{BorrowedFd, OwnedFd},
+    io::{self, Error, Result},
+};
 
 #[allow(clippy::cast_possible_wrap)]
 pub(crate) fn open(path: &CStr, options: &crate::fs::OpenOptions) -> Result<OwnedFd> {

@@ -14,7 +14,7 @@ overflow_delimited_expr = true
 # This is unstable (tracking issue: none).
 imports_granularity = "Crate"
 # This is unstable (tracking issue: none).
-# group_imports = "StdExternalCrate"
+group_imports = "StdExternalCrate"
 
 # Apply rustfmt to more places.
 # This is unstable (tracking issue: https://github.com/rust-lang/rustfmt/issues/3348).

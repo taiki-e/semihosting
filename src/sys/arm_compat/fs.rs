@@ -2,13 +2,12 @@
 
 use core::ffi::CStr;
 
+use super::{errno, sys_flen, sys_open, sys_seek, OpenMode};
+pub(crate) use super::{sys_remove as unlink, sys_rename as rename};
 use crate::{
     fd::{BorrowedFd, OwnedFd},
     io::{self, Error, Result},
 };
-
-use super::{errno, sys_flen, sys_open, sys_seek, OpenMode};
-pub(crate) use super::{sys_remove as unlink, sys_rename as rename};
 
 pub(crate) struct Metadata {
     size: u64,
