@@ -22,6 +22,8 @@ SECTIONS
     PROVIDE(__eh_frame = .);
     .eh_frame : { KEEP(*(.eh_frame)) *(.eh_frame.*) }
 
-    . = ALIGN(STACK_ALIGN);
+    /* https://github.com/riscv-non-isa/riscv-eabi-spec/blob/HEAD/EABI.adoc#eabi-stack-alignment */
+    /* https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/HEAD/riscv-elf.adoc#tag_riscv_stack_align-4-uleb128value */
+    . = ALIGN(16);
     PROVIDE(_stack = . + 8M);
 }
