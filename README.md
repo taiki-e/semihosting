@@ -24,7 +24,7 @@ APIs are categorized into the following four types:
   - API that panics on failure in `std` (in no-std it makes sense to return `Result` since `panic=abort` is default)
 
 - Helpers that are useful when using this library.
-  - `c!`: `CStr` literal macro. (Since Rust 1.76, this macro is soft-deprecated in favor of C string literals (`c"..."`).)
+  - `c!`: `CStr` literal macro. (Stable alternative to unstable C string literals (`c"..."`).)
 
 - `semihosting::sys` module, which provides low-level access to platform-specific semihosting interfaces.
 

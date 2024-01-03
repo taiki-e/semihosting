@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 // Provide safe abstraction (c! macro) for creating static C strings without runtime checks.
-// (c"..." requires Rust 1.76)
+// (c"..." is unstable: https://github.com/rust-lang/rust/issues/105723)
 
 /// [`CStr`] literal macro.
 ///
-/// **Note:** Since Rust 1.76, this macro is soft-deprecated in favor of C string literals (`c"..."`).
+/// This is a stable alternative to unstable C string literals (`c"..."`).
 ///
 /// [`Path`] is not available in `core`, so this crate uses [`CStr`] instead in the API where
 /// `std` uses [`Path`]. This macro makes it safe and zero-cost to create a [`CStr`] from a literal.
