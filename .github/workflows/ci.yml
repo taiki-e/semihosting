@@ -22,7 +22,7 @@ env:
   RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
-  # NB: sync with msrv job's --features option and package.metadata.docs.rs.features field in Cargo.toml.
+  # NB: sync with miri/msrv/tidy jobs' --features option and package.metadata.docs.rs.features field in Cargo.toml
   TEST_FEATURES: alloc,stdio,fs,args,time
 
 defaults:
@@ -40,6 +40,13 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/deny.yml@main
   docs:
     uses: taiki-e/github-actions/.github/workflows/docs.yml@main
+  miri:
+    uses: taiki-e/github-actions/.github/workflows/miri.yml@main
+    with:
+      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+      target: aarch64-unknown-linux-gnu
+      # NB: sync with env.TEST_FEATURES
+      args: --features alloc,stdio,fs,args,time
   msrv:
     uses: taiki-e/github-actions/.github/workflows/msrv.yml@main
     with:
@@ -53,6 +60,7 @@ jobs:
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       target: aarch64-unknown-linux-gnu #,mips64-unknown-linux-muslabi64 # TODO: there is no tier 2 MIPS targets
+      # NB: sync with env.TEST_FEATURES
       args: --features alloc,stdio,fs,args,time
       known-cfgs: semihosting_doc_cfg
 
@@ -157,18 +165,3 @@ jobs:
       - run: tools/no-std.sh
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
-
-  # We have some platform-independent code, so test them with Miri.
-  # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-  miri:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: taiki-e/github-actions/checkout@main
-      - name: Install Rust
-        run: rustup toolchain add nightly --no-self-update --component miri && rustup default nightly
-      - run: cargo miri test --features $TEST_FEATURES --target aarch64-unknown-linux-gnu
-        env:
-          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation
-          RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
-          RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
