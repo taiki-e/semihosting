@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#[allow(clippy::used_underscore_binding)]
 #[inline(never)]
 #[cfg_attr(not(test), panic_handler)]
 fn _panic(_info: &core::panic::PanicInfo<'_>) -> ! {

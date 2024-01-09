@@ -12,6 +12,7 @@ use crate::sys;
 /// Terminates the current process with the specified exit code.
 pub fn exit(code: i32) -> ! {
     sys::exit(code);
+    #[allow(clippy::empty_loop)] // this crate is #![no_std]
     loop {}
 }
 
