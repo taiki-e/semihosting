@@ -95,6 +95,7 @@ jobs:
         if: startsWith(matrix.rust, 'nightly')
       - run: cargo hack build --workspace --no-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace --target ${{ matrix.target }} $BUILD_STD
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features $TEST_FEATURES --target ${{ matrix.target }} $BUILD_STD
+      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features $TEST_FEATURES --target ${{ matrix.target }} $BUILD_STD --direct
 
   no-std:
     strategy:
