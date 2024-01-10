@@ -7,9 +7,9 @@ use std::env;
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
-    let target = &*env::var("TARGET").expect("TARGET not set");
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
     if target_arch == "arm" {
+        let target = &*env::var("TARGET").expect("TARGET not set");
         // HACK: If --target is specified, rustflags is not applied to the build
         // script itself, so the build script will not be rerun when these are changed.
         //
