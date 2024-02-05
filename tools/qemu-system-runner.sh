@@ -71,7 +71,7 @@ case "${target}" in
         qemu_system arm -cpu cortex-m4 -M lm3s6965evb
         ;;
     thumbv8m.base-*)
-        # TODO: As of QEMU 8.0, QEMU doesn't support -cpu cortex-m23
+        # TODO: As of QEMU 8.2, QEMU doesn't support -cpu cortex-m23
         qemu_system arm -cpu cortex-m33 -M lm3s6965evb
         ;;
     thumbv8m.main-*)
@@ -89,7 +89,7 @@ case "${target}" in
     # ARMv4T
     armv4t* | thumbv4t*)
         # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'
-        # all passed: N/A
+        # all passed: N/A # TODO
         # exit-only passed:
         # - cheetah, sx1, sx1-v1 (OMAP310)
         # - collie (SA-1110)

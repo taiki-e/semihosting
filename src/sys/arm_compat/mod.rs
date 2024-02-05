@@ -298,7 +298,7 @@ pub(crate) fn should_close(_fd: &OwnedFd) -> bool {
     true
 }
 
-// TODO: read_uninit?
+// TODO: Add read_uninit?
 /// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#613sys_read-0x06)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
     let len = buf.len();
