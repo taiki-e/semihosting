@@ -242,7 +242,10 @@ run() {
             case "${runner}" in
                 qemu-system)
                     case "${target}" in
-                        aarch64* | arm64* | riscv*)
+                        # TODO: unwinding 0.2.1 regression: error: instruction requires: fp-armv8
+                        #       https://github.com/nbdd0121/unwinding/pull/25
+                        # aarch64* | arm64* | riscv*)
+                        riscv*)
                             # Handle targets without atomic CAS
                             case "${target}" in
                                 thumbv[4-5]t* | armv[4-5]t* | thumbv6m*)
