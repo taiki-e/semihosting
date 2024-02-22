@@ -86,6 +86,10 @@ case "${target}" in
         # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
         qemu_system arm -M xilinx-zynq-a9
         ;;
+    armv8r* | armebv8r*)
+        # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
+        qemu_system arm -M xilinx-zynq-a9
+        ;;
     # ARMv4T
     armv4t* | thumbv4t*)
         # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'

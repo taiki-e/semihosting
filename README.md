@@ -54,6 +54,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `armv7a-none-eabi{,hf}`             | ✓    | ✓                      | ✓                         |                            |      |
 | `armv7r-none-eabi{,hf}`             | ✓    | ✓                      | ✓                         |                            |      |
 | `armebv7r-none-eabi{,hf}`           | ✓    |                        | ✓                         |                            |      |
+| `armv8r-none-eabihf`                | ✓    | ✓                      | ✓                         |                            |      |
 | `thumbv6m-none-eabi`                | ✓    | ✓                      | N/A                       |                            |      |
 | `thumbv7m-none-eabi`                | ✓    | ✓                      | N/A                       |                            |      |
 | `thumbv7em-none-eabi{,hf}`          | ✓    | ✓                      | N/A                       |                            |      |

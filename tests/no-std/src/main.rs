@@ -338,7 +338,9 @@ fn run() {
     {
         // sys_*
         println!("sys_clock: {}", sys_clock().unwrap());
-        println!("sys_elapsed: {}", sys_elapsed().unwrap());
+        if cfg!(not(all(target_arch = "arm", target_feature = "v8", target_feature = "rclass"))) {
+            println!("sys_elapsed: {}", sys_elapsed().unwrap());
+        }
         // TODO: sys_heapinfo
         assert_eq!(sys_iserror(isize::MAX), false);
         assert_eq!(sys_iserror(1), false);

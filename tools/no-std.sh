@@ -33,6 +33,8 @@ default_targets=(
     armv7r-none-eabihf
     armebv7r-none-eabi
     armebv7r-none-eabihf
+    # armv8-r
+    armv8r-none-eabihf
 
     # armv6-m
     thumbv6m-none-eabi

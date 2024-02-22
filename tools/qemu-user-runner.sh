@@ -70,6 +70,12 @@ case "${target}" in
     armebv7r*)
         qemu_user armeb -cpu cortex-r5
         ;;
+    armv8r*)
+        qemu_user arm -cpu cortex-r52
+        ;;
+    armebv8r*)
+        qemu_user armeb -cpu cortex-r52
+        ;;
     # ARMv4T
     armv4t* | thumbv4t*)
         # qemu-system-arm -cpu help | grep -E '9.*t|sa1'
