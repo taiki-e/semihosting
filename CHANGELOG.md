@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Documentation improvements.
+
 ## [0.1.5] - 2023-12-27
 
 - Expose raw syscall interface as public API ([#7](https://github.com/taiki-e/semihosting/pull/7), thanks @t-moe)
