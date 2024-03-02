@@ -168,7 +168,7 @@ run() {
     local test_dir=tests/no-std
     case "${target}" in
         armv4t* | thumbv4t*)
-            if [[ -n "${CI:-}" ]] && [[ "${runner}" == "qemu-system" ]] && [[ "${OSTYPE}" == "linux"* ]]; then
+            if [[ -n "${CI:-}" ]] && [[ "${runner}" == "qemu-system" ]] && [[ "$(uname -s)" == "Linux" ]]; then
                 # Old QEMU we used in CI doesn't work on this case
                 return 0
             fi
@@ -222,8 +222,8 @@ run() {
     args+=(--features "${runner}")
     (
         cd "${test_dir}"
-        case "${OSTYPE}" in
-            cygwin* | msys*) export "CARGO_TARGET_${target_upper}_RUNNER"="bash ${workspace_root}/tools/${runner}-runner.sh ${target}" ;;
+        case "$(uname -s)" in
+            MINGW* | MSYS* | CYGWIN* | Windows_NT) export "CARGO_TARGET_${target_upper}_RUNNER"="bash ${workspace_root}/tools/${runner}-runner.sh ${target}" ;;
             *) export "CARGO_TARGET_${target_upper}_RUNNER"="${workspace_root}/tools/${runner}-runner.sh ${target}" ;;
         esac
         test_args=(a '' "c d")
