@@ -14,7 +14,7 @@ This library provides access to semihosting, a mechanism for programs running on
 APIs are categorized into the following four types:
 
 - The top-level API (`semihosting::{io,fs,..}`) provides a subset of the standard library's similar APIs.
-  - `io`: Provide no-std io traits and `std{in,out,err}`. (`std{in,out,err}` requires `stdio` feature)
+  - `io`: Provide no-std io traits and `std{in,out,err}`. (`std{in,out,err}` requires `stdio` feature, others are unconditionally provided)
   - `fs`: Provide methods to manipulate the contents of the host filesystem. (requires `fs` feature)
   - `process`: Provide `abort` and `exit`.
   - `dbg!`/`print{,ln}!`/`eprint{,ln}!`: macros to output to stdout/stderr. (requires `stdio` feature)
@@ -30,7 +30,7 @@ APIs are categorized into the following four types:
 
 - `semihosting::experimental` module, which provides experimental APIs. See [optional features](#optional-features) for more.
 
-Additionally, this library provides a panic handler for semihosting and `-C panic=unwind` support, via optional features.
+Additionally, this library provides a panic handler for semihosting, `-C panic=unwind` support, backtrace support, via [optional features](#optional-features).
 
 ## Platform Support
 
