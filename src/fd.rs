@@ -68,7 +68,7 @@ impl BorrowedFd<'_> {
     }
 
     /// Extracts the raw file descriptor.
-    #[allow(clippy::trivially_copy_pass_by_ref)]
+    #[allow(clippy::trivially_copy_pass_by_ref)] // align to AsRawFd::as_raw_fd
     #[inline]
     pub const fn as_raw_fd(&self) -> RawFd {
         self.fd
