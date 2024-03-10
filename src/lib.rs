@@ -215,6 +215,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     ),
     feature(asm_experimental_arch)
 )]
+// docs.rs only (cfg is enabled via [package.metadata.docs.rs] in Cargo.toml, not build script)
 #![cfg_attr(semihosting_doc_cfg, feature(doc_cfg))]
 
 #[cfg(not(any(
