@@ -120,6 +120,7 @@ if [[ -z "${is_custom_toolchain}" ]]; then
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -Vv | grep 'release: ' | sed 's/release: //')
+# target_dir=$(pwd)/target
 nightly=''
 if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]]; then
     nightly=1
@@ -265,10 +266,10 @@ run() {
         #                         build_std=(-Z build-std="core,alloc")
         #                         args+=(--features panic-unwind)
         #                         target_rustflags+=" -C panic=unwind"
-        #                         CARGO_TARGET_DIR="../../target/panic-unwind" \
+        #                         CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
         #                             RUSTFLAGS="${target_rustflags}" \
         #                             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
-        #                         CARGO_TARGET_DIR="../../target/panic-unwind" \
+        #                         CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
         #                             RUSTFLAGS="${target_rustflags}" \
         #                             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
         #                     fi
