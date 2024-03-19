@@ -18,6 +18,11 @@ fn main() {
     if host.contains("-windows") {
         println!("cargo:rustc-cfg=host_windows");
     }
+    if target_arch.starts_with("mips") {
+        println!("cargo:rustc-cfg=mips");
+    } else {
+        println!("cargo:rustc-cfg=arm_compat");
+    }
     if target_arch == "arm" {
         let mut subarch =
             target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
