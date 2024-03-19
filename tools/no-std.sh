@@ -120,7 +120,7 @@ if [[ -z "${is_custom_toolchain}" ]]; then
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -Vv | grep 'release: ' | sed 's/release: //')
-# target_dir=$(pwd)/target
+target_dir=$(pwd)/target
 nightly=''
 if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]]; then
     nightly=1
@@ -241,43 +241,39 @@ run() {
             RUSTFLAGS="${target_rustflags}" \
             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
 
-        # TODO: https://github.com/nbdd0121/unwinding/pull/27
-        # if [[ -n "${nightly}" ]]; then
-        #     case "${runner}" in
-        #         qemu-system)
-        #             case "${target}" in
-        #                 # TODO: unwinding 0.2.1 regression: error: instruction requires: fp-armv8
-        #                 #       https://github.com/nbdd0121/unwinding/pull/25
-        #                 # aarch64* | arm64* | riscv*)
-        #                 riscv*)
-        #                     # Handle targets without atomic CAS
-        #                     case "${target}" in
-        #                         thumbv[4-5]t* | armv[4-5]t* | thumbv6m*)
-        #                             args+=(--features portable-atomic)
-        #                             target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core"
-        #                             ;;
-        #                         riscv??i-* | riscv??im-* | riscv??imc-*)
-        #                             args+=(--features portable-atomic)
-        #                             target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core --cfg portable_atomic_s_mode"
-        #                             ;;
-        #                     esac
-        #                     # skip if we already tested with panic=unwind
-        #                     if [[ "${target_rustflags}" != *"panic=unwind"* ]]; then
-        #                         build_std=(-Z build-std="core,alloc")
-        #                         args+=(--features panic-unwind)
-        #                         target_rustflags+=" -C panic=unwind"
-        #                         CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
-        #                             RUSTFLAGS="${target_rustflags}" \
-        #                             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
-        #                         CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
-        #                             RUSTFLAGS="${target_rustflags}" \
-        #                             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
-        #                     fi
-        #                     ;;
-        #             esac
-        #             ;;
-        #     esac
-        # fi
+        if [[ -n "${nightly}" ]]; then
+            case "${runner}" in
+                qemu-system)
+                    case "${target}" in
+                        aarch64* | arm64* | riscv*)
+                            # Handle targets without atomic CAS
+                            case "${target}" in
+                                thumbv[4-5]t* | armv[4-5]t* | thumbv6m*)
+                                    args+=(--features portable-atomic)
+                                    target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core"
+                                    ;;
+                                riscv??i-* | riscv??im-* | riscv??imc-*)
+                                    args+=(--features portable-atomic)
+                                    target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core --cfg portable_atomic_s_mode"
+                                    ;;
+                            esac
+                            # skip if we already tested with panic=unwind
+                            if [[ "${target_rustflags}" != *"panic=unwind"* ]]; then
+                                build_std=(-Z build-std="core,alloc")
+                                args+=(--features panic-unwind)
+                                target_rustflags+=" -C panic=unwind"
+                                CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
+                                    RUSTFLAGS="${target_rustflags}" \
+                                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
+                                CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
+                                    RUSTFLAGS="${target_rustflags}" \
+                                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
+                            fi
+                            ;;
+                    esac
+                    ;;
+            esac
+        fi
     )
 }
 

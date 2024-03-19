@@ -238,7 +238,7 @@ fn run() {
     }
     {
         println!("test env::args ... ");
-        const BUF_SIZE: usize = 128;
+        const BUF_SIZE: usize = 256;
         #[cfg(arm_compat)]
         {
             let mut buf = [0; BUF_SIZE];
