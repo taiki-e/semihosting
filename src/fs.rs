@@ -62,7 +62,7 @@ pub fn remove_file<P: AsRef<CStr>>(path: P) -> io::Result<()> {
 ///
 /// # Platform-specific behavior
 ///
-/// Currently, this function is not supported on MIPS/MIPS64.
+/// Currently, this function is not supported on MIPS32/MIPS64.
 pub fn rename<P: AsRef<CStr>, Q: AsRef<CStr>>(from: P, to: Q) -> io::Result<()> {
     sys::fs::rename(from.as_ref(), to.as_ref())
 }

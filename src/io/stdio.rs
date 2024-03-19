@@ -10,10 +10,10 @@ use crate::{fd::AsFd, io, sys};
 ///
 /// # Platform-specific behavior
 ///
-/// Currently, this function will always success on MIPS/MIPS64, On other architectures,
+/// Currently, this function will always success on MIPS32/MIPS64, On other architectures,
 /// this may fail if semihosting is only partially supported.
 ///
-/// Also, we have found that reading from stdin does not work well on MIPS/MIPS64.
+/// Also, we have found that reading from stdin does not work well on MIPS32/MIPS64.
 ///
 /// [`std::io::stdin`]: https://doc.rust-lang.org/std/io/fn.stdin.html
 pub fn stdin() -> io::Result<Stdin> {
@@ -25,7 +25,7 @@ pub fn stdin() -> io::Result<Stdin> {
 ///
 /// # Platform-specific behavior
 ///
-/// Currently, this function will always success on MIPS/MIPS64, On other architectures,
+/// Currently, this function will always success on MIPS32/MIPS64, On other architectures,
 /// this may fail if semihosting is only partially supported.
 ///
 /// [`std::io::stdout`]: https://doc.rust-lang.org/std/io/fn.stdout.html
@@ -38,7 +38,7 @@ pub fn stdout() -> io::Result<Stdout> {
 ///
 /// # Platform-specific behavior
 ///
-/// Currently, this function will always success on MIPS/MIPS64, On other architectures,
+/// Currently, this function will always success on MIPS32/MIPS64, On other architectures,
 /// this may fail if semihosting is only partially supported.
 ///
 /// [`std::io::stderr`]: https://doc.rust-lang.org/std/io/fn.stderr.html

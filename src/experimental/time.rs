@@ -15,9 +15,11 @@ pub struct SystemTimeError(Duration);
 impl SystemTime {
     pub const UNIX_EPOCH: Self = Self(time::UNIX_EPOCH);
 
+    /// # Platform-specific behavior
+    ///
+    /// Currently, this function is not supported on MIPS32/MIPS64.
     #[must_use]
     pub fn now() -> Self {
-        // TODO: this always fails on MIPS/MIPS64
         Self(time::SystemTime::now().unwrap())
     }
 
