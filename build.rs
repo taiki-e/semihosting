@@ -66,7 +66,7 @@ fn target_feature_if(name: &str, mut has_target_feature: bool, version: &Version
     // - CARGO_CFG_TARGET_FEATURE excludes unstable target features on stable.
     //
     // As mentioned in the [RFC2045], unstable target features are also passed to LLVM
-    // (e.g., https://godbolt.org/z/TfaEx95jc), so this hack works properly on stable.
+    // (e.g., https://godbolt.org/z/4rr7rMcfG), so this hack works properly on stable.
     //
     // [RFC2045]: https://rust-lang.github.io/rfcs/2045-target-feature.html#backend-compilation-options
     if version.nightly {
