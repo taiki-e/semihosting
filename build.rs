@@ -36,9 +36,13 @@ fn main() {
             }
         };
 
-        if target.starts_with("thumb") {
-            target_feature_if("thumb-mode", true, &version);
-        }
+        // armv7-linux-androideabi and armv7-sony-vita-newlibeabihf are also enable +thumb-mode.
+        // https://github.com/rust-lang/rust/blob/1.77.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L21
+        // https://github.com/rust-lang/rust/blob/1.77.0/compiler/rustc_target/src/spec/targets/armv7_sony_vita_newlibeabihf.rs#L33
+        let is_thumb_mode = target.starts_with("thumb")
+            || target == "armv7-linux-androideabi"
+            || target == "armv7-sony-vita-newlibeabihf";
+        target_feature_if("thumb-mode", is_thumb_mode, &version);
         // See portable-atomic and atomic-maybe-uninit's build.rs for more
         let mut subarch =
             target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
