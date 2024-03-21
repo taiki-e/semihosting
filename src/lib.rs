@@ -2,7 +2,7 @@
 
 /*!
 <!-- tidy:crate-doc:start -->
-Semihosting for AArch64, ARM, RISC-V, MIPS32, and MIPS64.
+Semihosting for AArch64, ARM, RISC-V, MIPS32, MIPS64, and Xtensa.
 
 This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [ARM documentation](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) for more information on semihosting.
 
@@ -31,11 +31,12 @@ Additionally, this library provides a panic handler for semihosting, `-C panic=u
 
 The following target architectures are supported:
 
-| target_arch | Specification | `semihosting::sys` module |
-| ----------- | ------------- | ------------------------- |
-| arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` |
-| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc) | `sys::arm_compat` |
-| mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` |
+| target_arch | Specification | `semihosting::sys` module | Note |
+| ----------- | ------------- | ------------------------- | ---- |
+| arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` | |
+| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc) | `sys::arm_compat` | |
+| xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires the [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
+| mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` | |
 
 The host must be running an emulator or a debugger attached to the target.
 
@@ -92,6 +93,16 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 
   If the `stdio` feature is also enabled, this attempt to output panic message and
   location to stderr.
+
+- <a name="optional-features-openocd-semihosting"></a>**`openocd-semihosting`**<br>
+  Xtensa-specific: Use OpenOCD Semihosting.
+
+  Xtensa has two semihosting interfaces:
+
+  - Tensilica ISS SIMCALL used in Cadence tools and [QEMU](https://www.qemu.org/docs/master/about/emulation.html#supported-targets).
+  - ARM-semihosting-compatible semihosting interface used in [OpenOCD](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) and [probe-rs](https://github.com/probe-rs/probe-rs/pull/2303). (This crate calls it "OpenOCD Semihosting", which is the same as the option name in [newlib](https://github.com/espressif/newlib-esp32/blob/esp_based_on_4_1_0/libgloss/xtensa/syscalls.c#L23).)
+
+  This crate does not currently support SIMCALL-based semihosting, but users need to explicitly enable the feature to avoid accidentally selecting a different one than one actually want to use.
 
 - **`portable-atomic`**<br>
   Use [portable-atomic]'s atomic types.
@@ -212,6 +223,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
         target_arch = "mips32r6",
         target_arch = "mips64",
         target_arch = "mips64r6",
+        target_arch = "xtensa",
     ),
     feature(asm_experimental_arch)
 )]
@@ -227,8 +239,19 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     target_arch = "mips32r6",
     target_arch = "mips64",
     target_arch = "mips64r6",
+    target_arch = "xtensa",
 )))]
 compile_error!("unsupported target");
+#[cfg(target_arch = "xtensa")]
+#[cfg(not(feature = "openocd-semihosting"))]
+compile_error!(
+    "xtensa has two semihosting interfaces so you have to select implementation;\n\
+    please enable `openocd-semihosting` feature if you want to use OpenOCD Semihosting used in OpenOCD, probe-rs, etc.\n\
+    see <https://docs.rs/semihosting/latest/semihosting/#optional-features-openocd-semihosting> for more."
+);
+#[cfg(not(target_arch = "xtensa"))]
+#[cfg(feature = "openocd-semihosting")]
+compile_error!("`openocd-semihosting` feature does not compatible with this target");
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

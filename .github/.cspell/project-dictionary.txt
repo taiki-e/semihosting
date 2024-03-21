@@ -11,6 +11,7 @@ ebreak
 EINTR
 EINVAL
 errno
+espup
 fipe
 FLEN
 fopen
@@ -39,6 +40,7 @@ nlink
 norvc
 nsec
 OMAP
+openocd
 opensbi
 pcnet
 plog
@@ -55,12 +57,14 @@ requirechecksums
 rustfilt
 sdbbp
 Seekable
+simcall
 slli
 srai
 subarch
 subcode
 syscall
 TDMI
+Tensilica
 tickfreq
 timespec
 TMPNAM

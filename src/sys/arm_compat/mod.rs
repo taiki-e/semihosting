@@ -7,6 +7,7 @@
 //! - Semihosting for AArch32 and AArch64 <https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst>
 //! - RISC-V Semihosting <https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc>
 //! - <https://github.com/qemu/qemu/blob/HEAD/semihosting/arm-compat-semi.c>
+//! - <https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c>
 
 #![allow(clippy::missing_safety_doc)] // TODO
 

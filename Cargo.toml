@@ -9,7 +9,7 @@ keywords = ["qemu"]
 categories = ["embedded", "hardware-support", "no-std", "no-std::no-alloc"]
 exclude = ["/.*", "/tools", "/target-specs"]
 description = """
-Semihosting for AArch64, ARM, RISC-V, MIPS32, and MIPS64.
+Semihosting for AArch64, ARM, RISC-V, MIPS32, MIPS64, and Xtensa.
 """
 
 [package.metadata.docs.rs]
@@ -76,6 +76,11 @@ backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
 #
 # See readme for details.
 portable-atomic = ["dep:portable-atomic"]
+
+# Xtensa-specific: Use OpenOCD Semihosting.
+#
+# See readme for details.
+openocd-semihosting = []
 
 [dependencies]
 portable-atomic = { version = "1.3", optional = true, default-features = false, features = ["require-cas"] }

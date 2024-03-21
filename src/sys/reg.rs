@@ -51,6 +51,7 @@ impl<'a> ParamRegW<'a> {
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 impl<'a> ParamRegW<'a> {
     #[inline]
@@ -100,6 +101,7 @@ impl<'a> ParamRegR<'a> {
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 impl<'a> ParamRegR<'a> {
     #[inline]
@@ -157,6 +159,7 @@ impl RetReg {
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 impl RetReg {
     #[allow(clippy::cast_possible_truncation)]

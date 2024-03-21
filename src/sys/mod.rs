@@ -14,6 +14,7 @@
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 use arm_compat as arch;
 #[cfg(any(
@@ -21,6 +22,7 @@ use arm_compat as arch;
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 #[cfg_attr(
     semihosting_doc_cfg,
@@ -29,6 +31,7 @@ use arm_compat as arch;
         target_arch = "arm",
         target_arch = "riscv32",
         target_arch = "riscv64",
+        all(target_arch = "xtensa", feature = "openocd-semihosting"),
     )))
 )]
 pub mod arm_compat;

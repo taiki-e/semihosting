@@ -81,6 +81,7 @@ mod sys {
         target_arch = "arm",
         target_arch = "riscv32",
         target_arch = "riscv64",
+        all(target_arch = "xtensa", feature = "openocd-semihosting"),
     ))]
     mod imp {
         use core::cell::Cell;
