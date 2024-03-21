@@ -10,13 +10,15 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Support Xtensa (OpenOCD Semihosting) under the `openocd-semihosting` feature. ([#9](https://github.com/taiki-e/semihosting/pull/9))
+
 ## [0.1.6] - 2024-03-02
 
 - Documentation improvements.
 
 ## [0.1.5] - 2023-12-27
 
-- Expose raw syscall interface as public API ([#7](https://github.com/taiki-e/semihosting/pull/7), thanks @t-moe)
+- Expose raw syscall interface as public API. ([#7](https://github.com/taiki-e/semihosting/pull/7), thanks @t-moe)
 
 ## [0.1.4] - 2023-08-25
 
