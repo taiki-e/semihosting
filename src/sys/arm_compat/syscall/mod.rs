@@ -8,6 +8,7 @@ pub use arch::{syscall, syscall_readonly};
 #[cfg_attr(target_arch = "aarch64", path = "aarch64.rs")]
 #[cfg_attr(target_arch = "arm", path = "arm.rs")]
 #[cfg_attr(any(target_arch = "riscv32", target_arch = "riscv64"), path = "riscv.rs")]
+#[cfg_attr(target_arch = "xtensa", path = "xtensa.rs")]
 mod arch;
 
 pub use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};

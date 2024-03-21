@@ -93,7 +93,7 @@ jobs:
       - run: cargo test --workspace --features $TEST_FEATURES --release --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
       - run: cargo careful test --workspace --features $TEST_FEATURES --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
         if: startsWith(matrix.rust, 'nightly')
-      - run: cargo hack build --workspace --no-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace --target ${{ matrix.target }} $BUILD_STD
+      - run: cargo hack build --workspace --no-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace,openocd-semihosting --target ${{ matrix.target }} $BUILD_STD
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features $TEST_FEATURES --target ${{ matrix.target }} $BUILD_STD
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features $TEST_FEATURES --target ${{ matrix.target }} $BUILD_STD --direct
 
@@ -117,6 +117,12 @@ jobs:
       - uses: taiki-e/checkout-action@v1
       - name: Install Rust
         run: rustup toolchain add ${{ matrix.rust }} --no-self-update --component rust-src && rustup default ${{ matrix.rust }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: espup
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: |
           set -eEuxo pipefail
           sudo apt-get -o Acquire::Retries=10 -qq update && sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
@@ -164,6 +170,12 @@ jobs:
           echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
           "C:\Program Files\qemu\qemu-system-arm" --version
         if: startsWith(matrix.os, 'windows')
+      - run: espup install --targets esp32
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: tools/no-std.sh
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
+      - run: cargo +esp build --target xtensa-esp32-none-elf -Z build-std=core,alloc --features $TEST_FEATURES,openocd-semihosting
+        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
