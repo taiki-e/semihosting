@@ -163,7 +163,7 @@ pub fn sys_errno() -> RawOsError {
 #[allow(clippy::cast_sign_loss)]
 pub(crate) fn exit(code: i32) {
     // TODO: check sh_ext_exit_extended first
-    sys_exit_extended(ExitReason::ADP_Stopped_ApplicationExit, code as _);
+    sys_exit_extended(ExitReason::ADP_Stopped_ApplicationExit, code as isize as usize);
     // If SYS_EXIT_EXTENDED is not supported, above call doesn't exit program,
     // so try again with SYS_EXIT.
     let reason = match code {

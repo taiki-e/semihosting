@@ -191,7 +191,7 @@ fn run() {
             io::ErrorKind::InvalidInput
         );
         assert_eq!(
-            file.seek(io::SeekFrom::Start(usize::MAX as _)).unwrap_err().kind(),
+            file.seek(io::SeekFrom::Start(usize::MAX as u64)).unwrap_err().kind(),
             io::ErrorKind::InvalidInput
         );
         drop(file);
