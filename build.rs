@@ -10,20 +10,6 @@ fn main() {
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
     if target_arch == "arm" {
         let target = &*env::var("TARGET").expect("TARGET not set");
-        // HACK: If --target is specified, rustflags is not applied to the build
-        // script itself, so the build script will not be rerun when these are changed.
-        // TODO: once https://github.com/rust-lang/cargo/issues/13003 is fixed,
-        // remove this hack in the version that contains the fix.
-        //
-        // Ideally, the build script should be rebuilt when CARGO_ENCODED_RUSTFLAGS
-        // is changed, but since it is an environment variable set by cargo,
-        // as of 1.62.0-nightly, specifying it as rerun-if-env-changed does not work.
-        println!("cargo:rerun-if-env-changed=CARGO_ENCODED_RUSTFLAGS");
-        println!("cargo:rerun-if-env-changed=RUSTFLAGS");
-        println!("cargo:rerun-if-env-changed=CARGO_BUILD_RUSTFLAGS");
-        let mut target_upper = target.replace(['-', '.'], "_");
-        target_upper.make_ascii_uppercase();
-        println!("cargo:rerun-if-env-changed=CARGO_TARGET_{target_upper}_RUSTFLAGS");
 
         let version = match rustc_version() {
             Some(version) => version,
@@ -35,6 +21,22 @@ fn main() {
                 Version::LATEST
             }
         };
+
+        // https://github.com/rust-lang/rust/pull/123745 (includes https://github.com/rust-lang/cargo/pull/13560) merged in Rust 1.79 (nightly-2024-04-11).
+        if !version.probe(79, 2024, 4, 10) {
+            // HACK: If --target is specified, rustflags is not applied to the build
+            // script itself, so the build script will not be recompiled when rustflags
+            // is changed. That in itself is not a problem, but the old Cargo does
+            // not rerun the build script as well, which can be problematic.
+            // https://github.com/rust-lang/cargo/issues/13003
+            // This problem has been fixed in 1.79 so only older versions need a workaround.
+            println!("cargo:rerun-if-env-changed=CARGO_ENCODED_RUSTFLAGS");
+            println!("cargo:rerun-if-env-changed=RUSTFLAGS");
+            println!("cargo:rerun-if-env-changed=CARGO_BUILD_RUSTFLAGS");
+            let mut target_upper = target.replace(['-', '.'], "_");
+            target_upper.make_ascii_uppercase();
+            println!("cargo:rerun-if-env-changed=CARGO_TARGET_{target_upper}_RUSTFLAGS");
+        }
 
         // armv7-linux-androideabi and armv7-sony-vita-newlibeabihf are also enable +thumb-mode.
         // https://github.com/rust-lang/rust/blob/1.77.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L21
@@ -106,17 +108,27 @@ mod version {
     }
 
     pub(crate) struct Version {
+        pub(crate) minor: u32,
         pub(crate) nightly: bool,
+        commit_date: Date,
     }
 
     impl Version {
         // The known latest stable version. If we unable to determine
         // the rustc version, we assume this is the current version.
         // It is no problem if this is older than the actual latest stable.
-        pub(crate) const LATEST: Self = Self::stable();
+        pub(crate) const LATEST: Self = Self::stable(77);
 
-        const fn stable() -> Self {
-            Self { nightly: false }
+        const fn stable(minor: u32) -> Self {
+            Self { minor, nightly: false, commit_date: Date::UNKNOWN }
+        }
+
+        pub(crate) fn probe(&self, minor: u32, year: u16, month: u8, day: u8) -> bool {
+            if self.nightly {
+                self.minor > minor || self.commit_date >= Date::new(year, month, day)
+            } else {
+                self.minor >= minor
+            }
         }
 
         pub(crate) fn parse(verbose_version: &str) -> Option<Self> {
@@ -125,11 +137,52 @@ mod version {
                 .find(|line| line.starts_with("release: "))
                 .map(|line| &line["release: ".len()..])?
                 .splitn(2, '-');
-            let _version = release.next().unwrap();
+            let version = release.next().unwrap();
             let channel = release.next().unwrap_or_default();
+            let mut digits = version.splitn(3, '.');
+            let major = digits.next()?;
+            if major != "1" {
+                return None;
+            }
+            let minor = digits.next()?.parse::<u32>().ok()?;
+            let _patch = digits.next().unwrap_or("0").parse::<u32>().ok()?;
             let nightly = channel == "nightly" || channel == "dev";
 
-            Some(Self { nightly })
+            // we don't refer commit date on stable/beta.
+            if nightly {
+                let commit_date = (|| {
+                    let mut commit_date = verbose_version
+                        .lines()
+                        .find(|line| line.starts_with("commit-date: "))
+                        .map(|line| &line["commit-date: ".len()..])?
+                        .splitn(3, '-');
+                    let year = commit_date.next()?.parse::<u16>().ok()?;
+                    let month = commit_date.next()?.parse::<u8>().ok()?;
+                    let day = commit_date.next()?.parse::<u8>().ok()?;
+                    if month > 12 || day > 31 {
+                        return None;
+                    }
+                    Some(Date::new(year, month, day))
+                })();
+                Some(Self { minor, nightly, commit_date: commit_date.unwrap_or(Date::UNKNOWN) })
+            } else {
+                Some(Self::stable(minor))
+            }
+        }
+    }
+
+    #[derive(PartialEq, PartialOrd)]
+    struct Date {
+        year: u16,
+        month: u8,
+        day: u8,
+    }
+
+    impl Date {
+        const UNKNOWN: Self = Self::new(0, 0, 0);
+
+        const fn new(year: u16, month: u8, day: u8) -> Self {
+            Self { year, month, day }
         }
     }
 }
