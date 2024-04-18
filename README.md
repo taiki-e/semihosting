@@ -39,7 +39,7 @@ The following target architectures are supported:
 | target_arch | Specification | `semihosting::sys` module | Note |
 | ----------- | ------------- | ------------------------- | ---- |
 | arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` | |
-| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc) | `sys::arm_compat` | |
+| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/HEAD/riscv-semihosting.adoc) | `sys::arm_compat` | |
 | xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires the [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
 | mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` | |
 

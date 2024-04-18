@@ -5,7 +5,7 @@
 //!
 //! Refs:
 //! - Semihosting for AArch32 and AArch64 <https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst>
-//! - RISC-V Semihosting <https://github.com/riscv-software-src/riscv-semihosting/blob/HEAD/riscv-semihosting-spec.adoc>
+//! - RISC-V Semihosting <https://github.com/riscv-non-isa/riscv-semihosting/blob/HEAD/riscv-semihosting.adoc>
 //! - <https://github.com/qemu/qemu/blob/HEAD/semihosting/arm-compat-semi.c>
 //! - <https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c>
 
@@ -116,7 +116,7 @@ pub struct CommandLine {
     pub size: usize,
 }
 
-/// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys-clock-0x10)
+/// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_clock-0x10)
 pub fn sys_clock() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_CLOCK) };
     if res.int() == -1 {
@@ -126,7 +126,7 @@ pub fn sys_clock() -> Result<usize> {
     }
 }
 
-/// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#62sys_close-0x02)
+/// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_close-0x02)
 pub unsafe fn sys_close(fd: RawFd) -> Result<()> {
     let args = [ParamRegR::raw_fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_CLOSE, ParamRegR::block(&args)) };
@@ -139,7 +139,7 @@ pub unsafe fn sys_close(fd: RawFd) -> Result<()> {
 }
 pub(crate) use sys_close as close;
 
-/// [SYS_ELAPSED (0x30)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#63sys_elapsed-0x30)
+/// [SYS_ELAPSED (0x30)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_elapsed-0x30)
 pub fn sys_elapsed() -> Result<u64> {
     // On 32-bit, the parameter is a pointer to two 32-bit field data block
     // On 64-bit, the parameter is a pointer to one 64-bit field data block
@@ -153,7 +153,7 @@ pub fn sys_elapsed() -> Result<u64> {
     }
 }
 
-/// [SYS_ERRNO (0x13)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#64sys_errno-0x13)
+/// [SYS_ERRNO (0x13)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_errno-0x13)
 pub fn sys_errno() -> RawOsError {
     let res = unsafe { syscall0(OperationNumber::SYS_ERRNO) };
     res.errno()
@@ -171,7 +171,7 @@ pub(crate) fn exit(code: i32) {
     };
     sys_exit(reason);
 }
-/// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#65sys_exit-0x18)
+/// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_exit-0x18)
 pub fn sys_exit(reason: ExitReason) {
     #[cfg(target_pointer_width = "32")]
     let arg = ParamRegR::usize(reason as usize);
@@ -184,7 +184,7 @@ pub fn sys_exit(reason: ExitReason) {
     }
 }
 
-/// [SYS_EXIT_EXTENDED (0x20)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#66sys_exit_extended-0x20)
+/// [SYS_EXIT_EXTENDED (0x20)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_exit_extended-0x20)
 pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
     let args = [ParamRegR::usize(reason as usize), ParamRegR::usize(subcode)];
     #[cfg(target_pointer_width = "32")]
@@ -197,7 +197,7 @@ pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
     }
 }
 
-/// [SYS_FLEN (0x0C)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#67sys_flen-0x0c)
+/// [SYS_FLEN (0x0C)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_flen-0x0c)
 pub fn sys_flen(fd: BorrowedFd<'_>) -> Result<usize> {
     let args = [ParamRegR::fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_FLEN, ParamRegR::block(&args)) };
@@ -208,7 +208,7 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> Result<usize> {
     }
 }
 
-/// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#68sys_get_cmdline-0x15)
+/// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_get_cmdline-0x15)
 ///
 /// # Safety
 ///
@@ -223,21 +223,21 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> Result<()> {
     }
 }
 
-/// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#69sys_heapinfo-0x16)
+/// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_heapinfo-0x16)
 pub fn sys_heapinfo() -> HeapInfo {
     let mut buf: HeapInfo = unsafe { mem::zeroed() };
     unsafe { syscall(OperationNumber::SYS_HEAPINFO, ParamRegW::ref_(&mut buf)) };
     buf
 }
 
-/// [SYS_ISERROR (0x08)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#610sys_iserror-0x08)
+/// [SYS_ISERROR (0x08)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_iserror-0x08)
 pub fn sys_iserror(res: isize) -> bool {
     let args = [ParamRegR::isize(res)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_ISERROR, ParamRegR::block(&args)) };
     res.usize() != 0
 }
 
-/// [SYS_ISTTY (0x09)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#611sys_istty-0x09)
+/// [SYS_ISTTY (0x09)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_istty-0x09)
 pub fn sys_istty(fd: BorrowedFd<'_>) -> Result<bool> {
     let args = [ParamRegR::fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_ISTTY, ParamRegR::block(&args)) };
@@ -252,7 +252,7 @@ pub(crate) fn is_terminal(fd: BorrowedFd<'_>) -> bool {
     sys_istty(fd).unwrap_or(false)
 }
 
-/// [SYS_OPEN (0x01)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#612sys_open-0x01)
+/// [SYS_OPEN (0x01)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_open-0x01)
 pub fn sys_open(path: &CStr, mode: OpenMode) -> Result<OwnedFd> {
     let args = [
         ParamRegR::c_str(path),
@@ -268,7 +268,7 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> Result<OwnedFd> {
         None => Err(Error::from_raw_os_error(sys_errno())),
     }
 }
-// From https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#612sys_open-0x01:
+// From https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_open-0x01:
 // > ARM targets interpret the special path name `:tt` as meaning the console
 // > input stream, for an open-read or the console output stream, for an open-write.
 // > Opening these streams is performed as part of the standard startup code for
@@ -298,7 +298,7 @@ pub(crate) fn should_close(_fd: &OwnedFd) -> bool {
 }
 
 // TODO: Add read_uninit?
-/// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#613sys_read-0x06)
+/// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_read-0x06)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
     let len = buf.len();
     let mut args = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::usize(len)];
@@ -319,13 +319,13 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     sys_read(fd, buf)
 }
 
-/// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#614sys_readc-0x07)
+/// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_readc-0x07)
 pub fn sys_readc() -> u8 {
     let res = unsafe { syscall0(OperationNumber::SYS_READC) };
     res.u8()
 }
 
-/// [SYS_REMOVE (0x0E)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#615sys_remove-0x0e)
+/// [SYS_REMOVE (0x0E)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_remove-0x0e)
 pub fn sys_remove(path: &CStr) -> Result<()> {
     let args = [ParamRegR::c_str(path), ParamRegR::usize(path.to_bytes().len())];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_REMOVE, ParamRegR::block(&args)) };
@@ -336,7 +336,7 @@ pub fn sys_remove(path: &CStr) -> Result<()> {
     }
 }
 
-/// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#616sys_rename-0x0f)
+/// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_rename-0x0f)
 pub fn sys_rename(from: &CStr, to: &CStr) -> Result<()> {
     let args = [
         ParamRegR::c_str(from),
@@ -354,7 +354,7 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> Result<()> {
 
 // TODO: resolve safety
 // > The effect of seeking outside the current extent of the file object is undefined.
-/// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#617sys_seek-0x0a)
+/// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_seek-0x0a)
 pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> Result<()> {
     let args = [ParamRegR::fd(fd), ParamRegR::usize(abs_pos)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_SEEK, ParamRegR::block(&args)) };
@@ -365,14 +365,14 @@ pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> Result<()> {
     }
 }
 
-/// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#618sys_system-0x12)
+/// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_system-0x12)
 pub fn sys_system(cmd: &CStr) -> usize {
     let args = [ParamRegR::c_str(cmd), ParamRegR::usize(cmd.to_bytes().len())];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_SYSTEM, ParamRegR::block(&args)) };
     res.usize()
 }
 
-/// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#619sys_tickfreq-0x31)
+/// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_tickfreq-0x31)
 pub fn sys_tickfreq() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TICKFREQ) };
     if res.int() == -1 {
@@ -382,14 +382,14 @@ pub fn sys_tickfreq() -> Result<usize> {
     }
 }
 
-/// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#620sys_time-0x11)
+/// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_time-0x11)
 #[allow(clippy::unnecessary_wraps)] // TODO: change in next breaking release?
 pub fn sys_time() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TIME) };
     Ok(res.usize())
 }
 
-/// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#622sys_write-0x05)
+/// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_write-0x05)
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
     let args = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::usize(buf.len())];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_WRITE, ParamRegR::block(&args)) };
@@ -409,14 +409,14 @@ pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use sys_write as write;
 
-/// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#623sys_writec-0x03)
+/// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_writec-0x03)
 pub fn sys_writec(b: u8) {
     unsafe {
         syscall_readonly(OperationNumber::SYS_WRITEC, ParamRegR::ref_(&b));
     }
 }
 
-/// [SYS_WRITE0 (0x04)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#624sys_write0-0x04)
+/// [SYS_WRITE0 (0x04)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#sys_write0-0x04)
 pub fn sys_write0(s: &CStr) {
     unsafe {
         syscall_readonly(OperationNumber::SYS_WRITE0, ParamRegR::c_str(s));
