@@ -122,7 +122,6 @@ pub fn sys_clock() -> Result<usize> {
     if res.int() == -1 {
         Err(Error::from_raw_os_error(sys_errno()))
     } else {
-        // debug_assert!(res.isize() >= 0); // TODO
         Ok(res.usize())
     }
 }
@@ -205,7 +204,6 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> Result<usize> {
     if res.int() == -1 {
         Err(Error::from_raw_os_error(sys_errno()))
     } else {
-        // debug_assert!(res.isize() >= 0); // TODO
         Ok(res.usize())
     }
 }
@@ -380,21 +378,15 @@ pub fn sys_tickfreq() -> Result<usize> {
     if res.int() == -1 {
         Err(Error::from_raw_os_error(sys_errno()))
     } else {
-        // debug_assert!(res.isize() >= 0); // TODO
         Ok(res.usize())
     }
 }
 
 /// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#620sys_time-0x11)
+#[allow(clippy::unnecessary_wraps)] // TODO: change in next breaking release?
 pub fn sys_time() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TIME) };
-    if res.int() == -1 {
-        // doesn't return error?
-        Err(Error::from_raw_os_error(sys_errno()))
-    } else {
-        // debug_assert!(res.isize() >= 0); // TODO
-        Ok(res.usize())
-    }
+    Ok(res.usize())
 }
 
 /// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#622sys_write-0x05)

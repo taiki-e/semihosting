@@ -2,12 +2,11 @@
 
 //! Raw semihosting call.
 
-#![allow(clippy::needless_pass_by_value)]
-
 pub use arch::{
     syscall0, syscall1, syscall1_readonly, syscall2, syscall2_readonly, syscall3,
     syscall3_readonly, syscall4, syscall4_readonly,
 };
+#[allow(clippy::needless_pass_by_value)]
 #[cfg_attr(
     any(
         doc,

@@ -2,9 +2,8 @@
 
 //! Raw semihosting call.
 
-#![allow(clippy::needless_pass_by_value)]
-
 pub use arch::{syscall, syscall_readonly};
+#[allow(clippy::needless_pass_by_value)]
 #[cfg_attr(target_arch = "aarch64", path = "aarch64.rs")]
 #[cfg_attr(target_arch = "arm", path = "arm.rs")]
 #[cfg_attr(any(target_arch = "riscv32", target_arch = "riscv64"), path = "riscv.rs")]

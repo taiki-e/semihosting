@@ -214,7 +214,7 @@ mod sys {
 
         impl SystemTime {
             pub(crate) fn now() -> io::Result<Self> {
-                // SYS_TIME returns int, Y2038...
+                // SYS_TIME doesn't have Y2038 problem (although it still has Y2106 problem): https://github.com/ARM-software/abi-aa/commit/d281283bf3dcec4d4ebf9e5646020d77904904e1
                 Ok(Self { t: Timespec { tv_sec: sys_time()? as u64 as i64, tv_nsec: 0 } })
             }
         }
