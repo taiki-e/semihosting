@@ -6,12 +6,13 @@
 //!
 //! [`Path`] is not available in `core`, so this module uses [`CStr`] instead in the API where
 //! `std` uses [`Path`]. When creating a path from a string literal, it is recommended to use the
-//! [c!](c!()) macro.
+//! C string literals (`c"..."`, available since Rust 1.77) or [c!](c!()) macro.
 //!
 //! ```no_run
 //! use semihosting::{c, fs};
 //!
-//! fs::write(c!("a.txt"), "abc")?;
+//! fs::write(c"a.txt", "abc")?; // with C string literal
+//! fs::write(c!("b.txt"), "123")?; // with c! macro
 //! # Ok::<(), semihosting::io::Error>(())
 //! ```
 //!
