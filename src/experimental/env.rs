@@ -144,12 +144,12 @@ mod sys {
             let argc = mips_argc();
             let mut start = 0;
             for i in 0..argc {
-                let len = mips_argnlen(i).unwrap() + 1;
+                let len = mips_argnlen(i)? + 1;
                 if start + len > BUF_SIZE {
                     return Err(io::ErrorKind::__ArgumentListTooLong.into());
                 }
                 unsafe {
-                    mips_argn(i, buf.as_mut_ptr().add(start)).unwrap();
+                    mips_argn(i, buf.as_mut_ptr().add(start))?;
                     start += len;
                 }
             }

@@ -12,8 +12,10 @@
 ///
 /// ```no_run
 /// use semihosting::{c, fs};
-/// fs::write(c!("a.txt"), "abc").unwrap();
-/// fs::write(c!(concat!("b", ".txt")), "def").unwrap(); // concat! in c! is also supported
+///
+/// fs::write(c!("a.txt"), "abc")?;
+/// fs::write(c!(concat!("b", ".txt")), "def")?; // concat! in c! is also supported
+/// # Ok::<(), semihosting::io::Error>(())
 /// ```
 ///
 /// This macro guarantees the correctness of the input by compile-time validation.
@@ -21,6 +23,7 @@
 ///
 /// ```compile_fail,E0080
 /// use semihosting::c;
+///
 /// let s = c!("ab\0c"); // CStr must not contain any interior nul bytes.
 /// ```
 ///

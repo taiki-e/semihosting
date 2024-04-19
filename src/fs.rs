@@ -10,7 +10,9 @@
 //!
 //! ```no_run
 //! use semihosting::{c, fs};
-//! fs::write(c!("a.txt"), "abc").unwrap();
+//!
+//! fs::write(c!("a.txt"), "abc")?;
+//! # Ok::<(), semihosting::io::Error>(())
 //! ```
 //!
 //! This module is a subset of the [`std::fs`] module except that [`CStr`] is used for the path
