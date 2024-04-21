@@ -14,6 +14,9 @@ fn main() {
         let version = match rustc_version() {
             Some(version) => version,
             None => {
+                if env::var_os("SEMIHOSTING_DENY_WARNINGS").unwrap_or_default() == "1" {
+                    panic!("unable to determine rustc version")
+                }
                 println!(
                     "cargo:warning={}: unable to determine rustc version; assuming latest stable rustc",
                     env!("CARGO_PKG_NAME"),
@@ -97,12 +100,19 @@ fn target_feature_if(name: &str, mut has_target_feature: bool, version: &Version
 }
 
 mod version {
-    use std::{env, process::Command, str};
+    use std::{env, iter, process::Command, str};
 
     pub(crate) fn rustc_version() -> Option<Version> {
         let rustc = env::var_os("RUSTC")?;
+        let rustc_wrapper = env::var_os("RUSTC_WRAPPER").filter(|v| !v.is_empty());
+        // Do not apply RUSTC_WORKSPACE_WRAPPER: https://github.com/cuviper/autocfg/issues/58#issuecomment-2067625980
+        let mut rustc = rustc_wrapper.into_iter().chain(iter::once(rustc));
+        let mut cmd = Command::new(rustc.next().unwrap());
+        cmd.args(rustc);
         // Use verbose version output because the packagers add extra strings to the normal version output.
-        let output = Command::new(rustc).args(["--version", "--verbose"]).output().ok()?;
+        // Do not use long flags (--version --verbose) because clippy-deriver doesn't handle them properly.
+        // -vV is also matched with that cargo internally uses: https://github.com/rust-lang/cargo/blob/14b46ecc62aa671d7477beba237ad9c6a209cf5d/src/cargo/util/rustc.rs#L65
+        let output = cmd.arg("-vV").output().ok()?;
         let verbose_version = str::from_utf8(&output.stdout).ok()?;
         Version::parse(verbose_version)
     }

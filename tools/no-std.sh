@@ -129,6 +129,7 @@ if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]
     fi
 fi
 workspace_root=$(pwd)
+export SEMIHOSTING_DENY_WARNINGS=1
 
 run() {
     local target="$1"
