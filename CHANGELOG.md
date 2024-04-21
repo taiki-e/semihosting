@@ -10,6 +10,10 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Respect `RUSTC_WRAPPER` in rustc version detection.
+
+- Documentation improvements.
+
 ## [0.1.7] - 2024-03-21
 
 - Support Xtensa (OpenOCD Semihosting) under the `openocd-semihosting` feature. ([#9](https://github.com/taiki-e/semihosting/pull/9))
