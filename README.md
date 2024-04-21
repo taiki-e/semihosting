@@ -38,9 +38,10 @@ The following target architectures are supported:
 
 | target_arch | Specification | `semihosting::sys` module | Note |
 | ----------- | ------------- | ------------------------- | ---- |
-| arm/aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` | |
+| aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` | |
+| arm | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst) | `sys::arm_compat` | use `SVC` on A+R profile by default based on ARM's recommendation but it can be changed by [`trap-hlt` feature](#optional-features-trap-hlt). |
 | riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/HEAD/riscv-semihosting.adoc) | `sys::arm_compat` | |
-| xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires the [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
+| xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
 | mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` | |
 
 The host must be running an emulator or a debugger attached to the target.
@@ -99,6 +100,26 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   If the `stdio` feature is also enabled, this attempt to output panic message and
   location to stderr.
 
+- <a name="optional-features-trap-hlt"></a>**`trap-hlt`**<br>
+  ARM-specific: Use HLT instruction on A+R profile.
+
+  [ARM documentation](https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#the-semihosting-interface) says:
+
+  > The `HLT` encodings are new in version 2.0 of the semihosting specification.
+  > Where possible, have semihosting callers continue to use the previously existing
+  > trap instructions to ensure compatibility with legacy semihosting implementations.
+  > These trap instructions are `HLT` for A64, `SVC` on A+R profile A32 or T32, and
+  > `BKPT` on M profile. However, it is necessary to change from SVC to HLT instructions
+  > to support AArch32 semihosting properly in a mixed AArch32/AArch64 system.
+  >
+  > ARM encourages semihosting callers to implement support for trapping using `HLT`
+  > on A32 and T32 as a configurable option. ARM strongly discourages semihosting
+  > callers from mixing the `HLT` and `SVC` mechanisms within the same executable.
+
+  Based on the ARM's recommendation, this is implemented as an optional feature.
+
+  Enabling this feature on architectures other than ARM A+R profile will result in a compile error.
+
 - <a name="optional-features-openocd-semihosting"></a>**`openocd-semihosting`**<br>
   Xtensa-specific: Use OpenOCD Semihosting.
 
@@ -109,13 +130,15 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 
   This crate does not currently support SIMCALL-based semihosting, but users need to explicitly enable the feature to avoid accidentally selecting a different one than one actually want to use.
 
+  Enabling this feature on architectures other than Xtensa will result in a compile error.
+
 - **`portable-atomic`**<br>
   Use [portable-atomic]'s atomic types.
 
   portable-atomic provides atomic CAS on targets where the standard library does not provide atomic CAS.
   To use the `panic-unwind` feature on such targets (e.g., RISC-V without A-extension), you need to enable this feature.
 
-  See [the documentation](https://github.com/taiki-e/portable-atomic#optional-features-critical-section) for details.
+  See [its documentation](https://github.com/taiki-e/portable-atomic#optional-features-critical-section) for details.
 
 - **`args`**<br>
   Enable `semihosting::experimental::env::args`.

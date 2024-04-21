@@ -35,6 +35,7 @@ default_targets=(
     armebv7r-none-eabihf
     # armv8-r
     armv8r-none-eabihf
+    armebv8r-none-eabihf # custom target
 
     # armv6-m
     thumbv6m-none-eabi
@@ -241,6 +242,16 @@ run() {
         QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED=1 \
             RUSTFLAGS="${target_rustflags}" \
             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
+
+        case "${target}" in
+            arm64* | thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*) ;;
+            arm* | thumb*)
+                RUSTFLAGS="${target_rustflags}" \
+                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --features semihosting/trap-hlt "$@" -- "${test_args[@]}" <<<"stdin"
+                RUSTFLAGS="${target_rustflags}" \
+                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --features semihosting/trap-hlt --release "$@" -- "${test_args[@]}" <<<"stdin"
+                ;;
+        esac
 
         if [[ -n "${nightly}" ]]; then
             case "${runner}" in

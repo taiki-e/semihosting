@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `trap-hlt` feature to use `HLT` instruction on ARM A+R profile. See the [documentation](https://github.com/taiki-e/semihosting#optional-features-trap-hlt) for details.
+
 ## [0.1.8] - 2024-04-21
 
 - Respect `RUSTC_WRAPPER` in rustc version detection.

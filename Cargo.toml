@@ -77,6 +77,11 @@ backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
 # See readme for details.
 portable-atomic = ["dep:portable-atomic"]
 
+# ARM-specific: Use HLT instruction on A+R profile.
+#
+# See readme for details.
+trap-hlt = []
+
 # Xtensa-specific: Use OpenOCD Semihosting.
 #
 # See readme for details.
