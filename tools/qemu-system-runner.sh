@@ -62,20 +62,20 @@ case "${target}" in
         ;;
     # Cortex-M
     thumbv6m-*)
-        qemu_system arm -cpu cortex-m0 -M lm3s6965evb
+        qemu_system arm -M lm3s6965evb -cpu cortex-m0
         ;;
     thumbv7m-*)
-        qemu_system arm -cpu cortex-m3 -M lm3s6965evb
+        qemu_system arm -M lm3s6965evb -cpu cortex-m3
         ;;
     thumbv7em-*)
-        qemu_system arm -cpu cortex-m4 -M lm3s6965evb
+        qemu_system arm -M lm3s6965evb -cpu cortex-m4
         ;;
     thumbv8m.base-*)
         # TODO: As of QEMU 8.2, QEMU doesn't support -cpu cortex-m23
-        qemu_system arm -cpu cortex-m33 -M lm3s6965evb
+        qemu_system arm -M lm3s6965evb -cpu cortex-m33
         ;;
     thumbv8m.main-*)
-        qemu_system arm -cpu cortex-m33 -M lm3s6965evb
+        qemu_system arm -M lm3s6965evb -cpu cortex-m33
         ;;
     # Cortex-A (AArch32)
     armv7a* | armebv7a*)
@@ -84,10 +84,12 @@ case "${target}" in
     # Cortex-R (AArch32)
     armv7r* | armebv7r*)
         # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
+        # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (ARMv8-R AArch32)
         qemu_system arm -M xilinx-zynq-a9
         ;;
     armv8r* | armebv8r*)
         # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
+        # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (ARMv8-R AArch32)
         qemu_system arm -M xilinx-zynq-a9
         ;;
     # ARMv4T
@@ -102,7 +104,7 @@ case "${target}" in
         ;;
     # ARMv5TE
     armv5te* | thumbv5te*)
-        qemu_system arm -cpu arm926 -M versatilepb
+        qemu_system arm -M versatilepb -cpu arm926
         ;;
     # RISC-V
     riscv32*)
@@ -119,22 +121,22 @@ case "${target}" in
         qemu_system mipsel -M malta
         ;;
     mipsisa32r6-*)
-        qemu_system mips -cpu mips32r6-generic -M malta
+        qemu_system mips -M malta -cpu mips32r6-generic
         ;;
     mipsisa32r6el-*)
-        qemu_system mipsel -cpu mips32r6-generic -M malta
+        qemu_system mipsel -M malta -cpu mips32r6-generic
         ;;
     mips64-*)
-        qemu_system mips64 -cpu MIPS64R2-generic -M malta
+        qemu_system mips64 -M malta -cpu MIPS64R2-generic
         ;;
     mips64el-*)
-        qemu_system mips64el -cpu MIPS64R2-generic -M malta
+        qemu_system mips64el -M malta -cpu MIPS64R2-generic
         ;;
     mipsisa64r6-*)
-        qemu_system mips64 -cpu I6400 -M malta
+        qemu_system mips64 -M malta -cpu I6400
         ;;
     mipsisa64r6el-*)
-        qemu_system mips64el -cpu I6400 -M malta
+        qemu_system mips64el -M malta -cpu I6400
         ;;
     *) echo "unrecognized target ${target}" && exit 1 ;;
 esac
