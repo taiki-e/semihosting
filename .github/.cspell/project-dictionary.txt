@@ -3,7 +3,6 @@ argnlen
 balign
 bkpt
 blksize
-choco
 CMDLINE
 CREAT
 demangle
@@ -53,7 +52,6 @@ RDONLY
 RDWR
 readc
 realview
-requirechecksums
 rustfilt
 sdbbp
 Seekable
@@ -69,6 +67,7 @@ tickfreq
 timespec
 TMPNAM
 TRUNC
+ucrt
 Uncategorized
 unseekable
 versatileab

@@ -121,6 +121,8 @@ if [[ -z "${is_custom_toolchain}" ]]; then
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | grep '^release:' | cut -d' ' -f2)
+llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | (grep '^LLVM version:' || true) | cut -d' ' -f3)
+llvm_version="${llvm_version%%.*}"
 target_dir=$(pwd)/target
 nightly=''
 if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]]; then
@@ -177,8 +179,10 @@ run() {
             fi
             ;;
         armebv7r*)
-            # lld doesn't support big-endian arm
-            target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+            if [[ "${llvm_version}" -lt 17 ]]; then
+                # pre-17 LLD doesn't support big-endian arm
+                target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+            fi
             ;;
         thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*)
             case "${runner}" in

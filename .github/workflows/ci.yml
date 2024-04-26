@@ -124,11 +124,16 @@ jobs:
         if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: |
           set -eEuxo pipefail
-          sudo apt-get -o Acquire::Retries=10 -qq update && sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
-            binutils-arm-none-eabi \
+          sudo apt-get -o Acquire::Retries=10 -qq update
+          sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
             qemu-system-arm \
             qemu-system-mips \
             qemu-system-misc
+          if [[ "${{ matrix.rust }}" == "1.64" ]]; then
+            # pre-17 LLD doesn't support big-endian arm
+            sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
+              binutils-arm-none-eabi
+          fi
           # APT's qemu package doesn't provide firmware for riscv32 and mips:
           # https://packages.ubuntu.com/en/jammy/all/qemu-system-data/filelist
           OPENSBI_VERSION=1.4 # https://github.com/riscv-software-src/opensbi/releases
@@ -159,16 +164,14 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
           set -eEuxo pipefail
-          brew install --cask gcc-arm-embedded
           brew install qemu
           qemu-system-arm --version
         if: startsWith(matrix.os, 'macos')
       - run: |
           set -eEuxo pipefail
-          choco install --no-progress --requirechecksums gcc-arm-embedded
-          choco install --no-progress --requirechecksums qemu --version=2024.4.23 # 9.0 https://community.chocolatey.org/packages/Qemu#versionhistory
-          echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
-          "C:\Program Files\qemu\qemu-system-arm" --version
+          C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-ucrt-x86_64-qemu
+          echo "C:\msys64\ucrt64\bin" >>"${GITHUB_PATH}"
+          C:/msys64/ucrt64/bin/qemu-system-arm --version
         if: startsWith(matrix.os, 'windows')
       - run: espup install --targets esp32
         env:
