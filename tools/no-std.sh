@@ -205,7 +205,7 @@ run() {
             case "${runner}" in
                 qemu-system)
                     # On QEMU 8.0+, QEMU doesn't seem to support semihosting for MIPS. https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0
-                    if qemu-system-mips --version | grep -Eq "QEMU emulator version 8\."; then
+                    if qemu-system-mips --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
                         info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
                         return 0
                     fi

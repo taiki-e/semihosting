@@ -111,7 +111,7 @@ jobs:
           - rust: nightly
           # The behavior of semihosting somewhat depends on the behavior of the host system.
           - rust: nightly
-            os: macos-latest
+            os: macos-14
           - rust: nightly
             os: windows-latest
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -148,7 +148,7 @@ jobs:
           rm -rf qemu
           # TODO: retry on failure
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
-          docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1 # TODO: "qemu-armeb: Error mapping file: Operation not permitted" error in 8.2
+          docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1 # TODO: "qemu-armeb: Error mapping file: Operation not permitted" error in 8.2/9.0
           mkdir -p qemu-user
           docker cp qemu-user:/usr/bin qemu-user/bin
           docker rm -f qemu-user >/dev/null
@@ -160,12 +160,13 @@ jobs:
       - run: |
           set -eEuxo pipefail
           brew install --cask gcc-arm-embedded
+          brew install qemu
           qemu-system-arm --version
         if: startsWith(matrix.os, 'macos')
       - run: |
           set -eEuxo pipefail
           choco install --no-progress --requirechecksums gcc-arm-embedded
-          choco install --no-progress --requirechecksums qemu --version=2023.8.22 # 8.1 https://community.chocolatey.org/packages/Qemu#versionhistory
+          choco install --no-progress --requirechecksums qemu --version=2024.4.23 # 9.0 https://community.chocolatey.org/packages/Qemu#versionhistory
           echo "C:\Program Files\qemu" >>"${GITHUB_PATH}"
           "C:\Program Files\qemu\qemu-system-arm" --version
         if: startsWith(matrix.os, 'windows')
