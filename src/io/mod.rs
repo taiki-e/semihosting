@@ -26,7 +26,7 @@ const _: fn() = || {
     _assert_object_safety::<dyn Seek>();
 };
 
-pub(crate) fn default_read_exact<R: Read + ?Sized>(this: &mut R, mut buf: &mut [u8]) -> Result<()> {
+pub(crate) fn default_read_exact<R: ?Sized + Read>(this: &mut R, mut buf: &mut [u8]) -> Result<()> {
     while !buf.is_empty() {
         match this.read(buf) {
             Ok(0) => break,
@@ -152,7 +152,7 @@ pub trait Write {
             error: Result<()>,
         }
 
-        impl<T: Write + ?Sized> fmt::Write for Adapter<'_, T> {
+        impl<T: ?Sized + Write> fmt::Write for Adapter<'_, T> {
             fn write_str(&mut self, s: &str) -> fmt::Result {
                 match self.inner.write_all(s.as_bytes()) {
                     Ok(()) => Ok(()),
