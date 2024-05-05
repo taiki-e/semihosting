@@ -133,13 +133,13 @@ pub trait AsFd {
     fn as_fd(&self) -> BorrowedFd<'_>;
 }
 
-impl<T: AsFd> AsFd for &T {
+impl<T: ?Sized + AsFd> AsFd for &T {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         T::as_fd(self)
     }
 }
-impl<T: AsFd> AsFd for &mut T {
+impl<T: ?Sized + AsFd> AsFd for &mut T {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         T::as_fd(self)
@@ -164,7 +164,7 @@ impl AsFd for OwnedFd {
 
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-impl<T: AsFd> AsFd for alloc::boxed::Box<T> {
+impl<T: ?Sized + AsFd> AsFd for alloc::boxed::Box<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         (**self).as_fd()
@@ -172,7 +172,7 @@ impl<T: AsFd> AsFd for alloc::boxed::Box<T> {
 }
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-impl<T: AsFd> AsFd for alloc::rc::Rc<T> {
+impl<T: ?Sized + AsFd> AsFd for alloc::rc::Rc<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         (**self).as_fd()
@@ -181,7 +181,7 @@ impl<T: AsFd> AsFd for alloc::rc::Rc<T> {
 #[cfg(target_has_atomic = "ptr")]
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-impl<T: AsFd> AsFd for alloc::sync::Arc<T> {
+impl<T: ?Sized + AsFd> AsFd for alloc::sync::Arc<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
         (**self).as_fd()

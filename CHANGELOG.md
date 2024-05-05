@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Make `impl<Fd: AsFd>` impl take `?Sized`.
+
 ## [0.1.9] - 2024-04-21
 
 - Add `trap-hlt` feature to use `HLT` instruction on ARM A+R profile. See the [documentation](https://github.com/taiki-e/semihosting#optional-features-trap-hlt) for details.
