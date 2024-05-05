@@ -163,7 +163,7 @@ impl AsFd for OwnedFd {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg_attr(semihosting_doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<T: AsFd> AsFd for alloc::boxed::Box<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
@@ -171,7 +171,7 @@ impl<T: AsFd> AsFd for alloc::boxed::Box<T> {
     }
 }
 #[cfg(feature = "alloc")]
-#[cfg_attr(semihosting_doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<T: AsFd> AsFd for alloc::rc::Rc<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
@@ -180,7 +180,7 @@ impl<T: AsFd> AsFd for alloc::rc::Rc<T> {
 }
 #[cfg(target_has_atomic = "ptr")]
 #[cfg(feature = "alloc")]
-#[cfg_attr(semihosting_doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<T: AsFd> AsFd for alloc::sync::Arc<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {

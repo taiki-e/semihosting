@@ -250,8 +250,8 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     ),
     feature(asm_experimental_arch)
 )]
-// docs.rs only (cfg is enabled via [package.metadata.docs.rs] in Cargo.toml, not build script)
-#![cfg_attr(semihosting_doc_cfg, feature(doc_cfg))]
+// docs.rs only (cfg is enabled by docs.rs, not build script)
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 #[cfg(not(any(
     target_arch = "aarch64",
@@ -311,10 +311,10 @@ pub mod io;
 
 #[cfg(any(feature = "args", feature = "panic-unwind", feature = "time"))]
 // Skip doc(cfg) due to rustdoc doesn't handle nested doc(cfg) well.
-// #[cfg_attr(semihosting_doc_cfg, doc(cfg(any(feature = "args", feature = "panic-unwind", feature = "time"))))]
+// #[cfg_attr(docsrs, doc(cfg(any(feature = "args", feature = "panic-unwind", feature = "time"))))]
 pub mod experimental;
 #[cfg(feature = "fs")]
-#[cfg_attr(semihosting_doc_cfg, doc(cfg(feature = "fs")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 pub mod fs;
 #[cfg(feature = "panic-handler")]
 mod panicking;
