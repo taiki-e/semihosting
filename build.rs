@@ -52,43 +52,49 @@ fn main() {
             println!("cargo:rerun-if-env-changed=CARGO_TARGET_{target_upper}_RUSTFLAGS");
         }
 
-        // armv7-linux-androideabi and armv7-sony-vita-newlibeabihf are also enable +thumb-mode.
-        // https://github.com/rust-lang/rust/blob/1.77.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L21
-        // https://github.com/rust-lang/rust/blob/1.77.0/compiler/rustc_target/src/spec/targets/armv7_sony_vita_newlibeabihf.rs#L33
-        let is_thumb_mode = target.starts_with("thumb")
-            || target == "armv7-linux-androideabi"
-            || target == "armv7-sony-vita-newlibeabihf";
-        target_feature_if("thumb-mode", is_thumb_mode, &version);
-        // See portable-atomic and atomic-maybe-uninit's build.rs for more
-        let mut subarch =
-            target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
-        subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
-        subarch = subarch.split('-').next().unwrap(); // ignore vender/os/env
-        subarch = subarch.split('.').next().unwrap(); // ignore .base/.main suffix
-        let mut is_mclass = false;
-        match subarch {
-            "v6m" | "v7em" | "v7m" | "v8m" => is_mclass = true,
-            _ => {}
+        if needs_target_feature_fallback(&version) {
+            // See https://github.com/taiki-e/atomic-maybe-uninit/blob/HEAD/build.rs for details
+            let mut subarch =
+                target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
+            subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
+            subarch = subarch.split('-').next().unwrap(); // ignore vender/os/env
+            subarch = subarch.split('.').next().unwrap(); // ignore .base/.main suffix
+            let mut mclass = false;
+            match subarch {
+                "v6m" | "v7em" | "v7m" | "v8m" => mclass = true,
+                _ => {}
+            }
+            target_feature_fallback("mclass", mclass);
+            // armv7-linux-androideabi and armv7-sony-vita-newlibeabihf are also enable +thumb-mode.
+            // https://github.com/rust-lang/rust/blob/1.78.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L27
+            // https://github.com/rust-lang/rust/blob/1.78.0/compiler/rustc_target/src/spec/targets/armv7_sony_vita_newlibeabihf.rs#L39
+            let thumb_mode = target.starts_with("thumb")
+                || target == "armv7-linux-androideabi"
+                || target == "armv7-sony-vita-newlibeabihf";
+            target_feature_fallback("thumb-mode", thumb_mode);
         }
-        target_feature_if("mclass", is_mclass, &version);
     }
 }
 
-fn target_feature_if(name: &str, mut has_target_feature: bool, version: &Version) {
-    // HACK: Currently, it seems that the only way to handle unstable target
-    // features on the stable is to parse the `-C target-feature` in RUSTFLAGS.
-    //
-    // - #[cfg(target_feature = "unstable_target_feature")] doesn't work on stable.
-    // - CARGO_CFG_TARGET_FEATURE excludes unstable target features on stable.
-    //
-    // As mentioned in the [RFC2045], unstable target features are also passed to LLVM
-    // (e.g., https://godbolt.org/z/4rr7rMcfG), so this hack works properly on stable.
-    //
-    // [RFC2045]: https://rust-lang.github.io/rfcs/2045-target-feature.html#backend-compilation-options
+// HACK: Currently, it seems that the only way to handle unstable target
+// features on the stable is to parse the `-C target-feature` in RUSTFLAGS.
+//
+// - #[cfg(target_feature = "unstable_target_feature")] doesn't work on stable.
+// - CARGO_CFG_TARGET_FEATURE excludes unstable target features on stable.
+//
+// As mentioned in the [RFC2045], unstable target features are also passed to LLVM
+// (e.g., https://godbolt.org/z/4rr7rMcfG), so this hack works properly on stable.
+//
+// [RFC2045]: https://rust-lang.github.io/rfcs/2045-target-feature.html#backend-compilation-options
+fn needs_target_feature_fallback(version: &Version) -> bool {
     if version.nightly {
-        // In this case, cfg(target_feature = "...") would work, so skip emitting our own target_feature cfg.
-        return;
+        // In this case, cfg(target_feature = "...") would work, so skip emitting our own fallback target_feature cfg.
+        false
+    } else {
+        true
     }
+}
+fn target_feature_fallback(name: &str, mut has_target_feature: bool) {
     if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
         for mut flag in rustflags.to_string_lossy().split('\x1f') {
             flag = flag.strip_prefix("-C").unwrap_or(flag);
