@@ -4,6 +4,9 @@ use std::env;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    println!(
+        "cargo:rustc-check-cfg=cfg(host_linux,host_macos,host_windows,mips,arm_compat,armv4t)"
+    );
 
     let host = &*env::var("HOST").expect("TARGET not set");
     let target = &*env::var("TARGET").expect("TARGET not set");
