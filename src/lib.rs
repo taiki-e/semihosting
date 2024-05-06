@@ -253,18 +253,22 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 // docs.rs only (cfg is enabled by docs.rs, not build script)
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+// 64-bit architecture's 32-bit ABI (e.g., AArch64 ILP32 ABI) are also unsupported yet.
 #[cfg(not(any(
-    target_arch = "aarch64",
+    all(target_arch = "aarch64", target_pointer_width = "64"),
     target_arch = "arm",
     target_arch = "riscv32",
-    target_arch = "riscv64",
+    all(target_arch = "riscv64", target_pointer_width = "64"),
     target_arch = "mips",
     target_arch = "mips32r6",
-    target_arch = "mips64",
-    target_arch = "mips64r6",
+    all(target_arch = "mips64", target_pointer_width = "64"),
+    all(target_arch = "mips64r6", target_pointer_width = "64"),
     target_arch = "xtensa",
 )))]
-compile_error!("unsupported target");
+compile_error!(
+    "unsupported target; if you need support for this target, \
+     please submit an issue at <https://github.com/taiki-e/semihosting>"
+);
 #[cfg(target_arch = "xtensa")]
 #[cfg(not(feature = "openocd-semihosting"))]
 compile_error!(
