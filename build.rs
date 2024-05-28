@@ -22,8 +22,6 @@ fn main() {
     };
 
     if version.minor >= 80 {
-        println!(r#"cargo:rustc-check-cfg=cfg(target_arch,values("xtensa"))"#);
-
         // Custom cfgs set by build script. Not public API.
         // TODO: handle multi-line target_feature_fallback
         // grep -E 'target_feature_fallback\("' build.rs | sed -E 's/^.*target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ','
