@@ -108,17 +108,13 @@ jobs:
           - rust: nightly
           # The behavior of semihosting somewhat depends on the behavior of the host system.
           - rust: nightly
-            os: macos-14
+            os: macos-latest
           - rust: nightly
             os: windows-latest
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@v1
-      - name: Install Rust
-        run: rustup toolchain add ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
-      - uses: taiki-e/install-action@espup
-        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: |
           set -eEuxo pipefail
           sudo apt-get -o Acquire::Retries=10 -qq update
@@ -170,6 +166,10 @@ jobs:
           echo "C:\msys64\ucrt64\bin" >>"${GITHUB_PATH}"
           C:/msys64/ucrt64/bin/qemu-system-arm --version
         if: startsWith(matrix.os, 'windows')
+      - name: Install Rust
+        run: rustup toolchain add ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+      - uses: taiki-e/install-action@espup
+        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: espup install --targets esp32
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
