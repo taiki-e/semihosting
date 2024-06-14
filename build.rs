@@ -23,11 +23,23 @@ fn main() {
 
     if version.minor >= 80 {
         // Custom cfgs set by build script. Not public API.
+        // grep -E 'cargo:rustc-cfg=' build.rs | grep -v '=//' | sed -E 's/^.*cargo:rustc-cfg=//; s/(=\\)?".*$//' | LC_ALL=C sort -u | tr '\n' ','
+        println!(
+            "cargo:rustc-check-cfg=cfg(semihosting_no_error_in_core,semihosting_target_feature)"
+        );
         // TODO: handle multi-line target_feature_fallback
         // grep -E 'target_feature_fallback\("' build.rs | sed -E 's/^.*target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ','
         println!(
             r#"cargo:rustc-check-cfg=cfg(semihosting_target_feature,values("mclass","thumb-mode"))"#
         );
+    }
+
+    // Note that this is `no_`*, not `has_*`. This allows treating as the latest
+    // stable rustc is used when the build script doesn't run. This is useful
+    // for non-cargo build systems that don't run the build script.
+    // error_in_core stabilized in Rust 1.81 (nightly-2024-06-09): https://github.com/rust-lang/rust/pull/125951
+    if !version.probe(81, 2024, 6, 8) {
+        println!("cargo:rustc-cfg=semihosting_no_error_in_core");
     }
 
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");

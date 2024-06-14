@@ -271,3 +271,13 @@ impl fmt::Display for Error {
         }
     }
 }
+
+#[cfg(not(semihosting_no_error_in_core))]
+impl core::error::Error for Error {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
+        match self.repr {
+            Repr::Os(..) | Repr::Simple(..) | Repr::SimpleMessage(..) => None,
+            // Repr::Custom(c) => c.error.source(),
+        }
+    }
+}

@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Implement `core::error::Error` for `semihosting::io::Error` at Rust 1.81+.
+
 ## [0.1.10] - 2024-05-06
 
 - Make `impl<Fd: AsFd>` impl take `?Sized`.
