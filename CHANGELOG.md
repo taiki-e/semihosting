@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.11] - 2024-06-16
+
 - Implement `core::error::Error` for `semihosting::io::Error` at Rust 1.81+. ([8701460](https://github.com/taiki-e/semihosting/commit/8701460101e5c9838bb09062435590f834837861))
 
 ## [0.1.10] - 2024-05-06
@@ -58,7 +60,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.10...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.11...HEAD
+[0.1.11]: https://github.com/taiki-e/semihosting/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/taiki-e/semihosting/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/taiki-e/semihosting/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/taiki-e/semihosting/compare/v0.1.7...v0.1.8
