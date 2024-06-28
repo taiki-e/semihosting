@@ -1,15 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: cargo
-    directory: /
-    schedule:
-      interval: daily
-    commit-message:
-      prefix: ''
-    labels: []
-  # crates with [workspace] table are not recognized by the above 'directory: /'
-  - package-ecosystem: cargo
-    directory: /tests/no-std
+    directories:
+      - /
+      # crates with [workspace] table are not recognized by the above 'directory: /'
+      - /tests/no-std
+      - /tests/no-std-rt
     schedule:
       interval: daily
     commit-message:
