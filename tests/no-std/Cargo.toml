@@ -44,9 +44,6 @@ rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 # unsafe_op_in_unsafe_fn = "warn" # Set at crate-level instead since https://github.com/rust-lang/rust/pull/100081 is not available on MSRV
 
-[patch.crates-io]
-unwinding = { git = "https://github.com/nbdd0121/unwinding.git", rev = "ac07eba" } # TODO: remove once https://github.com/nbdd0121/unwinding/pull/27 & https://github.com/nbdd0121/unwinding/pull/25 released
-
 [profile.dev]
 opt-level = "s"
 
