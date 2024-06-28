@@ -18,7 +18,7 @@ done
 qemu_user() {
     qemu_arch="$1"
     shift
-    if which "qemu-${qemu_arch}" >/dev/null; then
+    if type -P "qemu-${qemu_arch}" &>/dev/null; then
         "qemu-${qemu_arch}" "$@" "${args[@]}"
     else
         "qemu-${qemu_arch}-static" "$@" "${args[@]}"

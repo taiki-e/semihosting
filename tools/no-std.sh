@@ -85,8 +85,7 @@ x_cargo() {
     if [[ -n "${RUSTFLAGS:-}" ]]; then
         echo "+ RUSTFLAGS='${RUSTFLAGS}' \\"
     fi
-    RUSTFLAGS="${RUSTFLAGS:-}" \
-        x cargo "$@"
+    x cargo "$@"
     echo
 }
 bail() {

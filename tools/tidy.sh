@@ -64,6 +64,9 @@ error() {
     fi
     should_fail=1
 }
+ls_files() {
+    comm -23 <(git ls-files "$@" | sort) <(git ls-files --deleted "$@" | sort)
+}
 venv() {
     local bin="$1"
     shift
@@ -72,14 +75,14 @@ venv() {
 venv_install_yq() {
     local py_suffix=''
     if type -P python3 &>/dev/null; then
-        py_suffix='3'
+        py_suffix=3
     fi
     exe=''
-    venv_bin='.venv/bin'
+    venv_bin=.venv/bin
     case "$(uname -s)" in
         MINGW* | MSYS* | CYGWIN* | Windows_NT)
-            exe='.exe'
-            venv_bin='.venv/Scripts'
+            exe=.exe
+            venv_bin=.venv/Scripts
             ;;
     esac
     if [[ ! -d .venv ]]; then
@@ -100,7 +103,7 @@ EOF
 fi
 
 # Rust (if exists)
-if [[ -n "$(git ls-files '*.rs')" ]]; then
+if [[ -n "$(ls_files '*.rs')" ]]; then
     info "checking Rust code style"
     check_install cargo jq python3
     check_config .rustfmt.toml
@@ -112,22 +115,22 @@ if [[ -n "$(git ls-files '*.rs')" ]]; then
         if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]]; then
             rustup component add rustfmt &>/dev/null
             info "running \`rustfmt \$(git ls-files '*.rs')\`"
-            rustfmt $(git ls-files '*.rs')
+            rustfmt $(ls_files '*.rs')
         else
             rustup component add rustfmt --toolchain nightly &>/dev/null
             info "running \`rustfmt +nightly \$(git ls-files '*.rs')\`"
-            rustfmt +nightly $(git ls-files '*.rs')
+            rustfmt +nightly $(ls_files '*.rs')
         fi
-        check_diff $(git ls-files '*.rs')
+        check_diff $(ls_files '*.rs')
     fi
-    cast_without_turbofish=$(grep -n -E '\.cast\(\)' $(git ls-files '*.rs') || true)
+    cast_without_turbofish=$(grep -n -E '\.cast\(\)' $(ls_files '*.rs') || true)
     if [[ -n "${cast_without_turbofish}" ]]; then
         error "please replace \`.cast()\` with \`.cast::<type_name>()\`:"
         echo "${cast_without_turbofish}"
     fi
     # Sync readme and crate-level doc.
-    first='1'
-    for readme in $(git ls-files '*README.md'); do
+    first=1
+    for readme in $(ls_files '*README.md'); do
         if ! grep -q '^<!-- tidy:crate-doc:start -->' "${readme}"; then
             continue
         fi
@@ -167,7 +170,7 @@ if [[ -n "$(git ls-files '*.rs')" ]]; then
         if [[ "${publish}" == "[]" ]]; then
             continue
         fi
-        has_public_crate='1'
+        has_public_crate=1
     done
     if [[ -n "${has_public_crate}" ]]; then
         info "checking public crates don't contain executables and binaries"
@@ -191,7 +194,7 @@ if [[ -n "$(git ls-files '*.rs')" ]]; then
                 fi
             fi
         fi
-        for p in $(git ls-files); do
+        for p in $(ls_files); do
             # Skip directories.
             if [[ -d "${p}" ]]; then
                 continue
@@ -228,26 +231,26 @@ elif [[ -e .rustfmt.toml ]]; then
 fi
 
 # C/C++ (if exists)
-if [[ -n "$(git ls-files '*.c' '*.h' '*.cpp' '*.hpp')" ]]; then
+if [[ -n "$(ls_files '*.c' '*.h' '*.cpp' '*.hpp')" ]]; then
     info "checking C/C++ code style"
     check_config .clang-format
     if check_install clang-format; then
         info "running \`clang-format -i \$(git ls-files '*.c' '*.h' '*.cpp' '*.hpp')\`"
-        clang-format -i $(git ls-files '*.c' '*.h' '*.cpp' '*.hpp')
-        check_diff $(git ls-files '*.c' '*.h' '*.cpp' '*.hpp')
+        clang-format -i $(ls_files '*.c' '*.h' '*.cpp' '*.hpp')
+        check_diff $(ls_files '*.c' '*.h' '*.cpp' '*.hpp')
     fi
 elif [[ -e .clang-format ]]; then
     error ".clang-format is unused"
 fi
 
 # YAML/JavaScript/JSON (if exists)
-if [[ -n "$(git ls-files '*.yml' '*.yaml' '*.js' '*.json')" ]]; then
+if [[ -n "$(ls_files '*.yml' '*.yaml' '*.js' '*.json')" ]]; then
     info "checking YAML/JavaScript/JSON code style"
     check_config .editorconfig
     if check_install npm; then
         info "running \`npx -y prettier -l -w \$(git ls-files '*.yml' '*.yaml' '*.js' '*.json')\`"
-        npx -y prettier -l -w $(git ls-files '*.yml' '*.yaml' '*.js' '*.json')
-        check_diff $(git ls-files '*.yml' '*.yaml' '*.js' '*.json')
+        npx -y prettier -l -w $(ls_files '*.yml' '*.yaml' '*.js' '*.json')
+        check_diff $(ls_files '*.yml' '*.yaml' '*.js' '*.json')
     fi
     # Check GitHub workflows.
     if [[ -d .github/workflows ]]; then
@@ -280,38 +283,38 @@ if [[ -n "$(git ls-files '*.yml' '*.yaml' '*.js' '*.json')" ]]; then
         fi
     fi
 fi
-if [[ -n "$(git ls-files '*.yaml' | (grep -v .markdownlint-cli2.yaml || true))" ]]; then
+if [[ -n "$(ls_files '*.yaml' | (grep -v .markdownlint-cli2.yaml || true))" ]]; then
     error "please use '.yml' instead of '.yaml' for consistency"
-    git ls-files '*.yaml' | (grep -v .markdownlint-cli2.yaml || true)
+    ls_files '*.yaml' | (grep -v .markdownlint-cli2.yaml || true)
 fi
 
 # TOML (if exists)
-if [[ -n "$(git ls-files '*.toml' | (grep -v .taplo.toml || true))" ]]; then
+if [[ -n "$(ls_files '*.toml' | (grep -v .taplo.toml || true))" ]]; then
     info "checking TOML style"
     check_config .taplo.toml
     if check_install npm; then
         info "running \`npx -y @taplo/cli fmt \$(git ls-files '*.toml')\`"
-        RUST_LOG=warn npx -y @taplo/cli fmt $(git ls-files '*.toml')
-        check_diff $(git ls-files '*.toml')
+        RUST_LOG=warn npx -y @taplo/cli fmt $(ls_files '*.toml')
+        check_diff $(ls_files '*.toml')
     fi
 elif [[ -e .taplo.toml ]]; then
     error ".taplo.toml is unused"
 fi
 
 # Markdown (if exists)
-if [[ -n "$(git ls-files '*.md')" ]]; then
+if [[ -n "$(ls_files '*.md')" ]]; then
     info "checking Markdown style"
     check_config .markdownlint-cli2.yaml
     if check_install npm; then
         info "running \`npx -y markdownlint-cli2 \$(git ls-files '*.md')\`"
-        npx -y markdownlint-cli2 $(git ls-files '*.md')
+        npx -y markdownlint-cli2 $(ls_files '*.md')
     fi
 elif [[ -e .markdownlint-cli2.yaml ]]; then
     error ".markdownlint-cli2.yaml is unused"
 fi
-if [[ -n "$(git ls-files '*.markdown')" ]]; then
+if [[ -n "$(ls_files '*.markdown')" ]]; then
     error "please use '.md' instead of '.markdown' for consistency"
-    git ls-files '*.markdown'
+    ls_files '*.markdown'
 fi
 
 # Shell scripts
@@ -319,19 +322,19 @@ info "checking Shell scripts"
 if check_install shfmt; then
     check_config .editorconfig
     info "running \`shfmt -l -w \$(git ls-files '*.sh')\`"
-    shfmt -l -w $(git ls-files '*.sh')
-    check_diff $(git ls-files '*.sh')
+    shfmt -l -w $(ls_files '*.sh')
+    check_diff $(ls_files '*.sh')
 fi
 if check_install shellcheck; then
     check_config .shellcheckrc
     info "running \`shellcheck \$(git ls-files '*.sh')\`"
-    if ! shellcheck $(git ls-files '*.sh'); then
+    if ! shellcheck $(ls_files '*.sh'); then
         should_fail=1
     fi
-    if [[ -n "$(git ls-files '*Dockerfile')" ]]; then
+    if [[ -n "$(ls_files '*Dockerfile')" ]]; then
         # SC2154 doesn't seem to work on dockerfile.
         info "running \`shellcheck -e SC2148,SC2154,SC2250 \$(git ls-files '*Dockerfile')\`"
-        if ! shellcheck -e SC2148,SC2154,SC2250 $(git ls-files '*Dockerfile'); then
+        if ! shellcheck -e SC2148,SC2154,SC2250 $(ls_files '*Dockerfile'); then
             should_fail=1
         fi
     fi
@@ -353,17 +356,17 @@ if [[ -f tools/.tidy-check-license-headers ]]; then
         esac
         # TODO: The exact line number is not actually important; it is important
         # that it be part of the top-level comments of the file.
-        line="1"
-        if IFS= LC_ALL=C read -rn3 -d '' shebang <"${p}" && [[ "${shebang}" == '#!/' ]]; then
-            line="2"
-        elif [[ "${p}" == *"Dockerfile" ]] && IFS= LC_ALL=C read -rn9 -d '' syntax <"${p}" && [[ "${syntax}" == '# syntax=' ]]; then
-            line="2"
+        line=1
+        if IFS= LC_ALL=C read -rd '' -n3 shebang <"${p}" && [[ "${shebang}" == '#!/' ]]; then
+            line=2
+        elif [[ "${p}" == *"Dockerfile" ]] && IFS= LC_ALL=C read -rd '' -n9 syntax <"${p}" && [[ "${syntax}" == '# syntax=' ]]; then
+            line=2
         fi
         header_found=''
         for pre in "${prefix[@]}"; do
             # TODO: check that the license is valid as SPDX and is allowed in this project.
             if [[ "$(grep -E -n "${pre}SPDX-License-Identifier: " "${p}")" == "${line}:${pre}SPDX-License-Identifier: "* ]]; then
-                header_found='1'
+                header_found=1
                 break
             fi
         done
@@ -385,11 +388,11 @@ if [[ -f .cspell.json ]]; then
     project_dictionary=.github/.cspell/project-dictionary.txt
     if check_install npm jq python3; then
         has_rust=''
-        if [[ -n "$(git ls-files '*Cargo.toml')" ]]; then
+        if [[ -n "$(ls_files '*Cargo.toml')" ]]; then
             venv_install_yq
-            has_rust='1'
+            has_rust=1
             dependencies=''
-            for manifest_path in $(git ls-files '*Cargo.toml'); do
+            for manifest_path in $(ls_files '*Cargo.toml'); do
                 if [[ "${manifest_path}" != "Cargo.toml" ]] && [[ "$(venv tomlq -c '.workspace' "${manifest_path}")" == "null" ]]; then
                     continue
                 fi
@@ -405,17 +408,18 @@ if [[ -f .cspell.json ]]; then
         config_new=$(grep <<<"${config_old}" -v '^ *//' | jq 'del(.dictionaries[] | select(index("organization-dictionary") | not))' | jq 'del(.dictionaryDefinitions[] | select(.name == "organization-dictionary" | not))')
         trap -- 'echo "${config_old}" >.cspell.json; echo >&2 "$0: trapped SIGINT"; exit 1' SIGINT
         echo "${config_new}" >.cspell.json
+        dependencies_words=''
         if [[ -n "${has_rust}" ]]; then
             dependencies_words=$(npx <<<"${dependencies}" -y cspell stdin --no-progress --no-summary --words-only --unique || true)
         fi
-        all_words=$(npx -y cspell --no-progress --no-summary --words-only --unique $(git ls-files | (grep -v "${project_dictionary//\./\\.}" || true)) || true)
+        all_words=$(npx -y cspell --no-progress --no-summary --words-only --unique $(ls_files | (grep -v "${project_dictionary//\./\\.}" || true)) || true)
         echo "${config_old}" >.cspell.json
         trap - SIGINT
         cat >.github/.cspell/rust-dependencies.txt <<EOF
 // This file is @generated by $(basename "$0").
 // It is not intended for manual editing.
 EOF
-        if [[ -n "${dependencies_words:-}" ]]; then
+        if [[ -n "${dependencies_words}" ]]; then
             echo $'\n'"${dependencies_words}" >>.github/.cspell/rust-dependencies.txt
         fi
         check_diff .github/.cspell/rust-dependencies.txt
@@ -424,7 +428,7 @@ EOF
         fi
 
         info "running \`npx -y cspell --no-progress --no-summary \$(git ls-files)\`"
-        if ! npx -y cspell --no-progress --no-summary $(git ls-files); then
+        if ! npx -y cspell --no-progress --no-summary $(ls_files); then
             error "spellcheck failed: please fix uses of above words or add to ${project_dictionary} if correct"
         fi
 

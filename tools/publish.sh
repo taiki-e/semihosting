@@ -118,7 +118,7 @@ for id in $(jq <<<"${metadata}" '.workspace_members[]'); do
     fi
     name=$(jq <<<"${pkg}" -r '.name')
     actual_version=$(jq <<<"${pkg}" -r '.version')
-    if [[ -z "${prev_version:-}" ]]; then
+    if [[ -z "${prev_version}" ]]; then
         prev_version="${actual_version}"
     fi
     # Make sure that the version number of all publishable workspace members matches.
