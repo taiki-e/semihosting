@@ -10,7 +10,11 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Fix [build issue with `eps` toolchain](https://github.com/taiki-e/semihosting/issues/11).
+
 ## [0.1.11] - 2024-06-16
+
+**Note:** This release has been yanked due to an issue fixed in 0.1.12.
 
 - Implement `core::error::Error` for `semihosting::io::Error` at Rust 1.81+. ([8701460](https://github.com/taiki-e/semihosting/commit/8701460101e5c9838bb09062435590f834837861))
 
