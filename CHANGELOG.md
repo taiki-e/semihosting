@@ -12,7 +12,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.1.12] - 2024-07-09
 
-- Fix [build issue with `eps` toolchain](https://github.com/taiki-e/semihosting/issues/11).
+- Fix [build issue with `esp` toolchain](https://github.com/taiki-e/semihosting/issues/11).
 
 ## [0.1.11] - 2024-06-16
 
