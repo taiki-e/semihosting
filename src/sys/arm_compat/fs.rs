@@ -40,12 +40,12 @@ pub(crate) fn open(path: &CStr, options: &crate::fs::OpenOptions) -> Result<Owne
     // Refs: https://github.com/openocd-org/openocd/blob/HEAD/src/target/semihosting_common.c
     let mode = match (options.read, options.write, options.append, options.create, options.truncate)
     {
-        (true, false, false, false, false) => OpenMode::RDONLY,
-        (true, true, false, false, false) => OpenMode::RDWR,
-        (false, true, false, true, true) => OpenMode::WRONLY_TRUNC,
-        (true, true, false, true, true) => OpenMode::RDWR_TRUNC,
-        (false, true, true, true, false) => OpenMode::WRONLY_APPEND,
-        (true, true, true, true, false) => OpenMode::RDWR_APPEND,
+        (true, false, false, false, false) => OpenMode::RDONLY_BINARY,
+        (true, true, false, false, false) => OpenMode::RDWR_BINARY,
+        (false, true, false, true, true) => OpenMode::WRONLY_TRUNC_BINARY,
+        (true, true, false, true, true) => OpenMode::RDWR_TRUNC_BINARY,
+        (false, true, true, true, false) => OpenMode::WRONLY_APPEND_BINARY,
+        (true, true, true, true, false) => OpenMode::RDWR_APPEND_BINARY,
         _ => return Err(Error::from_raw_os_error(errno::EINVAL)),
     };
     sys_open(path, mode)

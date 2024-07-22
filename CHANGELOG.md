@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Open files in "binary" mode to match `std::fs::File`'s behavior. ([#12](https://github.com/taiki-e/semihosting/issues/12))
+
 ## [0.1.12] - 2024-07-09
 
 - Fix [build issue with `esp` toolchain](https://github.com/taiki-e/semihosting/issues/11).
