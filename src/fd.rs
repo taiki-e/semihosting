@@ -95,6 +95,7 @@ impl OwnedFd {
     }
 
     /// Consumes this object, returning the raw underlying file descriptor.
+    #[must_use = "losing the raw file descriptor may leak resources"]
     #[inline]
     pub fn into_raw_fd(self) -> RawFd {
         let this = ManuallyDrop::new(self);
