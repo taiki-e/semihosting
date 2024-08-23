@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `#[must_use]` to `OwnedFd::into_raw_fd`.
+
 ## [0.1.13] - 2024-07-22
 
 - Open files in "binary" mode to match `std::fs::File`'s behavior. ([#12](https://github.com/taiki-e/semihosting/issues/12))
