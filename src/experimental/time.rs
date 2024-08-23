@@ -90,12 +90,7 @@ impl fmt::Display for SystemTimeError {
 
 // Based on https://github.com/rust-lang/rust/blob/1.70.0/library/std/src/sys/unix/time.rs.
 mod sys {
-    #![allow(
-        clippy::cast_lossless,
-        clippy::cast_possible_truncation,
-        clippy::cast_possible_wrap,
-        clippy::cast_sign_loss
-    )]
+    #![allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::cast_sign_loss)]
 
     use core::{fmt, time::Duration};
 

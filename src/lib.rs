@@ -238,7 +238,6 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::must_use_candidate,
     clippy::new_without_default,
     clippy::undocumented_unsafe_blocks, // TODO
-    clippy::unreadable_literal,
 )]
 #![cfg_attr(
     any(
