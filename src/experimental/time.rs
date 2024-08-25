@@ -88,7 +88,7 @@ impl fmt::Display for SystemTimeError {
     }
 }
 
-// Based on https://github.com/rust-lang/rust/blob/1.70.0/library/std/src/sys/unix/time.rs.
+// Based on https://github.com/rust-lang/rust/blob/1.80.0/library/std/src/sys/pal/unix/time.rs.
 mod sys {
     #![allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::cast_sign_loss)]
 
@@ -98,6 +98,10 @@ mod sys {
     pub(crate) const UNIX_EPOCH: SystemTime = SystemTime { t: Timespec::zero() };
 
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[repr(transparent)]
+    struct Nanoseconds(u32);
+
+    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub(crate) struct SystemTime {
         t: Timespec,
     }
@@ -105,7 +109,7 @@ mod sys {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     struct Timespec {
         tv_sec: i64,
-        tv_nsec: u32,
+        tv_nsec: Nanoseconds,
     }
 
     impl SystemTime {
@@ -126,30 +130,28 @@ mod sys {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.debug_struct("SystemTime")
                 .field("tv_sec", &self.t.tv_sec)
-                .field("tv_nsec", &self.t.tv_nsec)
+                .field("tv_nsec", &self.t.tv_nsec.0)
                 .finish()
         }
     }
 
     impl Timespec {
-        pub(crate) const fn zero() -> Timespec {
-            Timespec::new(0, 0)
+        const fn new_unchecked(tv_sec: i64, tv_nsec: i64) -> Timespec {
+            Timespec { tv_sec, tv_nsec: Nanoseconds(tv_nsec as u32) }
         }
 
-        const fn new(tv_sec: i64, tv_nsec: i64) -> Timespec {
-            assert!(tv_nsec >= 0 && tv_nsec < NSEC_PER_SEC as i64);
-            // SAFETY: The assert above checks tv_nsec is within the valid range
-            Timespec { tv_sec, tv_nsec: tv_nsec as u32 }
+        const fn zero() -> Timespec {
+            Self::new_unchecked(0, 0)
         }
 
-        pub(crate) fn sub_timespec(&self, other: &Timespec) -> Result<Duration, Duration> {
+        fn sub_timespec(&self, other: &Timespec) -> Result<Duration, Duration> {
             if self >= other {
-                let (secs, nsec) = if self.tv_nsec >= other.tv_nsec {
-                    ((self.tv_sec - other.tv_sec) as u64, self.tv_nsec - other.tv_nsec)
+                let (secs, nsec) = if self.tv_nsec.0 >= other.tv_nsec.0 {
+                    ((self.tv_sec - other.tv_sec) as u64, self.tv_nsec.0 - other.tv_nsec.0)
                 } else {
                     (
                         (self.tv_sec - other.tv_sec - 1) as u64,
-                        self.tv_nsec + (NSEC_PER_SEC as u32) - other.tv_nsec,
+                        self.tv_nsec.0 + (NSEC_PER_SEC as u32) - other.tv_nsec.0,
                     )
                 };
 
@@ -163,36 +165,58 @@ mod sys {
         }
 
         pub(crate) fn checked_add_duration(&self, other: &Duration) -> Option<Timespec> {
-            let mut secs = other
-            .as_secs()
-            .try_into() // <- target type would be `i64`
-            .ok()
-            .and_then(|secs| self.tv_sec.checked_add(secs))?;
+            // i*::checked_add_unsigned requires Rust 1.66
+            #[inline]
+            fn checked_add_unsigned(this: i64, rhs: u64) -> Option<i64> {
+                let (a, b) = {
+                    let rhs = rhs as i64;
+                    let (res, overflowed) = this.overflowing_add(rhs);
+                    (res, overflowed ^ (rhs < 0))
+                };
+                if b {
+                    None
+                } else {
+                    Some(a)
+                }
+            }
+
+            let mut secs = checked_add_unsigned(self.tv_sec, other.as_secs())?;
 
             // Nano calculations can't overflow because nanos are <1B which fit
             // in a u32.
-            let mut nsec = other.subsec_nanos() + self.tv_nsec;
+            let mut nsec = other.subsec_nanos() + self.tv_nsec.0;
             if nsec >= NSEC_PER_SEC as u32 {
                 nsec -= NSEC_PER_SEC as u32;
                 secs = secs.checked_add(1)?;
             }
-            Some(Timespec::new(secs, nsec as i64))
+            Some(Timespec::new_unchecked(secs, nsec.into()))
         }
 
         pub(crate) fn checked_sub_duration(&self, other: &Duration) -> Option<Timespec> {
-            let mut secs = other
-            .as_secs()
-            .try_into() // <- target type would be `i64`
-            .ok()
-            .and_then(|secs| self.tv_sec.checked_sub(secs))?;
+            // i*::checked_sub_unsigned requires Rust 1.66
+            #[inline]
+            fn checked_sub_unsigned(this: i64, rhs: u64) -> Option<i64> {
+                let (a, b) = {
+                    let rhs = rhs as i64;
+                    let (res, overflowed) = this.overflowing_sub(rhs);
+                    (res, overflowed ^ (rhs < 0))
+                };
+                if b {
+                    None
+                } else {
+                    Some(a)
+                }
+            }
+
+            let mut secs = checked_sub_unsigned(self.tv_sec, other.as_secs())?;
 
             // Similar to above, nanos can't overflow.
-            let mut nsec = self.tv_nsec as i32 - other.subsec_nanos() as i32;
+            let mut nsec = self.tv_nsec.0 as i32 - other.subsec_nanos() as i32;
             if nsec < 0 {
                 nsec += NSEC_PER_SEC as i32;
                 secs = secs.checked_sub(1)?;
             }
-            Some(Timespec::new(secs, nsec as i64))
+            Some(Timespec::new_unchecked(secs, nsec.into()))
         }
     }
 
@@ -204,13 +228,15 @@ mod sys {
         all(target_arch = "xtensa", feature = "openocd-semihosting"),
     ))]
     mod inner {
-        use super::{SystemTime, Timespec};
+        use super::{Nanoseconds, SystemTime, Timespec};
         use crate::{io, sys::arm_compat::sys_time};
 
         impl SystemTime {
             pub(crate) fn now() -> io::Result<Self> {
                 // SYS_TIME doesn't have Y2038 problem (although it still has Y2106 problem): https://github.com/ARM-software/abi-aa/commit/d281283bf3dcec4d4ebf9e5646020d77904904e1
-                Ok(Self { t: Timespec { tv_sec: sys_time()? as u64 as i64, tv_nsec: 0 } })
+                Ok(Self {
+                    t: Timespec { tv_sec: sys_time()? as u64 as i64, tv_nsec: Nanoseconds(0) },
+                })
             }
         }
     }

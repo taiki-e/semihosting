@@ -76,8 +76,8 @@ fn main() {
             }
             target_feature_fallback("mclass", mclass);
             // armv7-linux-androideabi and armv7-sony-vita-newlibeabihf are also enable +thumb-mode.
-            // https://github.com/rust-lang/rust/blob/1.78.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L27
-            // https://github.com/rust-lang/rust/blob/1.78.0/compiler/rustc_target/src/spec/targets/armv7_sony_vita_newlibeabihf.rs#L39
+            // https://github.com/rust-lang/rust/blob/1.80.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L27
+            // https://github.com/rust-lang/rust/blob/1.80.0/compiler/rustc_target/src/spec/targets/armv7_sony_vita_newlibeabihf.rs#L39
             let thumb_mode = target.starts_with("thumb")
                 || target == "armv7-linux-androideabi"
                 || target == "armv7-sony-vita-newlibeabihf";

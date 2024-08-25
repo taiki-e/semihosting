@@ -2,7 +2,7 @@
 
 //! Traits, helpers, and type definitions for core I/O functionality.
 //!
-//! This module is a subset of the [`std::io`] module  except that the stdio functions returns
+//! This module is a subset of the [`std::io`] module except that the stdio functions returns
 //! the `Result`.
 //!
 //! [`std::io`]: https://doc.rust-lang.org/std/io/index.html
