@@ -13,7 +13,10 @@ pub(crate) mod errno;
 pub(crate) mod fs;
 pub mod syscall;
 
-use core::{ffi::CStr, mem};
+use core::{
+    ffi::{self, CStr},
+    mem,
+};
 
 use syscall::{
     syscall0, syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly,
@@ -132,7 +135,7 @@ pub(crate) fn stderr() -> Result<StdioFd> {
 #[inline]
 pub(crate) fn should_close(fd: &OwnedFd) -> bool {
     // In UHI, stdio streams are open by default, and shouldn't closed.
-    fd.as_raw_fd() > STDERR_FILENO
+    fd.as_raw_fd() as ffi::c_uint > STDERR_FILENO as ffi::c_uint
 }
 
 pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
