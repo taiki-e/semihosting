@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
-set -eEuo pipefail
+set -CeEuo pipefail
 IFS=$'\n\t'
+trap -- 's=$?; printf >&2 "%s\n" "${0##*/}:${LINENO}: \`${BASH_COMMAND}\` exit with ${s}"; exit ${s}' ERR
+
+bail() {
+    printf >&2 'error: %s\n' "$*"
+    exit 1
+}
 
 target="$1"
 shift
@@ -138,5 +144,5 @@ case "${target}" in
     mipsisa64r6el-*)
         qemu_system mips64el -M malta -cpu I6400
         ;;
-    *) echo "unrecognized target ${target}" && exit 1 ;;
+    *) bail "unrecognized target ${target}" ;;
 esac

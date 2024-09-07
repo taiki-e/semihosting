@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
-set -eEuo pipefail
+set -CeEuo pipefail
 IFS=$'\n\t'
+trap -- 's=$?; printf >&2 "%s\n" "${0##*/}:${LINENO}: \`${BASH_COMMAND}\` exit with ${s}"; exit ${s}' ERR
+
+bail() {
+    printf >&2 'error: %s\n' "$*"
+    exit 1
+}
 
 target="$1"
 shift
@@ -18,7 +24,7 @@ done
 qemu_user() {
     qemu_arch="$1"
     shift
-    if type -P "qemu-${qemu_arch}" &>/dev/null; then
+    if type -P "qemu-${qemu_arch}" >/dev/null; then
         "qemu-${qemu_arch}" "$@" "${args[@]}"
     else
         "qemu-${qemu_arch}-static" "$@" "${args[@]}"
@@ -99,6 +105,6 @@ case "${target}" in
         qemu_user riscv64
         ;;
     # MIPS
-    mips*) echo "QEMU doesn't support semihosting for MIPS (${target}) with user-mode" && exit 1 ;;
-    *) echo "unrecognized target ${target}" && exit 1 ;;
+    mips*) bail "QEMU doesn't support semihosting for MIPS (${target}) with user-mode" ;;
+    *) bail "unrecognized target ${target}" ;;
 esac

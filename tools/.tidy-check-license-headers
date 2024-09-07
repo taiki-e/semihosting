@@ -1,1 +1,1 @@
-comm -23 <(git ls-files | sort) <(git ls-files --deleted | sort)
+git ls-files

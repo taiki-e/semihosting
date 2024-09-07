@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0 OR MIT
-set -eEuo pipefail
+set -CeEuo pipefail
 IFS=$'\n\t'
-cd "$(dirname "$0")"/..
-
-# shellcheck disable=SC2154
-trap 's=$?; echo >&2 "$0: error on line "${LINENO}": ${BASH_COMMAND}"; exit ${s}' ERR
-trap -- 'echo >&2 "$0: trapped SIGINT"; exit 1' SIGINT
+trap -- 's=$?; printf >&2 "%s\n" "${0##*/}:${LINENO}: \`${BASH_COMMAND}\` exit with ${s}"; exit ${s}' ERR
+trap -- 'printf >&2 "%s\n" "${0##*/}: trapped SIGINT"; exit 1' SIGINT
+cd -- "$(dirname -- "$0")"/..
 
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
@@ -74,26 +72,24 @@ default_targets=(
 )
 
 x() {
-    local cmd="$1"
-    shift
     (
         set -x
-        "${cmd}" "$@"
+        "$@"
     )
 }
 x_cargo() {
     if [[ -n "${RUSTFLAGS:-}" ]]; then
-        echo "+ RUSTFLAGS='${RUSTFLAGS}' \\"
+        printf '%s\n' "+ RUSTFLAGS='${RUSTFLAGS}' \\"
     fi
     x cargo "$@"
-    echo
+    printf '\n'
 }
 bail() {
-    echo >&2 "error: $*"
+    printf >&2 'error: %s\n' "$*"
     exit 1
 }
 info() {
-    echo >&2 "info: $*"
+    printf >&2 'info: %s\n' "$*"
 }
 
 pre_args=()
@@ -119,12 +115,12 @@ if [[ -z "${is_custom_toolchain}" ]]; then
     rustup_target_list=$(rustup ${pre_args[@]+"${pre_args[@]}"} target list | cut -d' ' -f1)
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
-rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | grep '^release:' | cut -d' ' -f2)
-llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | (grep '^LLVM version:' || true) | cut -d' ' -f3)
+rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | grep -E '^release:' | cut -d' ' -f2)
+llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
 llvm_version="${llvm_version%%.*}"
 target_dir=$(pwd)/target
 nightly=''
-if [[ "${rustc_version}" == *"nightly"* ]] || [[ "${rustc_version}" == *"dev"* ]]; then
+if [[ "${rustc_version}" =~ nightly|dev ]]; then
     nightly=1
     if [[ -z "${is_custom_toolchain}" ]]; then
         rustup ${pre_args[@]+"${pre_args[@]}"} component add rust-src &>/dev/null
@@ -142,7 +138,7 @@ run() {
     target_upper=$(tr '[:lower:]' '[:upper:]' <<<"${target_lower}")
     local args=(${pre_args[@]+"${pre_args[@]}"})
     local target_rustflags="${RUSTFLAGS:-}"
-    if ! grep <<<"${rustc_target_list}" -Eq "^${target}$" || [[ -f "target-specs/${target}.json" ]]; then
+    if ! grep -Eq "^${target}$" <<<"${rustc_target_list}" || [[ -f "target-specs/${target}.json" ]]; then
         if [[ ! -f "target-specs/${target}.json" ]]; then
             info "target '${target}' not available on ${rustc_version} (skipped)"
             return 0
@@ -154,7 +150,7 @@ run() {
     local subcmd=run
     args+=("${subcmd}" "${target_flags[@]}")
     build_std=()
-    if grep <<<"${rustup_target_list}" -Eq "^${target}$"; then
+    if grep -Eq "^${target}$" <<<"${rustup_target_list}"; then
         rustup ${pre_args[@]+"${pre_args[@]}"} target add "${target}" &>/dev/null
     elif [[ -n "${nightly}" ]]; then
         build_std=(-Z build-std="core")
@@ -227,7 +223,7 @@ run() {
 
     args+=(--features "${runner}")
     (
-        cd "${test_dir}"
+        cd -- "${test_dir}"
         case "$(uname -s)" in
             MINGW* | MSYS* | CYGWIN* | Windows_NT) export "CARGO_TARGET_${target_upper}_RUNNER"="bash ${workspace_root}/tools/${runner}-runner.sh ${target}" ;;
             *) export "CARGO_TARGET_${target_upper}_RUNNER"="${workspace_root}/tools/${runner}-runner.sh ${target}" ;;

@@ -28,7 +28,7 @@ env:
 
 defaults:
   run:
-    shell: bash
+    shell: bash --noprofile --norc -CeEuxo pipefail {0}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -80,7 +80,7 @@ jobs:
     steps:
       - uses: taiki-e/checkout-action@v1
       - name: Install Rust
-        run: rustup toolchain add ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+        run: rustup toolchain add "${{ matrix.rust }}" --no-self-update && rustup default "${{ matrix.rust }}"
       - run: rustup toolchain add nightly --no-self-update
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
@@ -89,13 +89,13 @@ jobs:
       - uses: taiki-e/setup-cross-toolchain-action@v1
         with:
           target: ${{ matrix.target }}
-      - run: cargo test --workspace --features $TEST_FEATURES --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
-      - run: cargo test --workspace --features $TEST_FEATURES --release --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
-      - run: cargo careful test --workspace --features $TEST_FEATURES --target ${{ matrix.target }} $DOCTEST_XCOMPILE $BUILD_STD
+      - run: cargo test --workspace --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${DOCTEST_XCOMPILE:-} ${BUILD_STD:-}
+      - run: cargo test --workspace --features "${TEST_FEATURES}" --release --target "${{ matrix.target }}" ${DOCTEST_XCOMPILE:-} ${BUILD_STD:-}
+      - run: cargo careful test --workspace --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${DOCTEST_XCOMPILE:-} ${BUILD_STD:-}
         if: startsWith(matrix.rust, 'nightly')
-      - run: cargo hack build --workspace --no-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace,trap-hlt,openocd-semihosting --target ${{ matrix.target }} $BUILD_STD
-      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features $TEST_FEATURES --target ${{ matrix.target }} $BUILD_STD
-      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features $TEST_FEATURES --target ${{ matrix.target }} $BUILD_STD --direct
+      - run: cargo hack build --workspace --no-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace,trap-hlt,openocd-semihosting --target "${{ matrix.target }}" ${BUILD_STD:-}
+      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${BUILD_STD:-}
+      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${BUILD_STD:-} --direct
 
   no-std:
     strategy:
@@ -116,7 +116,6 @@ jobs:
     steps:
       - uses: taiki-e/checkout-action@v1
       - run: |
-          set -eEuxo pipefail
           sudo apt-get -o Acquire::Retries=10 -qq update
           sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
             qemu-system-arm \
@@ -132,42 +131,40 @@ jobs:
           OPENSBI_VERSION=1.5.1 # https://github.com/riscv-software-src/opensbi/releases
           curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused "https://github.com/riscv-software-src/opensbi/releases/download/v${OPENSBI_VERSION}/opensbi-${OPENSBI_VERSION}-rv-bin.tar.xz" \
             | tar xJf -
-          sudo mv "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
-          sudo mv "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
-          rm -rf "opensbi-${OPENSBI_VERSION}-rv-bin"
+          sudo mv -- "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
+          sudo mv -- "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
+          rm -rf -- "opensbi-${OPENSBI_VERSION}-rv-bin"
           git clone --depth 1 --filter=tree:0 --no-checkout https://github.com/qemu/qemu.git
-          cd qemu
+          cd -- qemu
           git sparse-checkout init
-          echo '!/*' >> .git/info/sparse-checkout
-          echo '/pc-bios/' >> .git/info/sparse-checkout
+          printf '!/*\n' >>.git/info/sparse-checkout
+          printf '/pc-bios/\n' >>.git/info/sparse-checkout
           git checkout
-          sudo mv pc-bios/{efi-pcnet.rom,vgabios-cirrus.bin} /usr/share/qemu/
-          cd ..
-          rm -rf qemu
+          sudo mv -- pc-bios/{efi-pcnet.rom,vgabios-cirrus.bin} /usr/share/qemu/
+          cd -- ..
+          rm -rf -- qemu
           # TODO: retry on failure
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
           docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1 # TODO: "qemu-armeb: Error mapping file: Operation not permitted" error in 8.2/9.0
-          mkdir -p qemu-user
-          docker cp qemu-user:/usr/bin qemu-user/bin
-          docker rm -f qemu-user >/dev/null
-          sudo mv qemu-user/bin/qemu-* /usr/bin/
-          rm -rf ./qemu-user
+          mkdir -p -- qemu-user
+          docker cp -- qemu-user:/usr/bin qemu-user/bin
+          docker rm -f -- qemu-user >/dev/null
+          sudo mv -- qemu-user/bin/qemu-* /usr/bin/
+          rm -rf -- ./qemu-user
           qemu-system-arm --version
           qemu-arm --version
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
-          set -eEuxo pipefail
           brew install qemu
           qemu-system-arm --version
         if: startsWith(matrix.os, 'macos')
       - run: |
-          set -eEuxo pipefail
           C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-ucrt-x86_64-qemu
-          echo "C:\msys64\ucrt64\bin" >>"${GITHUB_PATH}"
+          printf 'C:\\msys64\\ucrt64\\bin\n' >>"${GITHUB_PATH}"
           C:/msys64/ucrt64/bin/qemu-system-arm --version
         if: startsWith(matrix.os, 'windows')
       - name: Install Rust
-        run: rustup toolchain add ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+        run: rustup toolchain add "${{ matrix.rust }}" --no-self-update && rustup default "${{ matrix.rust }}"
       - uses: taiki-e/install-action@espup
         if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: espup install --targets esp32
@@ -177,5 +174,5 @@ jobs:
       - run: tools/no-std.sh
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
-      - run: cargo +esp build --target xtensa-esp32-none-elf -Z build-std=core,alloc --features $TEST_FEATURES,openocd-semihosting
+      - run: cargo +esp build --target xtensa-esp32-none-elf -Z build-std=core,alloc --features "${TEST_FEATURES},openocd-semihosting"
         if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
