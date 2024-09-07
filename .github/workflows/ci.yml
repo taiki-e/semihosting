@@ -106,6 +106,12 @@ jobs:
           - rust: stable
           - rust: beta
           - rust: nightly
+          # TODO: keep pre-8.0 QEMU for mips
+          # ubuntu 20.04 QEMU 4.2
+          # ubuntu 22.04 QEMU 6.2
+          # ubuntu 24.04 QEMU 8.2
+          # - rust: nightly
+          #   os: ubuntu-22
           # The behavior of semihosting somewhat depends on the behavior of the host system.
           - rust: nightly
             os: macos-latest

@@ -77,15 +77,15 @@ backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
 # See readme for details.
 portable-atomic = ["dep:portable-atomic"]
 
-# Arm-specific: Use HLT instruction on A+R profile.
-#
-# See readme for details.
-trap-hlt = []
+# # Arm-specific: Use HLT instruction on A+R profile.
+# #
+# # See readme for details.
+# trap-hlt = []
 
-# Xtensa-specific: Use OpenOCD Semihosting.
-#
-# See readme for details.
-openocd-semihosting = []
+# # Xtensa-specific: Use OpenOCD Semihosting.
+# #
+# # See readme for details.
+# openocd-semihosting = []
 
 [dependencies]
 portable-atomic = { version = "1.3", optional = true, default-features = false, features = ["require-cas"] }
