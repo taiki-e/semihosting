@@ -183,7 +183,7 @@ fn run() {
             let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
             assert!(errno == 22 || errno == 9, "{}", errno);
         } else {
-            // TODO: if no read permission, arm semihosting handles it like eof.
+            // TODO: if no read permission, Arm semihosting handles it like eof.
             assert_eq!(file.read(&mut buf[..]).unwrap(), 0);
         }
         assert_eq!(

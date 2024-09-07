@@ -77,7 +77,7 @@ case "${target}" in
         qemu_system arm -M lm3s6965evb -cpu cortex-m4
         ;;
     thumbv8m.base-*)
-        # TODO: As of QEMU 8.2, QEMU doesn't support -cpu cortex-m23
+        # TODO: As of QEMU 9.1, QEMU doesn't support -cpu cortex-m23
         qemu_system arm -M lm3s6965evb -cpu cortex-m33
         ;;
     thumbv8m.main-*)
@@ -89,16 +89,16 @@ case "${target}" in
         ;;
     # Cortex-R (AArch32)
     armv7r* | armebv7r*)
-        # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
-        # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (ARMv8-R AArch32)
+        # TODO: As of QEMU 8.2, qemu-system-arm doesn't support Cortex-R machine.
+        # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (Armv8-R AArch32)
         qemu_system arm -M xilinx-zynq-a9
         ;;
     armv8r* | armebv8r*)
-        # TODO: As of qemu 7.2, qemu-system-arm doesn't support Cortex-R machine.
-        # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (ARMv8-R AArch32)
+        # TODO: As of QEMU 8.2, qemu-system-arm doesn't support Cortex-R machine.
+        # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (Armv8-R AArch32)
         qemu_system arm -M xilinx-zynq-a9
         ;;
-    # ARMv4T
+    # Armv4T
     armv4t* | thumbv4t*)
         # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'
         # all passed: N/A # TODO
@@ -108,7 +108,7 @@ case "${target}" in
         # not worked: N/A
         qemu_system arm -M cheetah
         ;;
-    # ARMv5TE
+    # Armv5TE
     armv5te* | thumbv5te*)
         qemu_system arm -M versatilepb -cpu arm926
         ;;

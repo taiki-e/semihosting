@@ -30,7 +30,8 @@ macro_rules! trap {
         "svc 0x123456"
     };
 }
-// https://github.com/ARM-software/abi-aa/blob/HEAD/semihosting/semihosting.rst#the-semihosting-interface
+// A+R Profile T32, HLT
+// https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#the-semihosting-interface
 // > This requirement includes supporting the HLT encodings on ARMv7 and earlier processors,
 // > even though HLT is only defined as an instruction in ARMv8. This may require the semihosting
 // > implementation to trap the UNDEF exception.
@@ -44,7 +45,6 @@ macro_rules! trap {
 // > ARM encourages semihosting callers to implement support for trapping using HLT on A32 and T32
 // > as a configurable option. ARM strongly discourages semihosting callers from mixing the HLT and
 // > SVC mechanisms within the same executable.
-// A+R Profile T32, HLT
 #[cfg(feature = "trap-hlt")]
 #[cfg(not(any(target_feature = "mclass", semihosting_target_feature = "mclass")))]
 #[cfg(any(target_feature = "thumb-mode", semihosting_target_feature = "thumb-mode"))]

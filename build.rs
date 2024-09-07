@@ -23,20 +23,21 @@ fn main() {
 
     if version.minor >= 80 {
         // Custom cfgs set by build script. Not public API.
-        // grep -E 'cargo:rustc-cfg=' build.rs | grep -v '=//' | sed -E 's/^.*cargo:rustc-cfg=//; s/(=\\)?".*$//' | LC_ALL=C sort -u | tr '\n' ','
+        // grep -F 'cargo:rustc-cfg=' build.rs | grep -Ev '^ *//' | sed -E 's/^.*cargo:rustc-cfg=//; s/(=\\)?".*$//' | LC_ALL=C sort -u | tr '\n' ',' | sed -E 's/,$/\n/'
         println!(
             "cargo:rustc-check-cfg=cfg(semihosting_no_error_in_core,semihosting_target_feature)"
         );
         // TODO: handle multi-line target_feature_fallback
-        // grep -E 'target_feature_fallback\("' build.rs | sed -E 's/^.*target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ','
+        // grep -F 'target_feature_fallback("' build.rs | grep -Ev '^ *//' | sed -E 's/^.*target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ',' | sed -E 's/,$/\n/'
         println!(
             r#"cargo:rustc-check-cfg=cfg(semihosting_target_feature,values("mclass","thumb-mode"))"#
         );
     }
 
-    // Note that this is `no_`*, not `has_*`. This allows treating as the latest
+    // Note that cfgs are `no_`*, not `has_*`. This allows treating as the latest
     // stable rustc is used when the build script doesn't run. This is useful
     // for non-cargo build systems that don't run the build script.
+
     // error_in_core stabilized in Rust 1.81 (nightly-2024-06-09): https://github.com/rust-lang/rust/pull/125951
     if !version.probe(81, 2024, 6, 8) {
         println!("cargo:rustc-cfg=semihosting_no_error_in_core");
@@ -138,7 +139,7 @@ mod version {
         cmd.args(rustc);
         // Use verbose version output because the packagers add extra strings to the normal version output.
         // Do not use long flags (--version --verbose) because clippy-deriver doesn't handle them properly.
-        // -vV is also matched with that cargo internally uses: https://github.com/rust-lang/cargo/blob/14b46ecc62aa671d7477beba237ad9c6a209cf5d/src/cargo/util/rustc.rs#L65
+        // -vV is also matched with that cargo internally uses: https://github.com/rust-lang/cargo/blob/0.80.0/src/cargo/util/rustc.rs#L65
         let output = cmd.arg("-vV").output().ok()?;
         let verbose_version = str::from_utf8(&output.stdout).ok()?;
         Version::parse(verbose_version)

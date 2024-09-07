@@ -23,7 +23,7 @@ SECTIONS
     .eh_frame : { KEEP(*(.eh_frame)) *(.eh_frame.*) }
 
     /* https://github.com/riscv-non-isa/riscv-eabi-spec/blob/HEAD/EABI.adoc#eabi-stack-alignment */
-    /* https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/HEAD/riscv-elf.adoc#tag_riscv_stack_align-4-uleb128value */
+    /* https://github.com/riscv-non-isa/riscv-elf-psabi-doc/blob/draft-20240829-13bfa9f54634cb60d86b9b333e109f077805b4b3/riscv-elf.adoc#tag_riscv_stack_align-4-uleb128value */
     . = ALIGN(16);
     PROVIDE(_stack = . + 8M);
 }

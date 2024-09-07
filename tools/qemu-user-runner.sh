@@ -50,7 +50,7 @@ case "${target}" in
         qemu_user arm -cpu cortex-m4
         ;;
     thumbv8m.base-*)
-        # TODO: As of QEMU 8.2, QEMU doesn't support -cpu cortex-m23
+        # TODO: As of QEMU 9.1, QEMU doesn't support -cpu cortex-m23
         qemu_user arm -cpu cortex-m33
         ;;
     thumbv8m.main-*)
@@ -82,7 +82,7 @@ case "${target}" in
     armebv8r*)
         qemu_user armeb -cpu cortex-r52
         ;;
-    # ARMv4T
+    # Armv4T
     armv4t* | thumbv4t*)
         # qemu-system-arm -cpu help | grep -E '9.*t|sa1'
         # all passed:
@@ -90,10 +90,10 @@ case "${target}" in
         # exit-only passed:
         # - sa1110, sa1100 (StrongARM)
         # not worked: N/A
-        # https://github.com/qemu/qemu/blob/74c581b6452394e591f13beba9fea2ec0688e2f5/target/arm/cpu_tcg.c#L913
+        # https://github.com/qemu/qemu/blob/v9.1.0/target/arm/tcg/cpu32.c#L778
         qemu_user arm -cpu ti925t
         ;;
-    # ARMv5TE
+    # Armv5TE
     armv5te* | thumbv5te*)
         qemu_user arm -cpu arm926
         ;;

@@ -16,32 +16,31 @@ default_targets=(
     aarch64-unknown-none
     aarch64-unknown-none-softfloat
 
-    # armv4t
+    # arm
+    # v4T
     armv4t-none-eabi
     thumbv4t-none-eabi
-    # armv5te
+    # v5TE
     armv5te-none-eabi
     thumbv5te-none-eabi
-
-    # armv7-a
+    # v7-A
     armv7a-none-eabi
     armv7a-none-eabihf
-    # armv7-r
+    # v7-R
     armv7r-none-eabi
     armv7r-none-eabihf
     armebv7r-none-eabi
     armebv7r-none-eabihf
-    # armv8-r
+    # v8-R
     armv8r-none-eabihf
     armebv8r-none-eabihf # custom target
-
-    # armv6-m
+    # v6-M
     thumbv6m-none-eabi
-    # armv7-m
+    # v7-M
     thumbv7m-none-eabi
     thumbv7em-none-eabi
     thumbv7em-none-eabihf
-    # armv8-m
+    # v8-M
     thumbv8m.base-none-eabi
     thumbv8m.main-none-eabi
     thumbv8m.main-none-eabihf
@@ -175,7 +174,7 @@ run() {
             ;;
         armebv7r*)
             if [[ "${llvm_version}" -lt 17 ]]; then
-                # pre-17 LLD doesn't support big-endian arm
+                # pre-17 LLD doesn't support big-endian Arm
                 target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
             fi
             ;;
