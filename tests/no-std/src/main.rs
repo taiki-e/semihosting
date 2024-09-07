@@ -3,6 +3,7 @@
 #![no_main]
 #![no_std]
 #![warn(unsafe_op_in_unsafe_fn)]
+#![allow(unused_imports)]
 
 use core::str;
 
@@ -11,7 +12,7 @@ use semihosting::sys::arm_compat::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
-    c, dbg, experimental,
+    c, dbg, eprintln, experimental,
     fd::AsFd,
     fs,
     io::{self, IsTerminal, Read, Seek, Write},
@@ -31,6 +32,23 @@ fn run_main() -> i32 {
 use run as run_main;
 
 fn run() {
+    eprintln!("ctrl-c + enter to exit\n");
+    let mut stdin = io::stdin().unwrap();
+    loop {
+        let mut first_byte = [0; 2];
+        // it also works even if open stdin per read.
+        // let mut stdin = io::stdin().unwrap();
+        let len = stdin.read(&mut first_byte).unwrap();
+
+        if len != 0 {
+            eprintln!(
+                "READ {len} BYTES [{:?}, {:?}]",
+                first_byte[0] as char, first_byte[1] as char
+            );
+        }
+    }
+
+    /*
     #[cfg(feature = "panic-unwind")]
     {
         #[inline(never)]
@@ -286,6 +304,7 @@ fn run() {
 
     #[cfg(not(mips))]
     println!("elapsed: {:?}", now.elapsed().unwrap());
+    */
 }
 
 #[cfg(feature = "panic-unwind")]

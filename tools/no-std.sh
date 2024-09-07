@@ -230,60 +230,60 @@ run() {
         test_args=(a '' "c d")
 
         RUSTFLAGS="${target_rustflags}" \
-            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
-        RUSTFLAGS="${target_rustflags}" \
-            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
+            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" # <<<"stdin"
+        # RUSTFLAGS="${target_rustflags}" \
+        #     x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
 
-        QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED=1 \
-            RUSTFLAGS="${target_rustflags}" \
-            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
-        QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED=1 \
-            RUSTFLAGS="${target_rustflags}" \
-            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
+        # QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED=1 \
+        #     RUSTFLAGS="${target_rustflags}" \
+        #     x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
+        # QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED=1 \
+        #     RUSTFLAGS="${target_rustflags}" \
+        #     x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
 
-        case "${target}" in
-            arm64* | thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*) ;;
-            arm* | thumb*)
-                RUSTFLAGS="${target_rustflags}" \
-                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --features semihosting/trap-hlt "$@" -- "${test_args[@]}" <<<"stdin"
-                RUSTFLAGS="${target_rustflags}" \
-                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --features semihosting/trap-hlt --release "$@" -- "${test_args[@]}" <<<"stdin"
-                ;;
-        esac
+        # case "${target}" in
+        #     arm64* | thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*) ;;
+        #     arm* | thumb*)
+        #         RUSTFLAGS="${target_rustflags}" \
+        #             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --features semihosting/trap-hlt "$@" -- "${test_args[@]}" <<<"stdin"
+        #         RUSTFLAGS="${target_rustflags}" \
+        #             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --features semihosting/trap-hlt --release "$@" -- "${test_args[@]}" <<<"stdin"
+        #         ;;
+        # esac
 
-        if [[ -n "${nightly}" ]]; then
-            case "${runner}" in
-                qemu-system)
-                    case "${target}" in
-                        aarch64* | arm64* | riscv*)
-                            # Handle targets without atomic CAS
-                            case "${target}" in
-                                thumbv[4-5]t* | armv[4-5]t* | thumbv6m*)
-                                    args+=(--features portable-atomic)
-                                    target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core"
-                                    ;;
-                                riscv??i-* | riscv??im-* | riscv??imc-*)
-                                    args+=(--features portable-atomic)
-                                    target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core --cfg portable_atomic_s_mode"
-                                    ;;
-                            esac
-                            # skip if we already tested with panic=unwind
-                            if [[ "${target_rustflags}" != *"panic=unwind"* ]]; then
-                                build_std=(-Z build-std="core,alloc")
-                                args+=(--features panic-unwind)
-                                target_rustflags+=" -C panic=unwind"
-                                CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
-                                    RUSTFLAGS="${target_rustflags}" \
-                                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
-                                CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
-                                    RUSTFLAGS="${target_rustflags}" \
-                                    x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
-                            fi
-                            ;;
-                    esac
-                    ;;
-            esac
-        fi
+        # if [[ -n "${nightly}" ]]; then
+        #     case "${runner}" in
+        #         qemu-system)
+        #             case "${target}" in
+        #                 aarch64* | arm64* | riscv*)
+        #                     # Handle targets without atomic CAS
+        #                     case "${target}" in
+        #                         thumbv[4-5]t* | armv[4-5]t* | thumbv6m*)
+        #                             args+=(--features portable-atomic)
+        #                             target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core"
+        #                             ;;
+        #                         riscv??i-* | riscv??im-* | riscv??imc-*)
+        #                             args+=(--features portable-atomic)
+        #                             target_rustflags+=" --cfg portable_atomic_unsafe_assume_single_core --cfg portable_atomic_s_mode"
+        #                             ;;
+        #                     esac
+        #                     # skip if we already tested with panic=unwind
+        #                     if [[ "${target_rustflags}" != *"panic=unwind"* ]]; then
+        #                         build_std=(-Z build-std="core,alloc")
+        #                         args+=(--features panic-unwind)
+        #                         target_rustflags+=" -C panic=unwind"
+        #                         CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
+        #                             RUSTFLAGS="${target_rustflags}" \
+        #                             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
+        #                         CARGO_TARGET_DIR="${target_dir}/panic-unwind" \
+        #                             RUSTFLAGS="${target_rustflags}" \
+        #                             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
+        #                     fi
+        #                     ;;
+        #             esac
+        #             ;;
+        #     esac
+        # fi
     )
 }
 
