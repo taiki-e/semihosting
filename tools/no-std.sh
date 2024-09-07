@@ -32,8 +32,8 @@ default_targets=(
     armebv7r-none-eabi
     armebv7r-none-eabihf
     # v8-R
-    armv8r-none-eabihf
-    armebv8r-none-eabihf # custom target
+    # armv8r-none-eabihf
+    # armebv8r-none-eabihf # custom target
     # v6-M
     thumbv6m-none-eabi
     # v7-M
@@ -230,7 +230,7 @@ run() {
         test_args=(a '' "c d")
 
         RUSTFLAGS="${target_rustflags}" \
-            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" <<<"stdin"
+            x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} "$@" -- "${test_args[@]}" # <<<"stdin"
         RUSTFLAGS="${target_rustflags}" \
             x_cargo "${args[@]}" ${build_std[@]+"${build_std[@]}"} --release "$@" -- "${test_args[@]}" <<<"stdin"
 

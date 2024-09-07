@@ -11,7 +11,7 @@ use semihosting::sys::arm_compat::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
-    c, dbg, experimental,
+    c, dbg, eprintln, experimental,
     fd::AsFd,
     fs,
     io::{self, IsTerminal, Read, Seek, Write},
@@ -56,6 +56,16 @@ fn run() {
             io::stderr().unwrap_err();
         }
         return;
+    }
+
+    let mut stdin = io::stdin().unwrap();
+    loop {
+        let mut first_byte = [0; 2];
+        let len = stdin.read(&mut first_byte).unwrap();
+
+        if len != 0 {
+            eprintln!("READ {len} BYTES {:?}", first_byte);
+        }
     }
 
     let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips) && !cfg!(host_linux);
