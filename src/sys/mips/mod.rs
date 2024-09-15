@@ -3,7 +3,7 @@
 //! Low-level access to MIPS Unified Hosting Interface (UHI).
 //!
 //! Refs:
-//! - Unified Hosting Interface. MD01069 Reference Manual <https://docplayer.net/62444141-Unified-hosting-interface-md01069-reference-manual.html>
+//! - Unified Hosting Interface. MD01069 Reference Manual
 //! - <https://github.com/qemu/qemu/blob/v9.1.0/target/mips/tcg/sysemu/mips-semi.c>
 
 #![allow(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)] // TODO
