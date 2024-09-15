@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.15] - 2024-09-15
+
 - Add `process::{ExitCode,Termination}`.
 
 ## [0.1.14] - 2024-08-23
@@ -76,7 +78,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.14...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.15...HEAD
+[0.1.15]: https://github.com/taiki-e/semihosting/compare/v0.1.14...v0.1.15
 [0.1.14]: https://github.com/taiki-e/semihosting/compare/v0.1.13...v0.1.14
 [0.1.13]: https://github.com/taiki-e/semihosting/compare/v0.1.12...v0.1.13
 [0.1.12]: https://github.com/taiki-e/semihosting/compare/v0.1.11...v0.1.12

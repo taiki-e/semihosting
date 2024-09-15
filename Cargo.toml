@@ -1,6 +1,6 @@
 [package]
 name = "semihosting"
-version = "0.1.14" #publish:version
+version = "0.1.15" #publish:version
 edition = "2021"
 rust-version = "1.64"
 license = "Apache-2.0 OR MIT"
