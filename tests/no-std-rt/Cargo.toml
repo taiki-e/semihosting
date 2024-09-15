@@ -8,6 +8,22 @@ publish = false
 qemu-system = []
 qemu-user = []
 
+# cfg(target_feature = "mclass") is not available on stable/beta.
+[target.thumbv6m-none-eabi.dependencies]
+cortex-m-rt = "0.7"
+[target.thumbv7m-none-eabi.dependencies]
+cortex-m-rt = "0.7"
+[target.thumbv7em-none-eabi.dependencies]
+cortex-m-rt = "0.7"
+[target.thumbv7em-none-eabihf.dependencies]
+cortex-m-rt = "0.7"
+[target.'thumbv8m.base-none-eabi'.dependencies]
+cortex-m-rt = "0.7"
+[target.'thumbv8m.main-none-eabi'.dependencies]
+cortex-m-rt = "0.7"
+[target.'thumbv8m.main-none-eabihf'.dependencies]
+cortex-m-rt = "0.7"
+
 [workspace]
 resolver = "2"
 

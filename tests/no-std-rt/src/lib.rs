@@ -17,10 +17,14 @@ pub static BOOT_CORE_ID: u64 = 0;
 core::arch::global_asm!(include_str!("../raspi/boot.s"));
 
 #[cfg(mclass)]
+#[doc(hidden)]
+pub use cortex_m_rt::{entry as cortex_m_rt_entry, *};
+#[cfg(mclass)]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
-        #[::cortex_m_rt::entry]
+        extern crate semihosting_no_std_test_rt as cortex_m_rt;
+        #[::semihosting_no_std_test_rt::cortex_m_rt_entry]
         fn main() -> ! {
             ::semihosting::process::Termination::report($entry_fn()).exit_process()
         }
@@ -33,6 +37,9 @@ macro_rules! entry {
     ($entry_fn:ident) => {
         #[no_mangle]
         unsafe fn _start_rust() -> ! {
+            main()
+        }
+        fn main() -> ! {
             ::semihosting::process::Termination::report($entry_fn()).exit_process()
         }
     };
@@ -45,6 +52,9 @@ macro_rules! entry {
         #[no_mangle]
         unsafe fn _start() -> ! {
             unsafe { $crate::init_start() }
+            main()
+        }
+        fn main() -> ! {
             ::semihosting::process::Termination::report($entry_fn()).exit_process()
         }
     };
