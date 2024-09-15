@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#![allow(missing_docs)] // TODO
+
 #[cfg(feature = "stdio")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 #[macro_export]

@@ -223,7 +223,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 #![warn(
     // Lints that may help when writing public library.
     missing_debug_implementations,
-    // missing_docs,
+    missing_docs,
     clippy::alloc_instead_of_core,
     clippy::exhaustive_enums,
     clippy::exhaustive_structs,
@@ -236,8 +236,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::len_without_is_empty,
     clippy::missing_panics_doc,
     clippy::must_use_candidate,
-    clippy::new_without_default,
-    clippy::undocumented_unsafe_blocks, // TODO
+    clippy::new_without_default
 )]
 #![cfg_attr(
     any(

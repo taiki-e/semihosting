@@ -161,6 +161,7 @@ pub struct OpenOptions {
     pub(crate) mode: u32,
 }
 
+#[allow(missing_docs)] // TODO
 impl OpenOptions {
     pub fn new() -> Self {
         Self {

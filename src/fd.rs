@@ -12,6 +12,8 @@
 //! This redundancy is intentional, as it serves as a reminder that it is usually not
 //! recommended.
 
+#![allow(clippy::undocumented_unsafe_blocks)] // TODO
+
 use core::{ffi, fmt, marker::PhantomData, mem::ManuallyDrop};
 
 use crate::sys;
@@ -156,7 +158,7 @@ impl AsFd for BorrowedFd<'_> {
 impl AsFd for OwnedFd {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
-        // Safety: `OwnedFd` and `BorrowedFd` have the same validity
+        // SAFETY: `OwnedFd` and `BorrowedFd` have the same validity
         // invariants, and the `BorrowedFd` is bounded by the lifetime
         // of `&self`.
         unsafe { BorrowedFd::borrow_raw(self.fd) }

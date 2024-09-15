@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#![allow(clippy::undocumented_unsafe_blocks)] // TODO
+
 use core::{fmt, str};
 
 use crate::io;

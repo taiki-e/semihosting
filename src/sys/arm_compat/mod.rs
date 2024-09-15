@@ -9,7 +9,7 @@
 //! - <https://github.com/qemu/qemu/blob/v9.1.0/semihosting/arm-compat-semi.c>
 //! - <https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c>
 
-#![allow(clippy::missing_safety_doc)] // TODO
+#![allow(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)] // TODO
 
 pub(crate) mod errno;
 #[cfg(feature = "fs")]

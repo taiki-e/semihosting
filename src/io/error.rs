@@ -61,6 +61,7 @@ macro_rules! const_io_error {
 /// See [`std::io::ErrorKind` documentation][std] for details.
 ///
 /// [std]: https://doc.rust-lang.org/std/io/enum.ErrorKind.html
+#[allow(missing_docs)] // TODO
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]
 pub enum ErrorKind {
