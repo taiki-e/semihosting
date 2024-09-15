@@ -207,7 +207,7 @@ macro_rules! impl_from_fd {
     ($($ty:ty),* $(,)?) => {$(
         impl From<$ty> for OwnedFd {
             #[inline]
-            fn from(this: $ty) -> OwnedFd {
+            fn from(this: $ty) -> Self {
                 this.0
             }
         }
