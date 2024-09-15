@@ -20,11 +20,11 @@ use semihosting::{
 
 semihosting_no_std_test_rt::entry!(run_main);
 #[cfg(feature = "panic-unwind")]
-fn run_main() -> i32 {
+fn run_main() -> semihosting::process::ExitCode {
     unsafe { allocator::init_global_allocator() }
     match experimental::panic::catch_unwind(run) {
-        Ok(()) => 0,
-        Err(_) => 101,
+        Ok(()) => semihosting::process::ExitCode::SUCCESS,
+        Err(_) => semihosting::process::ExitCode::from(101_u8),
     }
 }
 #[cfg(not(feature = "panic-unwind"))]

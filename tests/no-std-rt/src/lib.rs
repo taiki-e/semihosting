@@ -22,7 +22,7 @@ macro_rules! entry {
     ($entry_fn:ident) => {
         #[::cortex_m_rt::entry]
         fn main() -> ! {
-            ::semihosting::process::exit($crate::Termination::report($entry_fn()))
+            ::semihosting::process::Termination::report($entry_fn()).exit_process()
         }
     };
 }
@@ -33,7 +33,7 @@ macro_rules! entry {
     ($entry_fn:ident) => {
         #[no_mangle]
         unsafe fn _start_rust() -> ! {
-            ::semihosting::process::exit($crate::Termination::report($entry_fn()))
+            ::semihosting::process::Termination::report($entry_fn()).exit_process()
         }
     };
 }
@@ -45,7 +45,7 @@ macro_rules! entry {
         #[no_mangle]
         unsafe fn _start() -> ! {
             unsafe { $crate::init_start() }
-            ::semihosting::process::exit($crate::Termination::report($entry_fn()))
+            ::semihosting::process::Termination::report($entry_fn()).exit_process()
         }
     };
 }
@@ -69,22 +69,5 @@ pub unsafe fn init_start() {
             }
         }
         _init();
-    }
-}
-
-#[doc(hidden)]
-pub trait Termination {
-    fn report(self) -> i32;
-}
-impl Termination for () {
-    #[inline]
-    fn report(self) -> i32 {
-        0
-    }
-}
-impl Termination for i32 {
-    #[inline]
-    fn report(self) -> i32 {
-        self
     }
 }
