@@ -83,6 +83,16 @@ x_cargo() {
     x cargo "$@"
     printf '\n'
 }
+retry() {
+    for i in {1..10}; do
+        if "$@"; then
+            return 0
+        else
+            sleep "${i}"
+        fi
+    done
+    "$@"
+}
 bail() {
     printf >&2 'error: %s\n' "$*"
     exit 1
@@ -122,7 +132,7 @@ nightly=''
 if [[ "${rustc_version}" =~ nightly|dev ]]; then
     nightly=1
     if [[ -z "${is_custom_toolchain}" ]]; then
-        rustup ${pre_args[@]+"${pre_args[@]}"} component add rust-src &>/dev/null
+        retry rustup ${pre_args[@]+"${pre_args[@]}"} component add rust-src &>/dev/null
     fi
 fi
 workspace_root=$(pwd)
@@ -150,7 +160,7 @@ run() {
     args+=("${subcmd}" "${target_flags[@]}")
     build_std=()
     if grep -Eq "^${target}$" <<<"${rustup_target_list}"; then
-        rustup ${pre_args[@]+"${pre_args[@]}"} target add "${target}" &>/dev/null
+        retry rustup ${pre_args[@]+"${pre_args[@]}"} target add "${target}" &>/dev/null
     elif [[ -n "${nightly}" ]]; then
         build_std=(-Z build-std="core")
     else
