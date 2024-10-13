@@ -61,7 +61,7 @@ macro_rules! const_io_error {
 /// See [`std::io::ErrorKind` documentation][std] for details.
 ///
 /// [std]: https://doc.rust-lang.org/std/io/enum.ErrorKind.html
-#[allow(missing_docs)] // TODO
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]
 pub enum ErrorKind {
@@ -69,61 +69,47 @@ pub enum ErrorKind {
     PermissionDenied,
     ConnectionRefused,
     ConnectionReset,
-    #[doc(hidden)]
-    __HostUnreachable, // unstable
-    #[doc(hidden)]
-    __NetworkUnreachable, // unstable
+    HostUnreachable,
+    NetworkUnreachable,
     ConnectionAborted,
     NotConnected,
     AddrInUse,
     AddrNotAvailable,
-    #[doc(hidden)]
-    __NetworkDown, // unstable
+    NetworkDown,
     BrokenPipe,
     AlreadyExists,
     WouldBlock,
-    #[doc(hidden)]
-    __NotADirectory, // unstable
-    #[doc(hidden)]
-    __IsADirectory, // unstable
-    #[doc(hidden)]
-    __DirectoryNotEmpty, // unstable
-    #[doc(hidden)]
-    __ReadOnlyFilesystem, // unstable
+    NotADirectory,
+    IsADirectory,
+    DirectoryNotEmpty,
+    ReadOnlyFilesystem,
     #[doc(hidden)]
     __FilesystemLoop, // unstable
-    #[doc(hidden)]
-    __StaleNetworkFileHandle, // unstable
+    StaleNetworkFileHandle,
     InvalidInput,
     InvalidData,
     TimedOut,
     WriteZero,
-    #[doc(hidden)]
-    __StorageFull, // unstable
-    #[doc(hidden)]
-    __NotSeekable, // unstable
+    StorageFull,
+    NotSeekable,
     #[doc(hidden)]
     __FilesystemQuotaExceeded, // unstable
-    #[doc(hidden)]
-    __FileTooLarge, // unstable
-    #[doc(hidden)]
-    __ResourceBusy, // unstable
-    #[doc(hidden)]
-    __ExecutableFileBusy, // unstable
-    #[doc(hidden)]
-    __Deadlock, // unstable
+    FileTooLarge,
+    ResourceBusy,
+    ExecutableFileBusy,
+    Deadlock,
     #[doc(hidden)]
     __CrossesDevices, // unstable
-    #[doc(hidden)]
-    __TooManyLinks, // unstable
+    TooManyLinks,
     #[doc(hidden)]
     __InvalidFilename, // unstable
-    #[doc(hidden)]
-    __ArgumentListTooLong, // unstable
+    ArgumentListTooLong,
     Interrupted,
     Unsupported,
     UnexpectedEof,
     OutOfMemory,
+    #[doc(hidden)]
+    __InProgress, // unstable
     Other,
     // Uncategorized, // unstable, private api
 }
@@ -136,39 +122,40 @@ impl ErrorKind {
             AddrInUse => "address in use",
             AddrNotAvailable => "address not available",
             AlreadyExists => "entity already exists",
-            __ArgumentListTooLong => "argument list too long",
+            ArgumentListTooLong => "argument list too long",
             BrokenPipe => "broken pipe",
             ConnectionAborted => "connection aborted",
             ConnectionRefused => "connection refused",
             ConnectionReset => "connection reset",
             __CrossesDevices => "cross-device link or rename",
-            __Deadlock => "deadlock",
-            __DirectoryNotEmpty => "directory not empty",
-            __ExecutableFileBusy => "executable file busy",
-            __FileTooLarge => "file too large",
+            Deadlock => "deadlock",
+            DirectoryNotEmpty => "directory not empty",
+            ExecutableFileBusy => "executable file busy",
+            FileTooLarge => "file too large",
             __FilesystemLoop => "filesystem loop or indirection limit (e.g. symlink loop)",
             __FilesystemQuotaExceeded => "filesystem quota exceeded",
-            __HostUnreachable => "host unreachable",
+            HostUnreachable => "host unreachable",
             Interrupted => "operation interrupted",
+            __InProgress => "in progress",
             InvalidData => "invalid data",
             __InvalidFilename => "invalid filename",
             InvalidInput => "invalid input parameter",
-            __IsADirectory => "is a directory",
-            __NetworkDown => "network down",
-            __NetworkUnreachable => "network unreachable",
-            __NotADirectory => "not a directory",
+            IsADirectory => "is a directory",
+            NetworkDown => "network down",
+            NetworkUnreachable => "network unreachable",
+            NotADirectory => "not a directory",
             NotConnected => "not connected",
             NotFound => "entity not found",
-            __NotSeekable => "seek on unseekable file",
+            NotSeekable => "seek on unseekable file",
             Other => "other error",
             OutOfMemory => "out of memory",
             PermissionDenied => "permission denied",
-            __ReadOnlyFilesystem => "read-only filesystem or storage medium",
-            __ResourceBusy => "resource busy",
-            __StaleNetworkFileHandle => "stale network file handle",
-            __StorageFull => "no storage space",
+            ReadOnlyFilesystem => "read-only filesystem or storage medium",
+            ResourceBusy => "resource busy",
+            StaleNetworkFileHandle => "stale network file handle",
+            StorageFull => "no storage space",
             TimedOut => "timed out",
-            __TooManyLinks => "too many links",
+            TooManyLinks => "too many links",
             // Uncategorized => "uncategorized error",
             UnexpectedEof => "unexpected end of file",
             Unsupported => "unsupported",

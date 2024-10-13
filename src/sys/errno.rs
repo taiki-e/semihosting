@@ -5,7 +5,7 @@ use crate::{
     sys::arch::errno,
 };
 
-// From https://github.com/rust-lang/rust/blob/1.80.0/library/std/src/sys/pal/unix/mod.rs#L243.
+// From https://github.com/rust-lang/rust/blob/7067e4aee45c18cfa1c6af3bf79bd097684fb294/library/std/src/sys/pal/unix/mod.rs#L245.
 pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
     #[allow(clippy::enum_glob_use)]
     use io::ErrorKind::*;
@@ -16,10 +16,10 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips64",
             target_arch = "mips64r6",
         )))] // TODO
-        errno::E2BIG => __ArgumentListTooLong, // unstable
+        errno::E2BIG => ArgumentListTooLong,
         // errno::EADDRINUSE => AddrInUse,
         // errno::EADDRNOTAVAIL => AddrNotAvailable,
-        errno::EBUSY => __ResourceBusy, // unstable
+        errno::EBUSY => ResourceBusy,
         // errno::ECONNABORTED => ConnectionAborted,
         // errno::ECONNREFUSED => ConnectionRefused,
         #[cfg(any(
@@ -29,23 +29,23 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips64r6",
         ))] // TODO
         errno::ECONNRESET => ConnectionReset,
-        // errno::EDEADLK => Deadlock, // unstable
+        // errno::EDEADLK => Deadlock,
         // errno::EDQUOT => FilesystemQuotaExceeded, // unstable
         errno::EEXIST => AlreadyExists,
-        errno::EFBIG => __FileTooLarge, // unstable
-        // errno::EHOSTUNREACH => HostUnreachable, // unstable
+        errno::EFBIG => FileTooLarge,
+        // errno::EHOSTUNREACH => HostUnreachable,
         errno::EINTR => Interrupted,
         errno::EINVAL => InvalidInput,
-        errno::EISDIR => __IsADirectory, // unstable
+        errno::EISDIR => IsADirectory,
         // errno::ELOOP => FilesystemLoop, // unstable
         errno::ENOENT => NotFound,
         errno::ENOMEM => OutOfMemory,
-        errno::ENOSPC => __StorageFull, // unstable
+        errno::ENOSPC => StorageFull,
         // errno::ENOSYS => Unsupported,
-        errno::EMLINK => __TooManyLinks, // unstable
+        errno::EMLINK => TooManyLinks,
         // errno::ENAMETOOLONG => InvalidFilename, // unstable
-        // errno::ENETDOWN => NetworkDown, // unstable
-        // errno::ENETUNREACH => NetworkUnreachable, // unstable
+        // errno::ENETDOWN => NetworkDown,
+        // errno::ENETUNREACH => NetworkUnreachable,
         #[cfg(any(
             target_arch = "mips",
             target_arch = "mips32r6",
@@ -53,12 +53,12 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips64r6",
         ))] // TODO
         errno::ENOTCONN => NotConnected,
-        errno::ENOTDIR => __NotADirectory, // unstable
-        // errno::ENOTEMPTY => DirectoryNotEmpty, // unstable
+        errno::ENOTDIR => NotADirectory,
+        // errno::ENOTEMPTY => DirectoryNotEmpty,
         errno::EPIPE => BrokenPipe,
-        errno::EROFS => __ReadOnlyFilesystem, // unstable
-        errno::ESPIPE => __NotSeekable,       // unstable
-        // errno::ESTALE => StaleNetworkFileHandle, // unstable
+        errno::EROFS => ReadOnlyFilesystem,
+        errno::ESPIPE => NotSeekable,
+        // errno::ESTALE => StaleNetworkFileHandle,
         #[cfg(any(
             target_arch = "mips",
             target_arch = "mips32r6",
@@ -66,8 +66,9 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips64r6",
         ))] // TODO
         errno::ETIMEDOUT => TimedOut,
-        // errno::ETXTBSY => ExecutableFileBusy, // unstable
+        // errno::ETXTBSY => ExecutableFileBusy,
         errno::EXDEV => __CrossesDevices, // unstable
+        // errno::EINPROGRESS => InProgress, // unstable
         errno::EACCES | errno::EPERM => PermissionDenied,
 
         // These two constants can have the same value on some systems,

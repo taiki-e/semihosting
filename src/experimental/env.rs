@@ -106,7 +106,7 @@ mod sys {
             }
             debug_assert!(!cmdline_block.ptr.is_null());
             if cmdline_block.size > BUF_SIZE - 1 || buf[BUF_SIZE - 1] != NUL {
-                return Err(io::ErrorKind::__ArgumentListTooLong.into());
+                return Err(io::ErrorKind::ArgumentListTooLong.into());
             }
             Ok(ArgsBytes { buf, next: Cell::new(0), size: cmdline_block.size })
         }
@@ -147,7 +147,7 @@ mod sys {
             for i in 0..argc {
                 let len = mips_argnlen(i)? + 1;
                 if start + len > BUF_SIZE {
-                    return Err(io::ErrorKind::__ArgumentListTooLong.into());
+                    return Err(io::ErrorKind::ArgumentListTooLong.into());
                 }
                 unsafe {
                     mips_argn(i, buf.as_mut_ptr().add(start))?;
