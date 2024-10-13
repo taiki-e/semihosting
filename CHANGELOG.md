@@ -10,6 +10,10 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add more `io::ErrorKind` variants to reflect [upstream stabilization](https://github.com/rust-lang/rust/pull/128316). ([9677c7b](https://github.com/taiki-e/semihosting/commit/9677c7be05fee821113e9d36b34e8815532e6f5c))
+
+- Improve compile error messages. ([80f1153](https://github.com/taiki-e/semihosting/commit/80f115310a28e44c2d48b3cc714fc1048aa67386))
+
 ## [0.1.15] - 2024-09-15
 
 - Add `process::{ExitCode,Termination}`.
