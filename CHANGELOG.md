@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.16] - 2024-10-13
+
 - Add more `io::ErrorKind` variants to reflect [upstream stabilization](https://github.com/rust-lang/rust/pull/128316). ([9677c7b](https://github.com/taiki-e/semihosting/commit/9677c7be05fee821113e9d36b34e8815532e6f5c))
 
 - Improve compile error messages. ([80f1153](https://github.com/taiki-e/semihosting/commit/80f115310a28e44c2d48b3cc714fc1048aa67386))
@@ -82,7 +84,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.15...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.16...HEAD
+[0.1.16]: https://github.com/taiki-e/semihosting/compare/v0.1.15...v0.1.16
 [0.1.15]: https://github.com/taiki-e/semihosting/compare/v0.1.14...v0.1.15
 [0.1.14]: https://github.com/taiki-e/semihosting/compare/v0.1.13...v0.1.14
 [0.1.13]: https://github.com/taiki-e/semihosting/compare/v0.1.12...v0.1.13
