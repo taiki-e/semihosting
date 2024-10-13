@@ -277,13 +277,13 @@ compile_error!(
 );
 #[cfg(not(target_arch = "xtensa"))]
 #[cfg(feature = "openocd-semihosting")]
-compile_error!("`openocd-semihosting` feature does not compatible with this target");
+compile_error!("`openocd-semihosting` feature is only available on Xtensa");
 #[cfg(not(all(
     target_arch = "arm",
     not(any(target_feature = "mclass", semihosting_target_feature = "mclass")),
 )))]
 #[cfg(feature = "trap-hlt")]
-compile_error!("`trap-hlt` feature does not compatible with this target");
+compile_error!("`trap-hlt` feature is only available on Arm A+R profile");
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
