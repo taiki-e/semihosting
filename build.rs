@@ -7,6 +7,8 @@ use std::env;
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
 
+    let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
+
     let version = match rustc_version() {
         Some(version) => version,
         None => {
@@ -14,8 +16,9 @@ fn main() {
                 panic!("unable to determine rustc version")
             }
             println!(
-                "cargo:warning={}: unable to determine rustc version; assuming latest stable rustc",
+                "cargo:warning={}: unable to determine rustc version; assuming latest stable rustc (1.{})",
                 env!("CARGO_PKG_NAME"),
+                Version::LATEST.minor
             );
             Version::LATEST
         }
@@ -43,7 +46,6 @@ fn main() {
         println!("cargo:rustc-cfg=semihosting_no_error_in_core");
     }
 
-    let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
     if target_arch == "arm" {
         let target = &*env::var("TARGET").expect("TARGET not set");
 
@@ -79,6 +81,9 @@ fn main() {
             // armv7-linux-androideabi and armv7-sony-vita-newlibeabihf are also enable +thumb-mode.
             // https://github.com/rust-lang/rust/blob/1.80.0/compiler/rustc_target/src/spec/targets/armv7_linux_androideabi.rs#L27
             // https://github.com/rust-lang/rust/blob/1.80.0/compiler/rustc_target/src/spec/targets/armv7_sony_vita_newlibeabihf.rs#L39
+            // $ (for target in $(rustc --print target-list | grep -E '^arm'); do rustc --print cfg --target "${target}" | grep -Fq '"thumb-mode"' && printf '%s\n' "${target}"; done)
+            // There is no builtin target that starts with thumb but not in thumb-mode.
+            // $ (for target in $(rustc --print target-list | grep -E '^thumb'); do rustc --print cfg --target "${target}" | grep -Fq '"thumb-mode"' || printf '%s\n' "${target}"; done)
             let thumb_mode = target.starts_with("thumb")
                 || target == "armv7-linux-androideabi"
                 || target == "armv7-sony-vita-newlibeabihf";
