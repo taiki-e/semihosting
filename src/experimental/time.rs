@@ -4,7 +4,7 @@
 
 use core::{fmt, ops, time::Duration};
 
-use sys as time;
+use self::sys as time;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SystemTime(time::SystemTime);

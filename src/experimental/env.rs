@@ -32,7 +32,7 @@ impl<const BUF_SIZE: usize> fmt::Debug for Args<BUF_SIZE> {
 }
 
 mod sys {
-    pub(crate) use imp::{args_bytes, ArgsBytes};
+    pub(crate) use self::imp::{args_bytes, ArgsBytes};
 
     const NUL: u8 = b'\0';
 

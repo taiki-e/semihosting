@@ -7,12 +7,12 @@
 //!
 //! [`std::io`]: https://doc.rust-lang.org/std/io/index.html
 
-pub use error::{Error, ErrorKind, RawOsError, Result};
+pub use self::error::{Error, ErrorKind, RawOsError, Result};
 #[macro_use]
 mod error;
 
 #[cfg(feature = "stdio")]
-pub use stdio::{stderr, stdin, stdout, IsTerminal, Stderr, Stdin, Stdout};
+pub use self::stdio::{stderr, stdin, stdout, IsTerminal, Stderr, Stdin, Stdout};
 #[cfg(feature = "stdio")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 mod stdio;

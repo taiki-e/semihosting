@@ -2,7 +2,7 @@
 
 //! Raw semihosting call.
 
-pub use arch::{
+pub use self::arch::{
     syscall0, syscall1, syscall1_readonly, syscall2, syscall2_readonly, syscall3,
     syscall3_readonly, syscall4, syscall4_readonly,
 };

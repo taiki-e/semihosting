@@ -17,7 +17,7 @@
     target_arch = "riscv64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
-use arm_compat as arch;
+use self::arm_compat as arch;
 #[cfg(any(
     target_arch = "aarch64",
     target_arch = "arm",
@@ -43,7 +43,7 @@ pub mod arm_compat;
     target_arch = "mips64",
     target_arch = "mips64r6",
 ))]
-use mips as arch;
+use self::mips as arch;
 #[cfg(any(
     all(doc, docsrs),
     target_arch = "mips",
@@ -66,10 +66,12 @@ mod errno;
 mod reg;
 
 #[cfg(feature = "fs")]
-pub(crate) use arch::fs;
-pub(crate) use arch::{close, exit, should_close};
+pub(crate) use self::arch::fs;
 #[cfg(feature = "stdio")]
-pub(crate) use arch::{is_terminal, stderr, stdin, stdout, StdioFd};
+pub(crate) use self::arch::{is_terminal, stderr, stdin, stdout, StdioFd};
 #[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) use arch::{read, write};
-pub(crate) use errno::decode_error_kind;
+pub(crate) use self::arch::{read, write};
+pub(crate) use self::{
+    arch::{close, exit, should_close},
+    errno::decode_error_kind,
+};

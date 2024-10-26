@@ -18,11 +18,10 @@ use core::{
     mem,
 };
 
-use syscall::{
+use self::syscall::{
     syscall0, syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly,
     syscall4, syscall4_readonly, OperationCode, ParamRegR, ParamRegW, RetReg,
 };
-
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io::{Error, Result},
@@ -96,7 +95,7 @@ pub fn mips_exit(code: i32) {
         syscall1_readonly(OperationCode::UHI_EXIT, ParamRegR::usize(code as isize as usize));
     }
 }
-pub(crate) use mips_exit as exit;
+pub(crate) use self::mips_exit as exit;
 
 #[allow(clippy::cast_sign_loss)]
 pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> Result<OwnedFd> {
@@ -148,7 +147,7 @@ pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
         Err(from_errno(errno))
     }
 }
-pub(crate) use mips_close as close;
+pub(crate) use self::mips_close as close;
 
 pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     let len = buf.len();
@@ -168,7 +167,7 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) use mips_read as read;
+pub(crate) use self::mips_read as read;
 
 pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
     let (res, errno) = unsafe {
@@ -187,7 +186,7 @@ pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
     }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) use mips_write as write;
+pub(crate) use self::mips_write as write;
 
 pub unsafe fn mips_lseek(fd: BorrowedFd<'_>, offset: isize, whence: SeekWhence) -> Result<usize> {
     let (res, errno) = unsafe {

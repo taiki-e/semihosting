@@ -21,8 +21,7 @@ use core::{
     mem::{self, MaybeUninit},
 };
 
-use syscall::{syscall, syscall0, syscall_readonly, OperationNumber, ParamRegR, ParamRegW};
-
+use self::syscall::{syscall, syscall0, syscall_readonly, OperationNumber, ParamRegR, ParamRegW};
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io::{Error, RawOsError, Result},
@@ -137,7 +136,7 @@ pub unsafe fn sys_close(fd: RawFd) -> Result<()> {
         Err(Error::from_raw_os_error(sys_errno()))
     }
 }
-pub(crate) use sys_close as close;
+pub(crate) use self::sys_close as close;
 
 /// [SYS_ELAPSED (0x30)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-elapsed-0x30)
 pub fn sys_elapsed() -> Result<u64> {
@@ -407,7 +406,7 @@ pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
     }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) use sys_write as write;
+pub(crate) use self::sys_write as write;
 
 /// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-writec-0x03)
 pub fn sys_writec(b: u8) {
