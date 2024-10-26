@@ -65,7 +65,7 @@ jobs:
     secrets: inherit
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      target: aarch64-unknown-linux-gnu #,mips64-unknown-linux-muslabi64 # TODO: there is no tier 2 MIPS targets
+      target: aarch64-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
       # NB: sync with env.TEST_FEATURES
       args: --features alloc,stdio,fs,args,time
 

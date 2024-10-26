@@ -132,6 +132,7 @@ pub(crate) fn stderr() -> Result<StdioFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDERR_FILENO) })
 }
 #[inline]
+#[allow(clippy::cast_sign_loss)]
 pub(crate) fn should_close(fd: &OwnedFd) -> bool {
     // In UHI, stdio streams are open by default, and shouldn't closed.
     fd.as_raw_fd() as ffi::c_uint > STDERR_FILENO as ffi::c_uint
