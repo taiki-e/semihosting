@@ -233,6 +233,11 @@ run() {
                     ;;
             esac
             ;;
+        xtensa*)
+            linker=linkall.x
+            # linker=xtensa.ld
+            target_rustflags+=" -C link-arg=-T${linker} -C link-arg=-nostartfiles"
+            ;;
     esac
 
     args+=(--features "${runner}")

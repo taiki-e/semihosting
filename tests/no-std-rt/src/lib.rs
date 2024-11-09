@@ -44,8 +44,23 @@ macro_rules! entry {
         }
     };
 }
+#[cfg(target_arch = "xtensa")]
+#[doc(hidden)]
+pub use esp_hal::{entry as esp_hal_entry, *};
+#[cfg(target_arch = "xtensa")]
+#[macro_export]
+macro_rules! entry {
+    ($entry_fn:ident) => {
+        extern crate semihosting_no_std_test_rt as esp_hal;
+        #[::semihosting_no_std_test_rt::esp_hal_entry]
+        fn main() -> ! {
+            ::semihosting::process::Termination::report($entry_fn()).exit_process()
+        }
+    };
+}
 #[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[cfg(not(mclass))]
+#[cfg(not(target_arch = "xtensa"))]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
@@ -61,6 +76,7 @@ macro_rules! entry {
 }
 #[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[cfg(not(mclass))]
+#[cfg(not(target_arch = "xtensa"))]
 #[doc(hidden)]
 #[inline(always)]
 pub unsafe fn init_start() {

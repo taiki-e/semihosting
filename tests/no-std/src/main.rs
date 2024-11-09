@@ -10,6 +10,8 @@ use core::str;
 use semihosting::sys::arm_compat::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
+#[cfg(target_arch = "xtensa")]
+use semihosting::sys::xtensa_simcall::*;
 use semihosting::{
     c, dbg, experimental,
     fd::AsFd,
@@ -30,6 +32,9 @@ fn run_main() -> semihosting::process::ExitCode {
 #[cfg(not(feature = "panic-unwind"))]
 use run as run_main;
 
+#[cfg(target_arch = "xtensa")] // TODO
+fn run() {}
+#[cfg(not(target_arch = "xtensa"))]
 fn run() {
     #[cfg(feature = "panic-unwind")]
     {
@@ -283,7 +288,7 @@ fn run() {
         print!("sys_write0: ");
         sys_write0(c!("bc\n"));
     }
-    #[cfg(mips)]
+    #[cfg(not(arm_compat))]
     {}
 
     #[cfg(not(mips))]

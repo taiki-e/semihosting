@@ -269,15 +269,21 @@ compile_error!(
      please submit an issue at <https://github.com/taiki-e/semihosting>"
 );
 #[cfg(target_arch = "xtensa")]
-#[cfg(not(feature = "openocd-semihosting"))]
+#[cfg(not(any(feature = "openocd-semihosting", feature = "simcall")))]
 compile_error!(
     "xtensa has two semihosting interfaces so you have to select implementation;\n\
     please enable `openocd-semihosting` feature if you want to use OpenOCD Semihosting used in OpenOCD, probe-rs, etc.\n\
     see <https://docs.rs/semihosting/latest/semihosting/#optional-features-openocd-semihosting> for more."
 );
+#[cfg(target_arch = "xtensa")]
+#[cfg(all(feature = "openocd-semihosting", feature = "simcall"))]
+compile_error!("`openocd-semihosting` and `simcall` feature cannot be enabled at same time");
 #[cfg(not(target_arch = "xtensa"))]
 #[cfg(feature = "openocd-semihosting")]
 compile_error!("`openocd-semihosting` feature is only available on Xtensa");
+#[cfg(not(target_arch = "xtensa"))]
+#[cfg(feature = "simcall")]
+compile_error!("`simcall` feature is only available on Xtensa");
 #[cfg(not(all(
     target_arch = "arm",
     not(any(target_feature = "mclass", semihosting_target_feature = "mclass")),

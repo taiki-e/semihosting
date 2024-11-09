@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use crate::{
-    io::{self, RawOsError},
-    sys::arch::errno,
-};
+use crate::io::{self, RawOsError};
+#[cfg(not(all(target_arch = "xtensa", feature = "simcall")))]
+use crate::sys::arch::errno;
 
 // From https://github.com/rust-lang/rust/blob/7067e4aee45c18cfa1c6af3bf79bd097684fb294/library/std/src/sys/pal/unix/mod.rs#L245.
+#[cfg(not(all(target_arch = "xtensa", feature = "simcall")))]
 pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
     #[allow(clippy::enum_glob_use)]
     use io::ErrorKind::*;
@@ -83,4 +83,9 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
         x if x == errno::EAGAIN || x == errno::EWOULDBLOCK => WouldBlock,
         _ => Other,
     }
+}
+#[cfg(all(target_arch = "xtensa", feature = "simcall"))]
+pub(crate) fn decode_error_kind(_errno: RawOsError) -> io::ErrorKind {
+    // TODO
+    io::ErrorKind::Other
 }

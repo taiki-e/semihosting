@@ -62,6 +62,12 @@ use self::mips as arch;
 )]
 pub mod mips;
 
+#[cfg(all(target_arch = "xtensa", feature = "simcall"))]
+use self::xtensa_simcall as arch;
+#[cfg(any(all(doc, docsrs), all(target_arch = "xtensa", feature = "simcall")))]
+#[cfg_attr(docsrs, doc(cfg(all(target_arch = "xtensa", feature = "simcall"))))]
+pub mod xtensa_simcall;
+
 mod errno;
 mod reg;
 

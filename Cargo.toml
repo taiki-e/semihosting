@@ -82,6 +82,11 @@ portable-atomic = ["dep:portable-atomic"]
 # See readme for details.
 trap-hlt = []
 
+# Xtensa-specific: Use SIMCALL.
+#
+# See readme for details.
+simcall = []
+
 # Xtensa-specific: Use OpenOCD Semihosting.
 #
 # See readme for details.

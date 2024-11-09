@@ -198,4 +198,29 @@ mod sys {
             }
         }
     }
+    #[cfg(all(target_arch = "xtensa", feature = "simcall"))]
+    mod imp {
+        use core::cell::Cell;
+
+        use crate::io;
+
+        // TODO
+        #[allow(dead_code)]
+        pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
+            pub(super) buf: [u8; BUF_SIZE],
+            pub(super) next: Cell<usize>,
+            pub(super) size: usize,
+        }
+        pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
+            // TODO
+            Err(io::ErrorKind::Unsupported.into())
+        }
+        #[allow(clippy::copy_iterator)] // TODO
+        impl<'a, const BUF_SIZE: usize> Iterator for &'a ArgsBytes<BUF_SIZE> {
+            type Item = &'a [u8];
+            fn next(&mut self) -> Option<Self::Item> {
+                unimplemented!() // TODO
+            }
+        }
+    }
 }

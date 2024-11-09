@@ -23,6 +23,7 @@ fn main() {
     }
     if target_arch.starts_with("mips") {
         println!("cargo:rustc-cfg=mips");
+    } else if target_arch == "xtensa" {
     } else {
         println!("cargo:rustc-cfg=arm_compat");
     }

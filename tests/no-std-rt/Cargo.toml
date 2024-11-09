@@ -24,6 +24,11 @@ cortex-m-rt = "0.7"
 [target.'thumbv8m.main-none-eabihf'.dependencies]
 cortex-m-rt = "0.7"
 
+[target.xtensa-esp32-none-elf.dependencies]
+esp-hal = { version = "0.21", features = ["esp32"] }
+# esp32-hal = "0.18"
+# xtensa-lx-rt = { version = "0.17", features = ["esp32"] }
+
 [workspace]
 resolver = "2"
 

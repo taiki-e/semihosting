@@ -13,7 +13,8 @@ target="$1"
 shift
 
 bin="$1"
-args=(-display none -kernel "${bin}")
+# args=(-display none -kernel "${bin}")
+args=(-nographic -net none -serial mon:stdio -kernel "${bin}")
 semihosting_args=("$@")
 
 if [[ -n "${QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED:-}" ]]; then
@@ -56,7 +57,10 @@ qemu_system() {
     qemu_arch="$1"
     shift
 
-    "qemu-system-${qemu_arch}" "$@" "${args[@]}"
+    # "qemu-system-${qemu_arch}" "$@" "${args[@]}"
+    # From https://github.com/espressif/qemu/releases/tag/esp-develop-9.0.0-20240606
+    /Users/taiki/projects/sources/taiki-e/semihosting/tmp/qemu/bin/"qemu-system-${qemu_arch}" "$@" "${args[@]}"
+
 }
 
 export QEMU_AUDIO_DRV=none
@@ -143,6 +147,32 @@ case "${target}" in
         ;;
     mipsisa64r6el-*)
         qemu_system mips64el -M malta -cpu I6400
+        ;;
+    xtensa*)
+        # cpu:
+        # test_mmuhifi_c3
+        # sample_controller
+        # lx106
+        # dsp3400
+        # de233_fpu
+        # de212
+        # dc233c
+        # dc232b
+        #
+        # M:
+        # kc705                kc705 EVB (dc232b)
+        # kc705-nommu          kc705 noMMU EVB (de212)
+        # lx200                lx200 EVB (dc232b)
+        # lx200-nommu          lx200 noMMU EVB (de212)
+        # lx60                 lx60 EVB (dc232b)
+        # lx60-nommu           lx60 noMMU EVB (de212)
+        # ml605                ml605 EVB (dc232b)
+        # ml605-nommu          ml605 noMMU EVB (de212)
+        # none                 empty machine
+        # sim                  sim machine (dc232b) (default)
+        # virt                 virt machine (dc232b)
+        qemu_system xtensa -M esp32 -cpu esp32
+        # qemu_system xtensa -M sim
         ;;
     *) bail "unrecognized target ${target}" ;;
 esac
