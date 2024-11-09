@@ -120,6 +120,11 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@v1
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: taiki-e/install-action@espup
+        if: matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: |
           retry() {
             for i in {1..10}; do
@@ -131,24 +136,31 @@ jobs:
             done
             "$@"
           }
-          retry sudo apt-get -o Acquire::Retries=10 -qq update
-          retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
-            qemu-system-arm \
-            qemu-system-mips \
+          apt_packages=(
+            qemu-system-arm
             qemu-system-misc
+          )
+          if [[ "${{ matrix.rust }}" == "nightly"* ]]; then
+            apt_packages+=(
+              qemu-system-mips
+            )
+          fi
           if [[ "${{ matrix.rust }}" == "1.64" ]]; then
             # pre-17 LLD doesn't support big-endian arm
-            retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
+            apt_packages+=(
               binutils-arm-none-eabi
+            )
           fi
+          retry sudo apt-get -o Acquire::Retries=10 -qq update
+          retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends "${apt_packages[@]}"
           # APT's qemu package doesn't provide firmware for riscv32 and mips:
           # https://packages.ubuntu.com/en/jammy/all/qemu-system-data/filelist
-          OPENSBI_VERSION=1.5.1 # https://github.com/riscv-software-src/opensbi/releases
-          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused "https://github.com/riscv-software-src/opensbi/releases/download/v${OPENSBI_VERSION}/opensbi-${OPENSBI_VERSION}-rv-bin.tar.xz" \
+          opensbi_version=1.5.1 # https://github.com/riscv-software-src/opensbi/releases
+          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused "https://github.com/riscv-software-src/opensbi/releases/download/v${opensbi_version}/opensbi-${opensbi_version}-rv-bin.tar.xz" \
             | tar xJf -
-          sudo mv -- "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
-          sudo mv -- "opensbi-${OPENSBI_VERSION}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
-          rm -rf -- "opensbi-${OPENSBI_VERSION}-rv-bin"
+          sudo mv -- "opensbi-${opensbi_version}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
+          sudo mv -- "opensbi-${opensbi_version}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
+          rm -rf -- "opensbi-${opensbi_version}-rv-bin"
           retry git clone --depth 1 --filter=tree:0 --no-checkout https://github.com/qemu/qemu.git
           cd -- qemu
           git sparse-checkout init
@@ -165,8 +177,13 @@ jobs:
           docker rm -f -- qemu-user >/dev/null
           sudo mv -- qemu-user/bin/qemu-* /usr/bin/
           rm -rf -- ./qemu-user
+          if [[ "${{ matrix.rust }}" == "stable" ]]; then
+            retry espup install --targets esp32
+          fi
           qemu-system-arm --version
           qemu-arm --version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
           brew install qemu
@@ -177,17 +194,8 @@ jobs:
           printf '%s\n' 'C:\msys64\ucrt64\bin' >>"${GITHUB_PATH}"
           C:/msys64/ucrt64/bin/qemu-system-arm --version
         if: startsWith(matrix.os, 'windows')
-      - uses: taiki-e/github-actions/install-rust@main
-        with:
-          toolchain: ${{ matrix.rust }}
-      - uses: taiki-e/install-action@espup
-        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
-      - run: espup install --targets esp32
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: tools/no-std.sh
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: cargo +esp build --target xtensa-esp32-none-elf -Z build-std=core,alloc --features "${TEST_FEATURES},openocd-semihosting"
-        if: startsWith(matrix.rust, 'nightly') && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
+        if: matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
