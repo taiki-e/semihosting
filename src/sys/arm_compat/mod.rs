@@ -16,6 +16,8 @@ pub(crate) mod errno;
 pub(crate) mod fs;
 pub mod syscall;
 
+#[cfg(any(feature = "stdio", feature = "fs"))]
+use core::slice;
 use core::{
     ffi::{c_void, CStr},
     mem::{self, MaybeUninit},
@@ -296,9 +298,8 @@ pub(crate) fn should_close(_fd: &OwnedFd) -> bool {
     true
 }
 
-// TODO: Add read_uninit?
 /// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-read-0x06)
-pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
+pub fn sys_read_uninit(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
     let len = buf.len();
     let mut args = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::usize(len)];
     let res = unsafe { syscall(OperationNumber::SYS_READ, ParamRegW::block(&mut args)) };
@@ -308,15 +309,20 @@ pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize
         Err(Error::from_raw_os_error(sys_errno()))
     }
 }
+// TODO: use rustix's split_init style API? https://github.com/bytecodealliance/rustix/blob/d51b19556eb637c8cf6a49effce439868e3aed16/src/io/read_write.rs#L63
+// TODO: make sys_read take initialized buf in the next breaking release (e.i., rename sys_read_init to sys_read and make it public).
+pub use self::sys_read_uninit as sys_read;
 #[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
-    use core::slice;
-
+pub(crate) fn sys_read_init(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     let len = buf.len();
     // SAFETY: transmuting initialized u8 to MaybeUninit<u8> is always safe.
     let buf = unsafe { slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
-    sys_read(fd, buf)
+    sys_read_uninit(fd, buf)
 }
+// #[cfg(any(feature = "stdio", feature = "fs"))]
+// pub(crate) use self::sys_read_uninit as read_uninit;
+#[cfg(any(feature = "stdio", feature = "fs"))]
+pub(crate) use self::sys_read_init as read;
 
 /// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-readc-0x07)
 pub fn sys_readc() -> u8 {

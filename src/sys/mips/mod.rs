@@ -15,7 +15,8 @@ pub mod syscall;
 
 use core::{
     ffi::{self, CStr},
-    mem,
+    mem::{self, MaybeUninit},
+    slice,
 };
 
 use self::syscall::{
@@ -150,7 +151,7 @@ pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
 }
 pub(crate) use self::mips_close as close;
 
-pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
+pub fn mips_read_uninit(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
     let len = buf.len();
     let (res, errno) = unsafe {
         syscall3(
@@ -167,6 +168,14 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
         Ok(res.usize())
     }
 }
+pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
+    let len = buf.len();
+    // SAFETY: transmuting initialized u8 to MaybeUninit<u8> is always safe.
+    let buf = unsafe { slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
+    mips_read_uninit(fd, buf)
+}
+// #[cfg(any(feature = "stdio", feature = "fs"))]
+// pub(crate) use mips_read_uninit as read_uninit;
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_read as read;
 
@@ -261,7 +270,11 @@ pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> Result<()> {
 // TODO: UHI_PLOG
 // TODO: UHI_ASSERT
 
-pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<usize> {
+pub fn mips_pread_uninit(
+    fd: BorrowedFd<'_>,
+    buf: &mut [MaybeUninit<u8>],
+    offset: usize,
+) -> Result<usize> {
     let len = buf.len();
     let (res, errno) = unsafe {
         syscall4(
@@ -278,6 +291,12 @@ pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<u
         debug_assert!(res.usize() <= buf.len());
         Ok(res.usize())
     }
+}
+pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<usize> {
+    let len = buf.len();
+    // SAFETY: transmuting initialized u8 to MaybeUninit<u8> is always safe.
+    let buf = unsafe { slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
+    mips_pread_uninit(fd, buf, offset)
 }
 
 pub fn mips_pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: usize) -> Result<usize> {
