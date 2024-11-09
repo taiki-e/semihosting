@@ -260,7 +260,7 @@ fn run() {
     {
         // sys_*
         println!("sys_clock: {}", sys_clock().unwrap());
-        if cfg!(not(all(target_arch = "arm", target_feature = "v8", target_feature = "rclass"))) {
+        if cfg!(not(all(target_arch = "arm", target_feature = "rclass"))) {
             println!("sys_elapsed: {}", sys_elapsed().unwrap());
         }
         // TODO: sys_heapinfo
@@ -273,8 +273,10 @@ fn run() {
         assert_eq!(sys_iserror(isize::MIN), true);
         // println!("{}", sys_readc() as char); // only works on qemu-user
         println!("sys_system: {}", sys_system(c!("pwd")));
-        println!("sys_tickfreq: {}", sys_tickfreq().unwrap());
-        println!("sys_time: {}", sys_time().unwrap());
+        if cfg!(not(all(target_arch = "arm", target_feature = "rclass"))) {
+            println!("sys_tickfreq: {}", sys_tickfreq().unwrap());
+            println!("sys_time: {}", sys_time().unwrap());
+        }
         print!("sys_writec: ");
         sys_writec(b'a');
         sys_writec(b'\n');
