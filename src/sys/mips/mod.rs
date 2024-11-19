@@ -113,10 +113,10 @@ pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> Result<OwnedFd> {
     }
 }
 #[cfg(feature = "stdio")]
-pub(crate) const STDIN_FILENO: RawFd = 0; // /dev/stdin
+const STDIN_FILENO: RawFd = 0; // /dev/stdin
 #[cfg(feature = "stdio")]
-pub(crate) const STDOUT_FILENO: RawFd = 1; // /dev/stdout
-pub(crate) const STDERR_FILENO: RawFd = 2; // /dev/stderr
+const STDOUT_FILENO: RawFd = 1; // /dev/stdout
+const STDERR_FILENO: RawFd = 2; // /dev/stderr
 #[cfg(feature = "stdio")]
 pub(crate) type StdioFd = BorrowedFd<'static>;
 #[cfg(feature = "stdio")]
