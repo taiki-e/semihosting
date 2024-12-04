@@ -104,6 +104,7 @@ pub trait IsTerminal: crate::sealed::Sealed {
     /// On platforms where Rust does not know how to detect a terminal yet, this will return
     /// `false`. This will also return `false` if an unexpected error occurred, such as from
     /// passing an invalid file descriptor.
+    #[doc(alias = "isatty")]
     fn is_terminal(&self) -> bool;
 }
 macro_rules! impl_is_terminal {

@@ -25,6 +25,7 @@ IRUSR
 IRWXG
 IRWXO
 IRWXU
+isatty
 iserror
 ISTTY
 IWGRP
