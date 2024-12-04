@@ -12,6 +12,10 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Respect [`RUSTC_BOOTSTRAP=-1` recently added in nightly](https://github.com/rust-lang/rust/pull/132993) in rustc version detection.
+
+- Documentation improvements.
+
 ## [0.1.16] - 2024-10-13
 
 - Add more `io::ErrorKind` variants to reflect [upstream stabilization](https://github.com/rust-lang/rust/pull/128316). ([9677c7b](https://github.com/taiki-e/semihosting/commit/9677c7be05fee821113e9d36b34e8815532e6f5c))
