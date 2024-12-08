@@ -92,8 +92,7 @@ pub enum ErrorKind {
     WriteZero,
     StorageFull,
     NotSeekable,
-    #[doc(hidden)]
-    __FilesystemQuotaExceeded, // unstable
+    QuotaExceeded,
     FileTooLarge,
     ResourceBusy,
     ExecutableFileBusy,
@@ -132,7 +131,7 @@ impl ErrorKind {
             ExecutableFileBusy => "executable file busy",
             FileTooLarge => "file too large",
             __FilesystemLoop => "filesystem loop or indirection limit (e.g. symlink loop)",
-            __FilesystemQuotaExceeded => "filesystem quota exceeded",
+            QuotaExceeded => "filesystem quota exceeded",
             HostUnreachable => "host unreachable",
             Interrupted => "operation interrupted",
             __InProgress => "in progress",

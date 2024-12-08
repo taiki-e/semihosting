@@ -30,7 +30,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
         ))] // TODO
         errno::ECONNRESET => ConnectionReset,
         // errno::EDEADLK => Deadlock,
-        // errno::EDQUOT => FilesystemQuotaExceeded, // unstable
+        // errno::EDQUOT => QuotaExceeded,
         errno::EEXIST => AlreadyExists,
         errno::EFBIG => FileTooLarge,
         // errno::EHOSTUNREACH => HostUnreachable,
