@@ -67,7 +67,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
         ))] // TODO
         errno::ETIMEDOUT => TimedOut,
         // errno::ETXTBSY => ExecutableFileBusy,
-        errno::EXDEV => __CrossesDevices, // unstable
+        errno::EXDEV => CrossesDevices,
         // errno::EINPROGRESS => InProgress, // unstable
         errno::EACCES | errno::EPERM => PermissionDenied,
 

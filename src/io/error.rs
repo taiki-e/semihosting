@@ -98,8 +98,7 @@ pub enum ErrorKind {
     ResourceBusy,
     ExecutableFileBusy,
     Deadlock,
-    #[doc(hidden)]
-    __CrossesDevices, // unstable
+    CrossesDevices,
     TooManyLinks,
     #[doc(hidden)]
     __InvalidFilename, // unstable
@@ -127,7 +126,7 @@ impl ErrorKind {
             ConnectionAborted => "connection aborted",
             ConnectionRefused => "connection refused",
             ConnectionReset => "connection reset",
-            __CrossesDevices => "cross-device link or rename",
+            CrossesDevices => "cross-device link or rename",
             Deadlock => "deadlock",
             DirectoryNotEmpty => "directory not empty",
             ExecutableFileBusy => "executable file busy",
