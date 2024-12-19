@@ -32,3 +32,6 @@ single_use_lifetimes = "warn"
 opt-level = "s"
 
 [profile.release]
+
+[patch.crates-io]
+unwinding = { git = "https://github.com/nbdd0121/unwinding.git", rev = "f8aa6bfb5a623e311fb2eb48eeab8bcd92a62904" } # TODO: remove once the fix for https://github.com/nbdd0121/unwinding/issues/41 released
