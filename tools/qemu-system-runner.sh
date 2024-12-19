@@ -103,10 +103,10 @@ case "${target}" in
         # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'
         # all passed: N/A # TODO
         # exit-only passed:
-        # - cheetah, sx1, sx1-v1 (OMAP310)
+        # - sx1, sx1-v1 (OMAP310)
         # - collie (SA-1110)
         # not worked: N/A
-        qemu_system arm -M cheetah
+        qemu_system arm -M sx1
         ;;
     # Armv5TE
     armv5te* | thumbv5te*)
