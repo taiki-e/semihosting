@@ -4,7 +4,7 @@
 //!
 //! Refs:
 //! - Unified Hosting Interface. MD01069 Reference Manual
-//! - <https://github.com/qemu/qemu/blob/v9.1.0/target/mips/tcg/sysemu/mips-semi.c>
+//! - <https://github.com/qemu/qemu/blob/v9.2.0/target/mips/tcg/sysemu/mips-semi.c>
 
 #![allow(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)] // TODO
 
