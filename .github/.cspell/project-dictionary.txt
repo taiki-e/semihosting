@@ -60,7 +60,6 @@ simcall
 slli
 srai
 subarch
-subcode
 syscall
 TDMI
 Tensilica
