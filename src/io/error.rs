@@ -84,7 +84,7 @@ pub enum ErrorKind {
     DirectoryNotEmpty,
     ReadOnlyFilesystem,
     #[doc(hidden)]
-    __FilesystemLoop, // unstable
+    __FilesystemLoop, // unstable https://github.com/rust-lang/rust/issues/130188
     StaleNetworkFileHandle,
     InvalidInput,
     InvalidData,
@@ -100,14 +100,14 @@ pub enum ErrorKind {
     CrossesDevices,
     TooManyLinks,
     #[doc(hidden)]
-    __InvalidFilename, // unstable
+    __InvalidFilename, // unstable https://github.com/rust-lang/rust/issues/130192 / https://github.com/rust-lang/rust/pull/134076
     ArgumentListTooLong,
     Interrupted,
     Unsupported,
     UnexpectedEof,
     OutOfMemory,
     #[doc(hidden)]
-    __InProgress, // unstable
+    __InProgress, // unstable https://github.com/rust-lang/rust/issues/130840
     Other,
     // Uncategorized, // unstable, private api
 }
