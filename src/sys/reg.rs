@@ -26,7 +26,7 @@ impl<'a> ParamRegW<'a> {
     }
     #[inline]
     pub fn usize(n: usize) -> Self {
-        Self(n as *mut c_void, PhantomData)
+        Self(crate::ptr::with_exposed_provenance_mut(n), PhantomData)
     }
     #[allow(clippy::cast_sign_loss)]
     #[inline]
@@ -76,7 +76,7 @@ impl<'a> ParamRegR<'a> {
     }
     #[inline]
     pub fn usize(n: usize) -> Self {
-        Self(n as *const c_void, PhantomData)
+        Self(crate::ptr::with_exposed_provenance(n), PhantomData)
     }
     #[allow(clippy::cast_sign_loss)]
     #[inline]

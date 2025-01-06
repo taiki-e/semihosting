@@ -28,7 +28,7 @@ fn main() {
         // Custom cfgs set by build script. Not public API.
         // grep -F 'cargo:rustc-cfg=' build.rs | grep -Ev '^ *//' | sed -E 's/^.*cargo:rustc-cfg=//; s/(=\\)?".*$//' | LC_ALL=C sort -u | tr '\n' ',' | sed -E 's/,$/\n/'
         println!(
-            "cargo:rustc-check-cfg=cfg(semihosting_no_error_in_core,semihosting_target_feature)"
+            "cargo:rustc-check-cfg=cfg(semihosting_no_error_in_core,semihosting_no_strict_provenance,semihosting_target_feature)"
         );
         // TODO: handle multi-line target_feature_fallback
         // grep -F 'target_feature_fallback("' build.rs | grep -Ev '^ *//' | sed -E 's/^.*target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ',' | sed -E 's/,$/\n/'
@@ -44,6 +44,10 @@ fn main() {
     // error_in_core stabilized in Rust 1.81 (nightly-2024-06-09): https://github.com/rust-lang/rust/pull/125951
     if !version.probe(81, 2024, 6, 8) {
         println!("cargo:rustc-cfg=semihosting_no_error_in_core");
+    }
+    // strict_provenance/exposed_provenance APIs stabilized in Rust 1.84 (nightly-2024-10-22): https://github.com/rust-lang/rust/pull/130350
+    if !version.probe(84, 2024, 10, 21) {
+        println!("cargo:rustc-cfg=semihosting_no_strict_provenance");
     }
 
     if target_arch == "arm" {
