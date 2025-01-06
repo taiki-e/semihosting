@@ -326,6 +326,7 @@ pub mod sys;
 
 #[cfg(feature = "stdio")]
 mod sealed {
+    #[allow(unknown_lints, unnameable_types)] // Not public API. unnameable_types is available on Rust 1.79+
     pub trait Sealed {}
 }
 
