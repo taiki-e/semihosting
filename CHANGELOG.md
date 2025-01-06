@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.18] - 2025-01-06
+
 - Add `io::ErrorKind::CrossesDevices` variant to reflect [upstream stabilization in Rust 1.85](https://github.com/rust-lang/rust/pull/130209). ([0a09ce5](https://github.com/taiki-e/semihosting/commit/0a09ce540784739f972e76fe719a573a744b98eb))
 
 - Add `io::ErrorKind::QuotaExceeded` variant to reflect [upstream stabilization in Rust 1.85](https://github.com/rust-lang/rust/pull/130254). ([36b069a](https://github.com/taiki-e/semihosting/commit/36b069ab0e56b25bb64b5d7390ece5ce41534c94))
@@ -96,7 +98,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.17...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.18...HEAD
+[0.1.18]: https://github.com/taiki-e/semihosting/compare/v0.1.17...v0.1.18
 [0.1.17]: https://github.com/taiki-e/semihosting/compare/v0.1.16...v0.1.17
 [0.1.16]: https://github.com/taiki-e/semihosting/compare/v0.1.15...v0.1.16
 [0.1.15]: https://github.com/taiki-e/semihosting/compare/v0.1.14...v0.1.15
