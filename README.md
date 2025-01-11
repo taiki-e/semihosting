@@ -40,7 +40,7 @@ The following target architectures are supported:
 | ----------- | ------------- | ------------------------- | ---- |
 | aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst) | `sys::arm_compat` | |
 | arm | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst) | `sys::arm_compat` | use `SVC` on A+R profile by default based on Arm's recommendation but it can be changed by [`trap-hlt` feature](#optional-features-trap-hlt). |
-| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/0.5/riscv-semihosting.adoc) | `sys::arm_compat` | |
+| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/1.0-rc2/riscv-semihosting.adoc) | `sys::arm_compat` | |
 | xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
 | mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` | |
 

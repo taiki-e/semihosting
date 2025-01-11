@@ -4,7 +4,7 @@
 
 ENTRY(_start)
 
-/* https://github.com/riscv-software-src/opensbi/blob/v1.5.1/platform/template/objects.mk#L75 */
+/* https://github.com/riscv-software-src/opensbi/blob/v1.6/platform/template/objects.mk#L75 */
 FW_JUMP_ADDR = 0x80200000;
 
 INCLUDE riscv-common.ld
