@@ -105,7 +105,7 @@ mod tests {
     }
 
     #[test]
-    fn testis_c_str() {
+    fn test_is_c_str() {
         #[track_caller]
         fn t(bytes: &[u8]) {
             assert_eq!(
