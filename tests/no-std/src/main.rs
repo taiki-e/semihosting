@@ -12,9 +12,9 @@ use semihosting::sys::arm_compat::*;
 use semihosting::sys::mips::*;
 use semihosting::{
     c, dbg, experimental,
-    fd::AsFd,
+    fd::AsFd as _,
     fs,
-    io::{self, IsTerminal, Read, Seek, Write},
+    io::{self, IsTerminal as _, Read as _, Seek as _, Write as _},
     print, println,
 };
 

@@ -30,8 +30,8 @@
 use core::{ffi::CStr, fmt};
 
 use crate::{
-    fd::{AsFd, OwnedFd},
-    io::{self, Write},
+    fd::{AsFd as _, OwnedFd},
+    io::{self, Write as _},
     sys,
 };
 

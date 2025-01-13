@@ -2,7 +2,7 @@
 
 use core::fmt;
 
-use crate::{fd::AsFd, io, sys};
+use crate::{fd::AsFd as _, io, sys};
 
 /// Constructs a new handle to the standard input of the current process.
 ///
@@ -113,7 +113,7 @@ macro_rules! impl_is_terminal {
         impl crate::io::IsTerminal for $t {
             #[inline]
             fn is_terminal(&self) -> bool {
-                use crate::fd::AsFd;
+                use crate::fd::AsFd as _;
                 crate::sys::is_terminal(self.as_fd())
             }
         }
