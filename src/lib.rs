@@ -330,7 +330,7 @@ mod sealed {
     pub trait Sealed {}
 }
 
-// strict_provenance polyfill for pre-1.84 rustc.
+// This module provides core::ptr strict_provenance/exposed_provenance polyfill for pre-1.84 rustc.
 #[allow(dead_code)]
 mod ptr {
     #[cfg(not(semihosting_no_strict_provenance))]
