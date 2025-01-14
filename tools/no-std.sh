@@ -9,8 +9,7 @@ cd -- "$(dirname -- "$0")"/..
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
 
-# rustc --print target-list | grep -E -e '-none|avr-'
-# rustup target list | grep -E -e '-none|avr-'
+# rustc -Z unstable-options --print all-target-specs-json | jq -r '. | to_entries[] | if .value.os then empty else .key end'
 default_targets=(
     # aarch64
     aarch64-unknown-none

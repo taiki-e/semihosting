@@ -233,6 +233,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::std_instead_of_core,
 )]
 #![allow(
+    clippy::inline_always,
     clippy::len_without_is_empty,
     clippy::missing_panics_doc,
     clippy::must_use_candidate,
@@ -330,7 +331,7 @@ mod sealed {
     pub trait Sealed {}
 }
 
-// strict_provenance polyfill for pre-1.84 rustc.
+// This module provides core::ptr strict_provenance/exposed_provenance polyfill for pre-1.84 rustc.
 #[allow(dead_code)]
 mod ptr {
     #[cfg(not(semihosting_no_strict_provenance))]
