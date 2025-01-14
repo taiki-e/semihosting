@@ -90,8 +90,6 @@ pub const fn const_c_str_check(bytes: &[u8]) {
 mod tests {
     use core::ffi::CStr;
 
-    use super::const_c_str_check;
-
     #[test]
     fn test_c_macro() {
         #[track_caller]
@@ -109,7 +107,7 @@ mod tests {
         #[track_caller]
         fn t(bytes: &[u8]) {
             assert_eq!(
-                std::panic::catch_unwind(|| const_c_str_check(bytes)).is_ok(),
+                std::panic::catch_unwind(|| super::const_c_str_check(bytes)).is_ok(),
                 CStr::from_bytes_with_nul(bytes).is_ok()
             );
         }
