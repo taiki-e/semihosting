@@ -2,7 +2,7 @@
 name = "semihosting"
 version = "0.1.18" #publish:version
 edition = "2021"
-rust-version = "1.64"
+rust-version = "1.64" # For core::ffi::CStr
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/semihosting"
 keywords = ["qemu"]
