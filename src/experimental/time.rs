@@ -88,7 +88,7 @@ impl fmt::Display for SystemTimeError {
     }
 }
 
-// Based on https://github.com/rust-lang/rust/blob/1.80.0/library/std/src/sys/pal/unix/time.rs.
+// Based on https://github.com/rust-lang/rust/blob/1.84.0/library/std/src/sys/pal/unix/time.rs.
 mod sys {
     #![allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::cast_sign_loss)]
 

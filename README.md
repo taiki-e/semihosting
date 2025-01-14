@@ -20,7 +20,7 @@ APIs are categorized into the following four types:
   - `dbg!`/`print{,ln}!`/`eprint{,ln}!`: macros to output to stdout/stderr. (requires `stdio` feature)
 
   Note that some APIs are not strictly a subset of the standard library.
-  - API that uses types not available in `core` such as `Path` (technically, the same thing could be implemented, but it makes sense to use `CStr` directly, because when converting a long `Path`/`OsStr` to `CStr`, it needs to either [do an allocation](https://github.com/rust-lang/rust/blob/1.80.0/library/std/src/sys/pal/common/small_c_string.rs#L26-L27) or return an error)
+  - API that uses types not available in `core` such as `Path` (technically, the same thing could be implemented, but it makes sense to use `CStr` directly, because when converting a long `Path`/`OsStr` to `CStr`, it needs to either [do an allocation](https://github.com/rust-lang/rust/blob/1.84.0/library/std/src/sys/pal/common/small_c_string.rs#L25-L26) or return an error)
   - API that panics on failure in `std` (in no-std it makes sense to return `Result` since `panic=abort` is default)
 
 - Helpers that are useful when using this library.

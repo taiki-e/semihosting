@@ -5,7 +5,7 @@ use crate::{
     sys::arch::errno,
 };
 
-// From https://github.com/rust-lang/rust/blob/7067e4aee45c18cfa1c6af3bf79bd097684fb294/library/std/src/sys/pal/unix/mod.rs#L245.
+// From https://github.com/rust-lang/rust/blob/1.84.0/library/std/src/sys/pal/unix/mod.rs#L245.
 pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
     #[allow(clippy::enum_glob_use)]
     use io::ErrorKind::*;
