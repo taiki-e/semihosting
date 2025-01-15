@@ -225,7 +225,9 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> Result<()> {
 /// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-heapinfo-0x16)
 pub fn sys_heapinfo() -> HeapInfo {
     let mut buf: HeapInfo = unsafe { mem::zeroed() };
-    unsafe { syscall(OperationNumber::SYS_HEAPINFO, ParamRegW::ref_(&mut buf)) };
+    unsafe {
+        syscall(OperationNumber::SYS_HEAPINFO, ParamRegW::ref_(&mut buf));
+    }
     buf
 }
 
