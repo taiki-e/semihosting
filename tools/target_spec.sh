@@ -19,23 +19,23 @@ mkdir -p -- "$(dirname -- "${file}")"
 arm_but_thumb_mode=()
 thumb_but_arm_mode=()
 for target in $(rustc -Z unstable-options --print all-target-specs-json | jq -r '. | to_entries[] | if .value.arch == "arm" then .key else empty end'); do
-    cfgs=$(rustc --print cfg --target "${target}")
-    case "${target}" in
-        thumb*)
-            if ! grep -Fq '"thumb-mode"' <<<"${cfgs}"; then
-                thumb_but_arm_mode+=("${target}")
-            fi
-            ;;
-        *)
-            if grep -Fq '"thumb-mode"' <<<"${cfgs}"; then
-                arm_but_thumb_mode+=("${target}")
-            fi
-            ;;
-    esac
+  cfgs=$(rustc --print cfg --target "${target}")
+  case "${target}" in
+    thumb*)
+      if ! grep -Fq '"thumb-mode"' <<<"${cfgs}"; then
+        thumb_but_arm_mode+=("${target}")
+      fi
+      ;;
+    *)
+      if grep -Fq '"thumb-mode"' <<<"${cfgs}"; then
+        arm_but_thumb_mode+=("${target}")
+      fi
+      ;;
+  esac
 done
 if [[ ${#thumb_but_arm_mode[@]} -ne 0 ]]; then
-    echo "thumb* but in arm mode...: ${thumb_but_arm_mode[*]}"
-    exit 1
+  echo "thumb* but in arm mode...: ${thumb_but_arm_mode[*]}"
+  exit 1
 fi
 
 cat >|"${file}" <<EOF
