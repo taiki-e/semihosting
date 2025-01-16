@@ -233,6 +233,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     clippy::std_instead_of_core,
 )]
 #![allow(
+    clippy::inline_always,
     clippy::len_without_is_empty,
     clippy::missing_panics_doc,
     clippy::must_use_candidate,
