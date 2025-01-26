@@ -222,7 +222,8 @@ run() {
             return 0
           fi
           linker=link.x
-          target_rustflags+=" -C link-arg=-T${linker}"
+          # Allow linker_messages to work around https://github.com/llvm/llvm-project/issues/56192.
+          target_rustflags+=" -C link-arg=-T${linker} -A linker_messages"
           ;;
         # As of QEMU 7.2, QEMU doesn't support semihosting for MIPS with user-mode.
         # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
