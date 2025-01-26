@@ -20,10 +20,10 @@ mod stdio;
 use core::fmt;
 
 const _: fn() = || {
-    fn assert_object_safety<T: ?Sized>() {}
-    assert_object_safety::<dyn Read>();
-    assert_object_safety::<dyn Write>();
-    assert_object_safety::<dyn Seek>();
+    fn assert_dyn_compatibility<T: ?Sized>() {}
+    assert_dyn_compatibility::<dyn Read>();
+    assert_dyn_compatibility::<dyn Write>();
+    assert_dyn_compatibility::<dyn Seek>();
 };
 
 pub(crate) fn default_read_exact<R: ?Sized + Read>(this: &mut R, mut buf: &mut [u8]) -> Result<()> {
