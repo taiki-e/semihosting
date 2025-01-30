@@ -190,14 +190,14 @@ impl Error {
         Self { repr: Repr::SimpleMessage(msg) }
     }
     /// Creates a new instance of an `Error` from a particular OS error code.
-    #[must_use]
     #[inline]
+    #[must_use]
     pub fn from_raw_os_error(os: RawOsError) -> Self {
         Self { repr: Repr::Os(os) }
     }
     /// Returns the OS error that this error represents (if any).
-    #[must_use]
     #[inline]
+    #[must_use]
     pub fn raw_os_error(&self) -> Option<RawOsError> {
         match self.repr {
             Repr::Os(code) => Some(code),
@@ -205,8 +205,8 @@ impl Error {
         }
     }
     /// Returns the corresponding [`ErrorKind`] for this error.
-    #[must_use]
     #[inline]
+    #[must_use]
     pub fn kind(&self) -> ErrorKind {
         match self.repr {
             Repr::Os(code) => sys::decode_error_kind(code),

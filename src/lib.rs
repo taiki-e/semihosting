@@ -339,15 +339,15 @@ mod ptr {
     pub(crate) use core::ptr::{with_exposed_provenance, with_exposed_provenance_mut};
 
     #[cfg(semihosting_no_strict_provenance)]
-    #[must_use]
     #[inline(always)]
+    #[must_use]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub(crate) fn with_exposed_provenance<T>(addr: usize) -> *const T {
         addr as *const T
     }
     #[cfg(semihosting_no_strict_provenance)]
-    #[must_use]
     #[inline(always)]
+    #[must_use]
     #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
     pub(crate) fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
         addr as *mut T
