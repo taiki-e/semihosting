@@ -6,7 +6,8 @@
 [![msrv](https://img.shields.io/badge/msrv-1.64-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![github actions](https://img.shields.io/github/actions/workflow/status/taiki-e/semihosting/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/semihosting/actions)
 
-<!-- tidy:crate-doc:start -->
+<!-- tidy:sync-markdown-to-rustdoc:start:src/lib.rs -->
+
 Semihosting for AArch64, Arm, RISC-V, MIPS32, MIPS64, and Xtensa.
 
 This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst) for more information on semihosting.
@@ -213,7 +214,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 [rustfilt]: https://github.com/luser/rustfilt
 [unwinding]: https://github.com/nbdd0121/unwinding
 
-<!-- tidy:crate-doc:end -->
+<!-- tidy:sync-markdown-to-rustdoc:end -->
 
 ## License
 

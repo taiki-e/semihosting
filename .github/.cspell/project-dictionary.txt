@@ -7,13 +7,9 @@ CMDLINE
 CREAT
 demangle
 ebreak
-EINTR
-EINVAL
-errno
 espup
 fipe
 FLEN
-fopen
 fstat
 heapinfo
 IFCHR
@@ -64,9 +60,6 @@ syscall
 TDMI
 Tensilica
 tickfreq
-timespec
-TMPNAM
-TRUNC
 ucrt
 Uncategorized
 unseekable
