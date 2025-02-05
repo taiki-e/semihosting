@@ -36,7 +36,7 @@ macro_rules! entry {
 macro_rules! entry {
     ($entry_fn:ident) => {
         #[no_mangle]
-        unsafe fn _start_rust() -> ! {
+        unsafe extern "C" fn _start_rust() -> ! {
             main()
         }
         fn main() -> ! {
@@ -50,7 +50,7 @@ macro_rules! entry {
 macro_rules! entry {
     ($entry_fn:ident) => {
         #[no_mangle]
-        unsafe fn _start() -> ! {
+        unsafe extern "C" fn _start() -> ! {
             unsafe { $crate::init_start() }
             main()
         }
