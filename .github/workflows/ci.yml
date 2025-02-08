@@ -23,7 +23,7 @@ env:
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
   SEMIHOSTING_DENY_WARNINGS: 1
-  # NB: sync with miri/msrv/tidy jobs' --features option and package.metadata.docs.rs.features field in Cargo.toml
+  # NB: sync with miri/msrv/test/tidy jobs' --features option and package.metadata.docs.rs.features field in Cargo.toml
   TEST_FEATURES: alloc,stdio,fs,args,time
 
 defaults:
@@ -49,6 +49,17 @@ jobs:
       target: aarch64-unknown-linux-gnu
       # NB: sync with env.TEST_FEATURES
       args: --features alloc,stdio,fs,args,time
+  # We have some platform-independent code, so test them.
+  test:
+    uses: taiki-e/github-actions/.github/workflows/test.yml@main
+    with:
+      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+      target: aarch64-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
+      # NB: sync with env.TEST_FEATURES
+      features: --features alloc,stdio,fs,args,time
+      optional-deps: ''
+      build-args: --depth 2 --exclude-features panic-unwind,backtrace,trap-hlt,openocd-semihosting
+      no-std: false # covered by no-std job
   tidy:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
     permissions:
@@ -61,39 +72,6 @@ jobs:
       clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
       # NB: sync with env.TEST_FEATURES
       clippy-args: --features alloc,stdio,fs,args,time
-
-  # We have some platform-independent code, so test them.
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-          - rust: nightly
-            target: aarch64-unknown-linux-gnu
-          - rust: nightly
-            target: mips64-unknown-linux-gnuabi64
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: taiki-e/checkout-action@v1
-      - uses: taiki-e/github-actions/install-rust@main
-        with:
-          toolchain: ${{ matrix.rust }}
-      - uses: taiki-e/install-action@cargo-hack
-      - uses: taiki-e/install-action@cargo-minimal-versions
-      - uses: taiki-e/install-action@cargo-careful
-        if: startsWith(matrix.rust, 'nightly')
-      - uses: taiki-e/setup-cross-toolchain-action@v1
-        with:
-          target: ${{ matrix.target }}
-      - run: cargo test --workspace --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${DOCTEST_XCOMPILE:-} ${BUILD_STD:-}
-      - run: cargo test --workspace --features "${TEST_FEATURES}" --release --target "${{ matrix.target }}" ${DOCTEST_XCOMPILE:-} ${BUILD_STD:-}
-      - run: cargo careful test --workspace --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${DOCTEST_XCOMPILE:-} ${BUILD_STD:-}
-        if: startsWith(matrix.rust, 'nightly')
-      - run: cargo hack build --workspace --no-private --feature-powerset --depth 2 --optional-deps=portable-atomic --exclude-features panic-unwind,backtrace,trap-hlt,openocd-semihosting --target "${{ matrix.target }}" ${BUILD_STD:-}
-      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${BUILD_STD:-}
-      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --features "${TEST_FEATURES}" --target "${{ matrix.target }}" ${BUILD_STD:-} --direct
 
   no-std:
     strategy:
