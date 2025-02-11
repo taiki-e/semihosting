@@ -119,17 +119,19 @@ pub(crate) const STDIN_FILENO: RawFd = 0; // /dev/stdin
 pub(crate) const STDOUT_FILENO: RawFd = 1; // /dev/stdout
 pub(crate) const STDERR_FILENO: RawFd = 2; // /dev/stderr
 #[cfg(feature = "stdio")]
-pub(crate) type StdioFd = BorrowedFd<'static>;
+pub(crate) type StdinFd = BorrowedFd<'static>;
 #[cfg(feature = "stdio")]
-pub(crate) fn stdin() -> Result<StdioFd> {
+pub(crate) type StdoutFd = BorrowedFd<'static>;
+#[cfg(feature = "stdio")]
+pub(crate) fn stdin() -> Result<StdinFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDIN_FILENO) })
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stdout() -> Result<StdioFd> {
+pub(crate) fn stdout() -> Result<StdoutFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDOUT_FILENO) })
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stderr() -> Result<StdioFd> {
+pub(crate) fn stderr() -> Result<StdoutFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDERR_FILENO) })
 }
 #[inline]

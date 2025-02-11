@@ -277,17 +277,13 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> Result<OwnedFd> {
 // > If the special path name `:tt` is opened with an `fopen` mode requesting write access (`w`, `wb`, `w+`, or `w+b`), then this is a request to open `stdout`.
 // > If the special path name `:tt` is opened with a mode requesting append access (`a`, `ab`, `a+`, or `a+b`), then this is a request to open `stderr`.
 #[cfg(feature = "stdio")]
-pub(crate) type StdioFd = OwnedFd;
+pub(crate) type StdoutFd = OwnedFd;
 #[cfg(feature = "stdio")]
-pub(crate) fn stdin() -> Result<StdioFd> {
-    sys_open(c!(":tt"), OpenMode::RDONLY_BINARY)
-}
-#[cfg(feature = "stdio")]
-pub(crate) fn stdout() -> Result<StdioFd> {
+pub(crate) fn stdout() -> Result<StdoutFd> {
     sys_open(c!(":tt"), OpenMode::WRONLY_TRUNC_BINARY)
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stderr() -> Result<StdioFd> {
+pub(crate) fn stderr() -> Result<StdoutFd> {
     // if failed, redirect to stdout
     sys_open(c!(":tt"), OpenMode::WRONLY_APPEND_BINARY).or_else(|_| stdout())
 }
@@ -295,6 +291,43 @@ pub(crate) fn stderr() -> Result<StdioFd> {
 pub(crate) fn should_close(_fd: &OwnedFd) -> bool {
     // In Arm semihosting, stdio streams are handled like normal fd.
     true
+}
+#[cfg(feature = "stdio")]
+pub(crate) use stdin_imp::{stdin, StdinFd};
+#[cfg(feature = "stdio")]
+#[cfg(any(target_has_atomic = "32", feature = "portable-atomic"))]
+mod stdin_imp {
+    use super::{sys_open, BorrowedFd, OpenMode, Result};
+    use crate::atomic::{self, Ordering};
+
+    #[cfg(feature = "stdio")]
+    pub(crate) type StdinFd = BorrowedFd<'static>;
+    static STDIN_FD: atomic::AtomicI32 = atomic::AtomicI32::new(-1);
+    pub(crate) fn stdin() -> Result<StdinFd> {
+        let fd = STDIN_FD.load(Ordering::Acquire);
+        if fd != -1 {
+            return unsafe { Ok(BorrowedFd::borrow_raw(fd)) };
+        }
+        let new_fd = sys_open(c!(":tt"), OpenMode::RDONLY_BINARY)?;
+        match STDIN_FD.compare_exchange(
+            -1,
+            new_fd.as_raw_fd(),
+            Ordering::Release,
+            Ordering::Acquire,
+        ) {
+            Ok(_) => unsafe { Ok(BorrowedFd::borrow_raw(new_fd.into_raw_fd())) },
+            Err(fd) => unsafe { Ok(BorrowedFd::borrow_raw(fd)) },
+        }
+    }
+}
+#[cfg(feature = "stdio")]
+#[cfg(not(any(target_has_atomic = "32", feature = "portable-atomic")))]
+mod stdin_imp {
+    use super::{sys_open, OpenMode, OwnedFd, Result};
+    pub(crate) type StdinFd = OwnedFd;
+    pub(crate) fn stdin() -> Result<StdinFd> {
+        sys_open(c!(":tt"), OpenMode::RDONLY_BINARY)
+    }
 }
 
 // TODO: Add read_uninit?

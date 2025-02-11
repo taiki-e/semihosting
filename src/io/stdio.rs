@@ -49,15 +49,30 @@ pub fn stderr() -> io::Result<Stderr> {
 /// A handle to the standard input stream of a process.
 ///
 /// Created by the [`io::stdin`] method.
-pub struct Stdin(sys::StdioFd);
+pub struct Stdin(sys::StdinFd);
 /// A handle to the standard output stream of a process.
 ///
 /// Created by the [`io::stdout`] method.
-pub struct Stdout(sys::StdioFd);
+pub struct Stdout(sys::StdoutFd);
 /// A handle to the standard error stream of a process.
 ///
 /// Created by the [`io::stderr`] method.
-pub struct Stderr(sys::StdioFd);
+pub struct Stderr(sys::StdoutFd);
+
+// The following no-op Drop implementations are needed to hide difference of sys::Stdio type between two backends.
+// sys::arm_compat::Stdio is OwnedFd that implements Drop, but sys::mips::Stdio is BorrowedFd that doesn't implement Drop.
+impl Drop for Stdin {
+    #[inline(always)]
+    fn drop(&mut self) {}
+}
+impl Drop for Stdout {
+    #[inline(always)]
+    fn drop(&mut self) {}
+}
+impl Drop for Stderr {
+    #[inline(always)]
+    fn drop(&mut self) {}
+}
 
 impl_as_fd!(Stdin, Stdout, Stderr);
 impl io::Read for Stdin {

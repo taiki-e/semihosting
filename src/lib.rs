@@ -293,11 +293,17 @@ extern crate self as semihosting;
 #[cfg(test)]
 extern crate std;
 
-#[cfg(feature = "panic-unwind")]
+#[cfg(any(
+    all(feature = "stdio", any(target_has_atomic = "32", feature = "portable-atomic")),
+    feature = "panic-unwind",
+))]
 #[cfg(not(feature = "portable-atomic"))]
 use core::sync::atomic;
 
-#[cfg(feature = "panic-unwind")]
+#[cfg(any(
+    all(feature = "stdio", any(target_has_atomic = "32", feature = "portable-atomic")),
+    feature = "panic-unwind",
+))]
 #[cfg(feature = "portable-atomic")]
 use portable_atomic as atomic;
 
