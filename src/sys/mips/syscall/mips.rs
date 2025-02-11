@@ -4,6 +4,13 @@ use core::arch::asm;
 
 use super::{OperationCode, ParamRegR, ParamRegW, RetReg};
 
+// Semihosting Trap Instruction
+macro_rules! trap {
+    () => {
+        "sdbbp 1"
+    };
+}
+
 /// syscall with 0 arguments
 #[inline]
 pub unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
@@ -11,7 +18,7 @@ pub unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             out("$4") _,
@@ -30,7 +37,7 @@ pub unsafe fn syscall1(op: OperationCode, arg1: ParamRegW<'_>) -> (RetReg, RetRe
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -49,7 +56,7 @@ pub unsafe fn syscall1_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> (RetR
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -72,7 +79,7 @@ pub unsafe fn syscall2(
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -95,7 +102,7 @@ pub unsafe fn syscall2_readonly(
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -119,7 +126,7 @@ pub unsafe fn syscall3(
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -144,7 +151,7 @@ pub unsafe fn syscall3_readonly(
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -170,7 +177,7 @@ pub unsafe fn syscall4(
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -197,7 +204,7 @@ pub unsafe fn syscall4_readonly(
         let r1;
         let r2;
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,

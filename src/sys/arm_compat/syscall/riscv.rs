@@ -4,19 +4,26 @@ use core::arch::asm;
 
 use super::{OperationNumber, ParamRegR, ParamRegW, RetReg};
 
+// Semihosting Trap Instruction Sequence
+macro_rules! trap {
+    () => {
+        ".balign 16
+         .option push
+         .option norvc
+         slli zero, zero, 0x1F
+         ebreak
+         srai zero, zero, 0x7
+         .option pop"
+    };
+}
+
 /// Raw semihosting call with a parameter that will be read + modified by the host
 #[inline]
 pub unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetReg {
     unsafe {
         let r;
         asm!(
-            ".balign 16",
-            ".option push",
-            ".option norvc",
-            "slli zero, zero, 0x1F",
-            "ebreak",
-            "srai zero, zero, 0x7",
-            ".option pop",
+            trap!(),
             inout("a0") number.0 as usize => r, // OPERATION NUMBER REGISTER => RETURN REGISTER
             // Use inout because operation such as SYS_ELAPSED suggest that
             // PARAMETER REGISTER may be changed.
@@ -33,13 +40,7 @@ pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>
     unsafe {
         let r;
         asm!(
-            ".balign 16",
-            ".option push",
-            ".option norvc",
-            "slli zero, zero, 0x1F",
-            "ebreak",
-            "srai zero, zero, 0x7",
-            ".option pop",
+            trap!(),
             inout("a0") number.0 as usize => r, // OPERATION NUMBER REGISTER => RETURN REGISTER
             // Use inout because operation such as SYS_ELAPSED suggest that
             // PARAMETER REGISTER may be changed.
