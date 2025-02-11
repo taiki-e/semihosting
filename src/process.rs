@@ -13,7 +13,7 @@ use crate::sys;
 
 /// This type represents the status code the current process can return
 /// to its parent under normal termination.
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ExitCode(u8);
 
 impl ExitCode {
