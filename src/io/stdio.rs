@@ -49,15 +49,15 @@ pub fn stderr() -> io::Result<Stderr> {
 /// A handle to the standard input stream of a process.
 ///
 /// Created by the [`io::stdin`] method.
-pub struct Stdin(sys::StdioFd);
+pub struct Stdin(sys::StdinFd);
 /// A handle to the standard output stream of a process.
 ///
 /// Created by the [`io::stdout`] method.
-pub struct Stdout(sys::StdioFd);
+pub struct Stdout(sys::StdoutFd);
 /// A handle to the standard error stream of a process.
 ///
 /// Created by the [`io::stderr`] method.
-pub struct Stderr(sys::StdioFd);
+pub struct Stderr(sys::StdoutFd);
 
 impl_as_fd!(Stdin, Stdout, Stderr);
 impl io::Read for Stdin {

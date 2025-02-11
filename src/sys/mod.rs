@@ -68,7 +68,7 @@ mod reg;
 pub(crate) use arch::fs;
 pub(crate) use arch::{close, exit, should_close};
 #[cfg(feature = "stdio")]
-pub(crate) use arch::{is_terminal, stderr, stdin, stdout, StdioFd};
+pub(crate) use arch::{is_terminal, stderr, stdin, stdout, StdinFd, StdoutFd};
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use arch::{read, write};
 pub(crate) use errno::decode_error_kind;

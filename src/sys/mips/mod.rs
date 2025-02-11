@@ -116,23 +116,25 @@ pub(crate) const STDIN_FILENO: RawFd = 0; // /dev/stdin
 pub(crate) const STDOUT_FILENO: RawFd = 1; // /dev/stdout
 pub(crate) const STDERR_FILENO: RawFd = 2; // /dev/stderr
 #[cfg(feature = "stdio")]
-pub(crate) type StdioFd = BorrowedFd<'static>;
+pub(crate) type StdinFd = BorrowedFd<'static>;
 #[cfg(feature = "stdio")]
-pub(crate) fn stdin() -> Result<StdioFd> {
+pub(crate) type StdoutFd = BorrowedFd<'static>;
+#[cfg(feature = "stdio")]
+pub(crate) fn stdin() -> Result<StdinFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDIN_FILENO) })
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stdout() -> Result<StdioFd> {
+pub(crate) fn stdout() -> Result<StdoutFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDOUT_FILENO) })
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stderr() -> Result<StdioFd> {
+pub(crate) fn stderr() -> Result<StdoutFd> {
     Ok(unsafe { BorrowedFd::borrow_raw(STDERR_FILENO) })
 }
 #[inline]
 pub(crate) fn should_close(fd: &OwnedFd) -> bool {
     // In UHI, stdio streams are open by default, and shouldn't closed.
-    fd.as_raw_fd() > STDERR_FILENO
+    !matches!(fd.as_raw_fd(), STDIN_FILENO | STDOUT_FILENO | STDERR_FILENO)
 }
 
 pub unsafe fn mips_close(fd: RawFd) -> Result<()> {

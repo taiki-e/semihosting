@@ -277,29 +277,42 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> Result<OwnedFd> {
 // > If the special path name `:tt` is opened with an `fopen` mode requesting write access (`w`, `wb`, `w+`, or `w+b`), then this is a request to open `stdout`.
 // > If the special path name `:tt` is opened with a mode requesting append access (`a`, `ab`, `a+`, or `a+b`), then this is a request to open `stderr`.
 #[cfg(feature = "stdio")]
-pub(crate) type StdioFd = OwnedFd;
+pub(crate) type StdinFd = BorrowedFd<'static>;
 #[cfg(feature = "stdio")]
-pub(crate) fn stdin() -> Result<StdioFd> {
-    sys_open(c!(":tt"), OpenMode::RDONLY_BINARY)
+pub(crate) type StdoutFd = OwnedFd;
+#[cfg(feature = "stdio")]
+pub(crate) fn stdin() -> Result<StdinFd> {
+    Ok(unsafe { BorrowedFd::borrow_raw(0) })
+    // sys_open(c!(":tt"), OpenMode::RDONLY_BINARY)
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stdout() -> Result<StdioFd> {
+pub(crate) fn stdout() -> Result<StdoutFd> {
     sys_open(c!(":tt"), OpenMode::WRONLY_TRUNC_BINARY)
 }
 #[cfg(feature = "stdio")]
-pub(crate) fn stderr() -> Result<StdioFd> {
+pub(crate) fn stderr() -> Result<StdoutFd> {
     // if failed, redirect to stdout
     sys_open(c!(":tt"), OpenMode::WRONLY_APPEND_BINARY).or_else(|_| stdout())
 }
 #[inline]
-pub(crate) fn should_close(_fd: &OwnedFd) -> bool {
+pub(crate) fn should_close(fd: &OwnedFd) -> bool {
     // In Arm semihosting, stdio streams are handled like normal fd.
-    true
+    fd.as_raw_fd() != 0
 }
 
 // TODO: Add read_uninit?
 /// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-read-0x06)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
+    if fd.as_raw_fd() == 0 {
+        // https://github.com/picolibc/picolibc/blob/1.8.6/semihost/read.c#L47
+        if buf.is_empty() {
+            // TODO
+            return Ok(0);
+        }
+        let b = sys_readc();
+        buf[0] = MaybeUninit::new(b);
+        return Ok(1);
+    }
     let len = buf.len();
     let mut args = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::usize(len)];
     let res = unsafe { syscall(OperationNumber::SYS_READ, ParamRegW::block(&mut args)) };
