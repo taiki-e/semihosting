@@ -5,6 +5,11 @@ use crate::{
     sys::arch::errno,
 };
 
+#[inline]
+pub(crate) fn is_interrupted(errno: i32) -> bool {
+    errno == errno::EINTR
+}
+
 // From https://github.com/rust-lang/rust/blob/1.84.0/library/std/src/sys/pal/unix/mod.rs#L245.
 pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
     #[allow(clippy::enum_glob_use)]

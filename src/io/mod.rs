@@ -7,9 +7,15 @@
 //!
 //! [`std::io`]: https://doc.rust-lang.org/std/io/index.html
 
+// Based on nightly-2025-02-19's std::io module.
+
+// TODO: io utilities e.g., Cursor?
+
 pub use self::error::{Error, ErrorKind, RawOsError, Result};
 #[macro_use]
 mod error;
+
+mod impls;
 
 #[cfg(feature = "stdio")]
 pub use self::stdio::{stderr, stdin, stdout, IsTerminal, Stderr, Stdin, Stdout};
@@ -31,17 +37,16 @@ pub(crate) fn default_read_exact<R: ?Sized + Read>(this: &mut R, mut buf: &mut [
         match this.read(buf) {
             Ok(0) => break,
             Ok(n) => {
-                let tmp = buf;
-                buf = &mut tmp[n..];
+                buf = &mut buf[n..];
             }
-            Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
+            Err(ref e) if e.is_interrupted() => {}
             Err(e) => return Err(e),
         }
     }
     if buf.is_empty() {
         Ok(())
     } else {
-        Err(const_io_error!(ErrorKind::UnexpectedEof, "failed to fill whole buffer"))
+        Err(Error::READ_EXACT_EOF)
     }
 }
 
@@ -124,14 +129,9 @@ pub trait Write {
     fn write_all(&mut self, mut buf: &[u8]) -> Result<()> {
         while !buf.is_empty() {
             match self.write(buf) {
-                Ok(0) => {
-                    return Err(const_io_error!(
-                        ErrorKind::WriteZero,
-                        "failed to write whole buffer",
-                    ));
-                }
+                Ok(0) => return Err(Error::WRITE_ALL_EOF),
                 Ok(n) => buf = &buf[n..],
-                Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
+                Err(ref e) if e.is_interrupted() => {}
                 Err(e) => return Err(e),
             }
         }
@@ -172,10 +172,11 @@ pub trait Write {
                 if output.error.is_err() {
                     output.error
                 } else {
-                    Err(const_io_error!(
-                        ErrorKind::Other, /* Uncategorized */
-                        "formatter error"
-                    ))
+                    // This shouldn't happen: the underlying stream did not error, but somehow
+                    // the formatter still errored?
+                    panic!(
+                        "a formatting trait implementation returned an error when the underlying stream did not"
+                    );
                 }
             }
         }
@@ -204,15 +205,28 @@ pub trait Seek {
         self.seek(SeekFrom::Start(0))?;
         Ok(())
     }
+
+    // /// Returns the current seek position from the start of the stream.
+    // ///
+    // /// This is equivalent to `self.seek(SeekFrom::Current(0))`.
+    // fn stream_position(&mut self) -> Result<u64> {
+    //     self.seek(SeekFrom::Current(0))
+    // }
+
+    // /// Seeks relative to the current position.
+    // ///
+    // /// This is equivalent to `self.seek(SeekFrom::Current(offset))` but
+    // /// doesn't return the new position which can allow some implementations
+    // /// such as [`BufReader`] to perform more efficient seeks.
+    // fn seek_relative(&mut self, offset: i64) -> Result<()> {
+    //     self.seek(SeekFrom::Current(offset))?;
+    //     Ok(())
+    // }
 }
 
 /// Enumeration of possible methods to seek within an I/O object.
 ///
 /// It is used by the [`Seek`] trait.
-///
-/// See [`std::io::SeekFrom` documentation][std] for details.
-///
-/// [std]: https://doc.rust-lang.org/std/io/enum.SeekFrom.html
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum SeekFrom {

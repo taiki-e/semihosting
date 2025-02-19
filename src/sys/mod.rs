@@ -73,5 +73,5 @@ pub(crate) use self::arch::{is_terminal, stderr, stdin, stdout, StdioFd};
 pub(crate) use self::arch::{read, write};
 pub(crate) use self::{
     arch::{close, exit, should_close},
-    errno::decode_error_kind,
+    errno::{decode_error_kind, is_interrupted},
 };

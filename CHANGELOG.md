@@ -12,6 +12,14 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Implement `From<alloc::ffi::NulError>` and `From<alloc::collections::TryReserveError>` for `io::Error` when `alloc` feature is enabled to align `std::io::Error`.
+
+- Implement `io::{Read,Write,Seek}` for `&mut impl io::{Read,Write,Seek}` and `alloc::boxed::Box<impl {Read,Write,Seek}>` (when `alloc` feature is enabled) to align `std::io`.
+
+- Implement `io::Read` for `&[u8]` and `alloc::collections::VecDeque<u8>` (when `alloc` feature is enabled) to align `std::io`.
+
+- Implement `io::Write` for `&mut [u8]`, `alloc::vec::Vec<u8>` (when `alloc` feature is enabled), and `alloc::collections::VecDeque<u8>` (when `alloc` feature is enabled) to align `std::io`.
+
 ## [0.1.18] - 2025-01-06
 
 - Add `io::ErrorKind::CrossesDevices` variant to reflect [upstream stabilization in Rust 1.85](https://github.com/rust-lang/rust/pull/130209). ([0a09ce5](https://github.com/taiki-e/semihosting/commit/0a09ce540784739f972e76fe719a573a744b98eb))

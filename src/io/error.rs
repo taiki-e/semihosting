@@ -11,13 +11,6 @@ use crate::sys;
 /// [std]: https://doc.rust-lang.org/std/io/type.Result.html
 pub type Result<T> = core::result::Result<T, Error>;
 
-/// The type of raw OS error codes returned by [`Error::raw_os_error`].
-///
-/// See [`std::io::RawOsError` documentation][std] for details.
-///
-/// [std]: https://doc.rust-lang.org/nightly/std/io/type.RawOsError.html
-pub type RawOsError = i32;
-
 /// The error type for I/O operations.
 ///
 /// See [`std::io::Error` documentation][std] for details.
@@ -27,33 +20,83 @@ pub struct Error {
     repr: Repr,
 }
 
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.repr, f)
+    }
+}
+
+macro_rules! const_error {
+    ($kind:expr, $message:expr $(,)?) => {
+        $crate::io::Error::from_static_message({
+            const MESSAGE_DATA: $crate::io::error::SimpleMessage =
+                $crate::io::error::SimpleMessage { kind: $kind, message: $message };
+            &MESSAGE_DATA
+        })
+    };
+}
+
+#[allow(dead_code)]
+impl Error {
+    pub(crate) const INVALID_UTF8: Self =
+        const_error!(ErrorKind::InvalidData, "stream did not contain valid UTF-8");
+
+    pub(crate) const READ_EXACT_EOF: Self =
+        const_error!(ErrorKind::UnexpectedEof, "failed to fill whole buffer");
+
+    pub(crate) const UNKNOWN_THREAD_COUNT: Self = const_error!(
+        ErrorKind::NotFound,
+        "The number of hardware threads is not known for the target platform",
+    );
+
+    pub(crate) const UNSUPPORTED_PLATFORM: Self =
+        const_error!(ErrorKind::Unsupported, "operation not supported on this platform");
+
+    pub(crate) const WRITE_ALL_EOF: Self =
+        const_error!(ErrorKind::WriteZero, "failed to write whole buffer");
+
+    pub(crate) const ZERO_TIMEOUT: Self =
+        const_error!(ErrorKind::InvalidInput, "cannot set a 0 duration timeout");
+}
+
+#[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
+impl From<alloc::ffi::NulError> for Error {
+    /// Converts a [`alloc::ffi::NulError`] into a [`Error`].
+    fn from(_: alloc::ffi::NulError) -> Error {
+        const_error!(ErrorKind::InvalidInput, "data provided contains a nul byte")
+    }
+}
+
+#[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
+impl From<alloc::collections::TryReserveError> for Error {
+    /// Converts `TryReserveError` to an error with [`ErrorKind::OutOfMemory`].
+    ///
+    /// `TryReserveError` won't be available as the error `source()`,
+    /// but this may change in the future.
+    fn from(_: alloc::collections::TryReserveError) -> Error {
+        // ErrorData::Custom allocates, which isn't great for handling OOM errors.
+        ErrorKind::OutOfMemory.into()
+    }
+}
+
 enum Repr {
     Os(RawOsError),
     Simple(ErrorKind),
     SimpleMessage(&'static SimpleMessage),
 }
 
+/// The type of raw OS error codes returned by [`Error::raw_os_error`].
+///
+/// See [`std::io::RawOsError` documentation][std] for details.
+///
+/// [std]: https://doc.rust-lang.org/nightly/std/io/type.RawOsError.html
+pub type RawOsError = i32;
+
 pub(crate) struct SimpleMessage {
-    kind: ErrorKind,
-    message: &'static str,
-}
-
-impl SimpleMessage {
-    pub(crate) const fn new(kind: ErrorKind, message: &'static str) -> Self {
-        Self { kind, message }
-    }
-}
-
-/// Create and return an `io::Error` for a given `ErrorKind` and constant
-/// message. This doesn't allocate.
-macro_rules! const_io_error {
-    ($kind:expr, $message:expr $(,)?) => {
-        $crate::io::error::Error::from_static_message({
-            const MESSAGE_DATA: $crate::io::error::SimpleMessage =
-                $crate::io::error::SimpleMessage::new($kind, $message);
-            &MESSAGE_DATA
-        })
-    };
+    pub(crate) kind: ErrorKind,
+    pub(crate) message: &'static str,
 }
 
 /// A list specifying general categories of I/O error.
@@ -129,11 +172,11 @@ impl ErrorKind {
             Deadlock => "deadlock",
             DirectoryNotEmpty => "directory not empty",
             ExecutableFileBusy => "executable file busy",
-            FileTooLarge => "file too large",
             __FilesystemLoop => "filesystem loop or indirection limit (e.g. symlink loop)",
+            FileTooLarge => "file too large",
             HostUnreachable => "host unreachable",
-            Interrupted => "operation interrupted",
             __InProgress => "in progress",
+            Interrupted => "operation interrupted",
             InvalidData => "invalid data",
             __InvalidFilename => "invalid filename",
             InvalidInput => "invalid input parameter",
@@ -189,29 +232,48 @@ impl Error {
     pub(crate) const fn from_static_message(msg: &'static SimpleMessage) -> Error {
         Self { repr: Repr::SimpleMessage(msg) }
     }
+
+    // TODO: provide new,other when alloc feature is enabled?
+
+    // TODO: last_os_error: Arm semihosting has sys_errno, but MIPS UHI doesn't.
+
     /// Creates a new instance of an `Error` from a particular OS error code.
     #[inline]
     #[must_use]
     pub fn from_raw_os_error(os: RawOsError) -> Self {
         Self { repr: Repr::Os(os) }
     }
+
     /// Returns the OS error that this error represents (if any).
     #[inline]
     #[must_use]
     pub fn raw_os_error(&self) -> Option<RawOsError> {
         match self.repr {
             Repr::Os(code) => Some(code),
+            // Repr::Custom(..) |
             Repr::Simple(..) | Repr::SimpleMessage(..) => None,
         }
     }
+
     /// Returns the corresponding [`ErrorKind`] for this error.
     #[inline]
     #[must_use]
     pub fn kind(&self) -> ErrorKind {
         match self.repr {
             Repr::Os(code) => sys::decode_error_kind(code),
+            // Repr::Custom(ref c) => c.kind,
             Repr::Simple(kind) => kind,
             Repr::SimpleMessage(msg) => msg.kind,
+        }
+    }
+
+    #[inline]
+    pub(crate) fn is_interrupted(&self) -> bool {
+        match self.repr {
+            Repr::Os(code) => sys::is_interrupted(code),
+            // Repr::Custom(ref c) => c.kind == ErrorKind::Interrupted,
+            Repr::Simple(kind) => kind == ErrorKind::Interrupted,
+            Repr::SimpleMessage(m) => m.kind == ErrorKind::Interrupted,
         }
     }
 }
@@ -226,6 +288,7 @@ impl fmt::Debug for Repr {
                 // TODO
                 // .field("message", &sys::os::error_string(code))
                 .finish(),
+            // Self::Custom(c) => fmt::Debug::fmt(&c, fmt),
             Self::Simple(kind) => f.debug_tuple("Kind").field(&kind).finish(),
             Self::SimpleMessage(msg) => f
                 .debug_struct("Error")
@@ -233,12 +296,6 @@ impl fmt::Debug for Repr {
                 .field("message", &msg.message)
                 .finish(),
         }
-    }
-}
-
-impl fmt::Debug for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt::Debug::fmt(&self.repr, f)
     }
 }
 
@@ -252,6 +309,7 @@ impl fmt::Display for Error {
                 let detail = sys::decode_error_kind(code);
                 write!(f, "{detail} (os error {code})")
             }
+            // Repr::Custom(ref c) => c.error.fmt(fmt),
             Repr::Simple(kind) => f.write_str(kind.as_str()),
             Repr::SimpleMessage(msg) => msg.message.fmt(f),
         }

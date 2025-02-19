@@ -60,6 +60,7 @@ pub struct Stdout(sys::StdioFd);
 pub struct Stderr(sys::StdioFd);
 
 impl_as_fd!(Stdin, Stdout, Stderr);
+// TODO: std provides io trait implementations on &Std{in,out,err} as they uses locks.
 impl io::Read for Stdin {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         sys::read(self.as_fd(), buf)
