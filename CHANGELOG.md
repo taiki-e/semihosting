@@ -12,6 +12,10 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Change to open stdio handles (`io::Std{in,out,err}`) in "text" mode due to some tools doesn't support opening them in "binary" mode. ([#16](https://github.com/taiki-e/semihosting/issues/16))
+
+  This doesn't change the open behavior on files such as `fs::File`.
+
 - Implement `From<alloc::ffi::NulError>` and `From<alloc::collections::TryReserveError>` for `io::Error` when `alloc` feature is enabled to align `std::io::Error`.
 
 - Implement `io::{Read,Write,Seek}` for `&mut impl io::{Read,Write,Seek}` and `alloc::boxed::Box<impl {Read,Write,Seek}>` (when `alloc` feature is enabled) to align `std::io`.

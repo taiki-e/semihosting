@@ -281,16 +281,16 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> Result<OwnedFd> {
 pub(crate) type StdioFd = OwnedFd;
 #[cfg(feature = "stdio")]
 pub(crate) fn stdin() -> Result<StdioFd> {
-    sys_open(c!(":tt"), OpenMode::RDONLY_BINARY)
+    sys_open(c!(":tt"), OpenMode::RDONLY)
 }
 #[cfg(feature = "stdio")]
 pub(crate) fn stdout() -> Result<StdioFd> {
-    sys_open(c!(":tt"), OpenMode::WRONLY_TRUNC_BINARY)
+    sys_open(c!(":tt"), OpenMode::WRONLY_TRUNC)
 }
 #[cfg(feature = "stdio")]
 pub(crate) fn stderr() -> Result<StdioFd> {
     // if failed, redirect to stdout
-    sys_open(c!(":tt"), OpenMode::WRONLY_APPEND_BINARY).or_else(|_| stdout())
+    sys_open(c!(":tt"), OpenMode::WRONLY_APPEND).or_else(|_| stdout())
 }
 #[inline]
 pub(crate) fn should_close(_fd: &OwnedFd) -> bool {
