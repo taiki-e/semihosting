@@ -2,7 +2,7 @@
   "abi": "abi64",
   "arch": "mips64r6",
   "cpu": "mips64r6",
-  "data-layout": "E-m:e-i8:8:32-i16:16:32-i64:64-n32:64-S128",
+  "data-layout": "E-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128",
   "emit-debug-gdb-scripts": false,
   "features": "+mips64r6,+soft-float,+noabicalls",
   "linker": "rust-lld",
