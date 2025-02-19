@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.19] - 2025-02-19
+
 - Change to open stdio handles (`io::Std{in,out,err}`) in "text" mode due to some tools doesn't support opening them in "binary" mode. ([#16](https://github.com/taiki-e/semihosting/issues/16))
 
   This doesn't change the open behavior on files such as `fs::File`.
@@ -110,7 +112,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.18...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.19...HEAD
+[0.1.19]: https://github.com/taiki-e/semihosting/compare/v0.1.18...v0.1.19
 [0.1.18]: https://github.com/taiki-e/semihosting/compare/v0.1.17...v0.1.18
 [0.1.17]: https://github.com/taiki-e/semihosting/compare/v0.1.16...v0.1.17
 [0.1.16]: https://github.com/taiki-e/semihosting/compare/v0.1.15...v0.1.16
