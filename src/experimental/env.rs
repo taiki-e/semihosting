@@ -32,7 +32,7 @@ impl<const BUF_SIZE: usize> fmt::Debug for Args<BUF_SIZE> {
 }
 
 mod sys {
-    pub(crate) use self::imp::{args_bytes, ArgsBytes};
+    pub(crate) use self::imp::{ArgsBytes, args_bytes};
 
     const NUL: u8 = b'\0';
 
@@ -87,10 +87,10 @@ mod sys {
     mod imp {
         use core::cell::Cell;
 
-        use super::{next_from_cmdline, NUL};
+        use super::{NUL, next_from_cmdline};
         use crate::{
             io,
-            sys::arm_compat::{sys_get_cmdline, CommandLine},
+            sys::arm_compat::{CommandLine, sys_get_cmdline},
         };
 
         pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
@@ -128,7 +128,7 @@ mod sys {
 
         use core::cell::Cell;
 
-        use super::{next_from_cmdline, NUL};
+        use super::{NUL, next_from_cmdline};
         use crate::{
             io,
             sys::mips::{mips_argc, mips_argn, mips_argnlen},

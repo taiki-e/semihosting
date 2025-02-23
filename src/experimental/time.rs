@@ -173,11 +173,7 @@ mod sys {
                     let (res, overflowed) = this.overflowing_add(rhs);
                     (res, overflowed ^ (rhs < 0))
                 };
-                if b {
-                    None
-                } else {
-                    Some(a)
-                }
+                if b { None } else { Some(a) }
             }
 
             let mut secs = checked_add_unsigned(self.tv_sec, other.as_secs())?;
@@ -201,11 +197,7 @@ mod sys {
                     let (res, overflowed) = this.overflowing_sub(rhs);
                     (res, overflowed ^ (rhs < 0))
                 };
-                if b {
-                    None
-                } else {
-                    Some(a)
-                }
+                if b { None } else { Some(a) }
             }
 
             let mut secs = checked_sub_unsigned(self.tv_sec, other.as_secs())?;

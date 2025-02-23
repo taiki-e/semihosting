@@ -19,8 +19,8 @@ use core::{
 };
 
 use self::syscall::{
-    syscall0, syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly,
-    syscall4, syscall4_readonly, OperationCode, ParamRegR, ParamRegW, RetReg,
+    OperationCode, ParamRegR, ParamRegW, RetReg, syscall0, syscall1_readonly, syscall2,
+    syscall2_readonly, syscall3, syscall3_readonly, syscall4, syscall4_readonly,
 };
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
@@ -198,32 +198,20 @@ pub unsafe fn mips_lseek(fd: BorrowedFd<'_>, offset: isize, whence: SeekWhence) 
             ParamRegR::usize(whence as usize),
         )
     };
-    if res.int() == -1 {
-        Err(from_errno(errno))
-    } else {
-        Ok(res.usize())
-    }
+    if res.int() == -1 { Err(from_errno(errno)) } else { Ok(res.usize()) }
 }
 
 pub fn mips_unlink(path: &CStr) -> Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_UNLINK, ParamRegR::c_str(path)) };
-    if res.usize() == 0 {
-        Ok(())
-    } else {
-        Err(from_errno(errno))
-    }
+    if res.usize() == 0 { Ok(()) } else { Err(from_errno(errno)) }
 }
 
 pub fn mips_fstat(fd: BorrowedFd<'_>) -> Result<uhi_stat> {
     let mut buf: uhi_stat = unsafe { mem::zeroed() };
     let (res, errno) =
         unsafe { syscall2(OperationCode::UHI_FSTAT, ParamRegW::fd(fd), ParamRegW::ref_(&mut buf)) };
-    if res.usize() == 0 {
-        Ok(buf)
-    } else {
-        Err(from_errno(errno))
-    }
+    if res.usize() == 0 { Ok(buf) } else { Err(from_errno(errno)) }
 }
 #[cfg(feature = "stdio")]
 pub(crate) fn is_terminal(fd: BorrowedFd<'_>) -> bool {
@@ -240,11 +228,7 @@ pub fn mips_argc() -> usize {
 pub fn mips_argnlen(n: usize) -> Result<usize> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_ARGNLEN, ParamRegR::usize(n)) };
-    if res.int() == -1 {
-        Err(from_errno(errno))
-    } else {
-        Ok(res.usize())
-    }
+    if res.int() == -1 { Err(from_errno(errno)) } else { Ok(res.usize()) }
 }
 
 pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> Result<()> {

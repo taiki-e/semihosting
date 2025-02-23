@@ -24,7 +24,7 @@ fn _panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     {
         use core::{ffi::c_void, ptr};
 
-        use unwinding::abi::{UnwindContext, UnwindReasonCode, _Unwind_Backtrace, _Unwind_GetIP};
+        use unwinding::abi::{_Unwind_Backtrace, _Unwind_GetIP, UnwindContext, UnwindReasonCode};
 
         extern "C" fn callback(
             unwind_ctx: &UnwindContext<'_>,

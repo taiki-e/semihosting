@@ -17,11 +17,11 @@ pub(crate) mod fs;
 pub mod syscall;
 
 use core::{
-    ffi::{c_void, CStr},
+    ffi::{CStr, c_void},
     mem::{self, MaybeUninit},
 };
 
-use self::syscall::{syscall, syscall0, syscall_readonly, OperationNumber, ParamRegR, ParamRegW};
+use self::syscall::{OperationNumber, ParamRegR, ParamRegW, syscall, syscall_readonly, syscall0};
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io::{Error, RawOsError, Result},
@@ -118,11 +118,7 @@ pub struct CommandLine {
 /// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-clock-0x10)
 pub fn sys_clock() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_CLOCK) };
-    if res.int() == -1 {
-        Err(Error::from_raw_os_error(sys_errno()))
-    } else {
-        Ok(res.usize())
-    }
+    if res.int() == -1 { Err(Error::from_raw_os_error(sys_errno())) } else { Ok(res.usize()) }
 }
 
 /// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-close-0x02)
@@ -200,11 +196,7 @@ pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
 pub fn sys_flen(fd: BorrowedFd<'_>) -> Result<usize> {
     let args = [ParamRegR::fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_FLEN, ParamRegR::block(&args)) };
-    if res.int() == -1 {
-        Err(Error::from_raw_os_error(sys_errno()))
-    } else {
-        Ok(res.usize())
-    }
+    if res.int() == -1 { Err(Error::from_raw_os_error(sys_errno())) } else { Ok(res.usize()) }
 }
 
 /// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-get-cmdline-0x15)
@@ -330,11 +322,7 @@ pub fn sys_readc() -> u8 {
 pub fn sys_remove(path: &CStr) -> Result<()> {
     let args = [ParamRegR::c_str(path), ParamRegR::usize(path.to_bytes().len())];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_REMOVE, ParamRegR::block(&args)) };
-    if res.usize() == 0 {
-        Ok(())
-    } else {
-        Err(Error::from_raw_os_error(sys_errno()))
-    }
+    if res.usize() == 0 { Ok(()) } else { Err(Error::from_raw_os_error(sys_errno())) }
 }
 
 /// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-rename-0x0f)
@@ -346,11 +334,7 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> Result<()> {
         ParamRegR::usize(to.to_bytes().len()),
     ];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_RENAME, ParamRegR::block(&args)) };
-    if res.usize() == 0 {
-        Ok(())
-    } else {
-        Err(Error::from_raw_os_error(sys_errno()))
-    }
+    if res.usize() == 0 { Ok(()) } else { Err(Error::from_raw_os_error(sys_errno())) }
 }
 
 // TODO: resolve safety
@@ -359,11 +343,7 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> Result<()> {
 pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> Result<()> {
     let args = [ParamRegR::fd(fd), ParamRegR::usize(abs_pos)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_SEEK, ParamRegR::block(&args)) };
-    if res.usize() == 0 {
-        Ok(())
-    } else {
-        Err(Error::from_raw_os_error(sys_errno()))
-    }
+    if res.usize() == 0 { Ok(()) } else { Err(Error::from_raw_os_error(sys_errno())) }
 }
 
 /// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-system-0x12)
@@ -376,11 +356,7 @@ pub fn sys_system(cmd: &CStr) -> usize {
 /// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-tickfreq-0x31)
 pub fn sys_tickfreq() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TICKFREQ) };
-    if res.int() == -1 {
-        Err(Error::from_raw_os_error(sys_errno()))
-    } else {
-        Ok(res.usize())
-    }
+    if res.int() == -1 { Err(Error::from_raw_os_error(sys_errno())) } else { Ok(res.usize()) }
 }
 
 /// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-time-0x11)

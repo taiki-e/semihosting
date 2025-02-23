@@ -2,7 +2,7 @@
 
 use core::ffi::CStr;
 
-use super::{errno, sys_flen, sys_open, sys_seek, OpenMode};
+use super::{OpenMode, errno, sys_flen, sys_open, sys_seek};
 pub(crate) use super::{sys_remove as unlink, sys_rename as rename};
 use crate::{
     fd::{BorrowedFd, OwnedFd},

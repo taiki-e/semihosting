@@ -330,11 +330,7 @@ impl Write for &mut [u8] {
     // }
     #[inline]
     fn write_all(&mut self, data: &[u8]) -> io::Result<()> {
-        if self.write(data)? == data.len() {
-            Ok(())
-        } else {
-            Err(io::Error::WRITE_ALL_EOF)
-        }
+        if self.write(data)? == data.len() { Ok(()) } else { Err(io::Error::WRITE_ALL_EOF) }
     }
     #[inline]
     fn flush(&mut self) -> io::Result<()> {

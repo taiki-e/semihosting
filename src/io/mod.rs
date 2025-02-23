@@ -18,7 +18,7 @@ mod error;
 mod impls;
 
 #[cfg(feature = "stdio")]
-pub use self::stdio::{stderr, stdin, stdout, IsTerminal, Stderr, Stdin, Stdout};
+pub use self::stdio::{IsTerminal, Stderr, Stdin, Stdout, stderr, stdin, stdout};
 #[cfg(feature = "stdio")]
 #[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 mod stdio;
@@ -43,11 +43,7 @@ pub(crate) fn default_read_exact<R: ?Sized + Read>(this: &mut R, mut buf: &mut [
             Err(e) => return Err(e),
         }
     }
-    if buf.is_empty() {
-        Ok(())
-    } else {
-        Err(Error::READ_EXACT_EOF)
-    }
+    if buf.is_empty() { Ok(()) } else { Err(Error::READ_EXACT_EOF) }
 }
 
 /// The `no_std` subset of `std::io::Read`.

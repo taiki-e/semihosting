@@ -3,8 +3,8 @@
 use core::ffi::CStr;
 
 use super::{
-    errno, mips_fstat, mips_lseek, mips_open, SeekWhence::SEEK_SET, O_APPEND, O_CREAT, O_EXCL,
-    O_RDONLY, O_RDWR, O_TRUNC, O_WRONLY,
+    O_APPEND, O_CREAT, O_EXCL, O_RDONLY, O_RDWR, O_TRUNC, O_WRONLY, SeekWhence::SEEK_SET, errno,
+    mips_fstat, mips_lseek, mips_open,
 };
 pub(crate) use super::{mips_fstat as metadata, mips_unlink as unlink, uhi_stat as Metadata};
 use crate::{

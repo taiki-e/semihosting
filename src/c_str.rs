@@ -14,7 +14,8 @@
 /// use semihosting::{c, fs};
 ///
 /// fs::write(c!("a.txt"), "abc")?;
-/// fs::write(c!(concat!("b", ".txt")), "def")?; // concat! in c! is also supported
+/// // concat! in c! is also supported
+/// fs::write(c!(concat!("b", ".txt")), "def")?;
 /// # Ok::<(), semihosting::io::Error>(())
 /// ```
 ///

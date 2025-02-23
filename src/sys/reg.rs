@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use core::{
-    ffi::{c_int, c_void, CStr},
+    ffi::{CStr, c_int, c_void},
     marker::PhantomData,
 };
 

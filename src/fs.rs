@@ -11,8 +11,10 @@
 //! ```no_run
 //! use semihosting::{c, fs};
 //!
-//! fs::write(c"a.txt", "abc")?; // with C string literal
-//! fs::write(c!("b.txt"), "123")?; // with c! macro
+//! // with C string literal
+//! fs::write(c"a.txt", "abc")?;
+//! // with c! macro
+//! fs::write(c!("b.txt"), "123")?;
 //! # Ok::<(), semihosting::io::Error>(())
 //! ```
 //!

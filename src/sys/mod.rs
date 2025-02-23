@@ -68,7 +68,7 @@ mod reg;
 #[cfg(feature = "fs")]
 pub(crate) use self::arch::fs;
 #[cfg(feature = "stdio")]
-pub(crate) use self::arch::{is_terminal, stderr, stdin, stdout, StdioFd};
+pub(crate) use self::arch::{StdioFd, is_terminal, stderr, stdin, stdout};
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::arch::{read, write};
 pub(crate) use self::{
