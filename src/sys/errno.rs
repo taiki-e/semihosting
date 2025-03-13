@@ -48,7 +48,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
         errno::ENOSPC => StorageFull,
         // errno::ENOSYS => Unsupported,
         errno::EMLINK => TooManyLinks,
-        // errno::ENAMETOOLONG => InvalidFilename, // unstable
+        // errno::ENAMETOOLONG => InvalidFilename,
         // errno::ENETDOWN => NetworkDown,
         // errno::ENETUNREACH => NetworkUnreachable,
         #[cfg(any(

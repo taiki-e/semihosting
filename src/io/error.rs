@@ -142,8 +142,7 @@ pub enum ErrorKind {
     Deadlock,
     CrossesDevices,
     TooManyLinks,
-    #[doc(hidden)]
-    __InvalidFilename, // unstable https://github.com/rust-lang/rust/issues/130192 / https://github.com/rust-lang/rust/pull/134076
+    InvalidFilename,
     ArgumentListTooLong,
     Interrupted,
     Unsupported,
@@ -178,7 +177,7 @@ impl ErrorKind {
             __InProgress => "in progress",
             Interrupted => "operation interrupted",
             InvalidData => "invalid data",
-            __InvalidFilename => "invalid filename",
+            InvalidFilename => "invalid filename",
             InvalidInput => "invalid input parameter",
             IsADirectory => "is a directory",
             NetworkDown => "network down",
