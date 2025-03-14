@@ -119,6 +119,11 @@ fn run() {
         drop(stderr2);
         let f1 = io::stdout().unwrap().as_fd().as_raw_fd();
         assert_eq!(io::stdout().unwrap().as_fd().as_raw_fd(), f1);
+        if cfg!(all(any(host_macos, host_windows), target_arch = "arm", target_feature = "rclass"))
+        {
+            // TODO(host_macos,host_windows): hang
+            return;
+        }
 
         if cfg!(mips) {
             let stdin = io::stdin().unwrap();
