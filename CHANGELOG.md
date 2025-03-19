@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `io::ErrorKind::InvalidFilename` variant to reflect [upstream stabilization in Rust 1.87](https://github.com/rust-lang/rust/pull/134076). ([b6f25e3](https://github.com/taiki-e/semihosting/commit/b6f25e33031c6aa9c4198cf78157170f4030c7a6))
+
 ## [0.1.19] - 2025-02-19
 
 - Change to open stdio handles (`io::Std{in,out,err}`) in "text" mode due to some tools doesn't support opening them in "binary" mode. ([#16](https://github.com/taiki-e/semihosting/issues/16))
