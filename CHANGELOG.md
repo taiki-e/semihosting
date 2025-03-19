@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.20] - 2025-03-19
+
 - Add `io::ErrorKind::InvalidFilename` variant to reflect [upstream stabilization in Rust 1.87](https://github.com/rust-lang/rust/pull/134076). ([b6f25e3](https://github.com/taiki-e/semihosting/commit/b6f25e33031c6aa9c4198cf78157170f4030c7a6))
 
 ## [0.1.19] - 2025-02-19
@@ -114,7 +116,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.19...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.20...HEAD
+[0.1.20]: https://github.com/taiki-e/semihosting/compare/v0.1.19...v0.1.20
 [0.1.19]: https://github.com/taiki-e/semihosting/compare/v0.1.18...v0.1.19
 [0.1.18]: https://github.com/taiki-e/semihosting/compare/v0.1.17...v0.1.18
 [0.1.17]: https://github.com/taiki-e/semihosting/compare/v0.1.16...v0.1.17
