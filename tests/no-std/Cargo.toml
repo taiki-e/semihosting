@@ -18,7 +18,7 @@ semihosting-no-std-test-rt = { path = "../no-std-rt" }
 # with targets without atomic CAS. Implement our own LockedHeap by using spin,
 # which supports portable-atomic.
 linked_list_allocator = { version = "0.10", optional = true, default-features = false }
-spin = { version = "0.9", optional = true, default-features = false, features = ["spin_mutex"] }
+spin = { version = "0.10", optional = true, default-features = false, features = ["spin_mutex"] }
 
 [workspace]
 resolver = "2"
