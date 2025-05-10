@@ -7,6 +7,7 @@
   "features": "+mips64r6,+soft-float,+noabicalls",
   "linker": "rust-lld",
   "linker-flavor": "ld.lld",
+  "llvm-abiname": "n64",
   "llvm-target": "mipsisa64r6el-unknown-none",
   "max-atomic-width": 64,
   "panic-strategy": "abort",
