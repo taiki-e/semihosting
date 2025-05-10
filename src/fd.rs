@@ -36,7 +36,7 @@ static_assert!(core::mem::size_of::<RawFd>() == core::mem::size_of::<u16>());
 /// descriptor, so it can be used in FFI in places where a file descriptor is
 /// passed as an argument, it is not captured or consumed, and it never has the
 /// value `-1`.
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct BorrowedFd<'fd> {
     fd: RawFd,

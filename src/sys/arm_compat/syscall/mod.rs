@@ -18,7 +18,7 @@ pub use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};
 /// - `0x32-0xFF` Reserved for future use by Arm.
 /// - `0x100-0x1FF` Reserved for user applications.
 /// - `0x200-0xFFFFFFFF` Undefined and currently unused.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct OperationNumber(u32);
 impl OperationNumber {
     /// [SYS_OPEN (0x01)](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#sys-open-0x01)

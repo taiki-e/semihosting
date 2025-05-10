@@ -6,7 +6,7 @@ use core::{fmt, ops, time::Duration};
 
 use self::sys as time;
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SystemTime(time::SystemTime);
 
 #[derive(Clone, Debug)]
@@ -97,16 +97,16 @@ mod sys {
     const NSEC_PER_SEC: u64 = 1_000_000_000;
     pub(crate) const UNIX_EPOCH: SystemTime = SystemTime { t: Timespec::zero() };
 
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[repr(transparent)]
     struct Nanoseconds(u32);
 
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub(crate) struct SystemTime {
         t: Timespec,
     }
 
-    #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     struct Timespec {
         tv_sec: i64,
         tv_nsec: Nanoseconds,
