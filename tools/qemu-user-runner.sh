@@ -90,7 +90,7 @@ case "${target}" in
     # exit-only passed:
     # - sa1110, sa1100 (StrongARM)
     # not worked: N/A
-    # https://github.com/qemu/qemu/blob/v9.2.0/target/arm/tcg/cpu32.c#L778
+    # https://github.com/qemu/qemu/blob/v10.1.0/target/arm/tcg/cpu32.c#L783
     qemu_user arm -cpu ti925t
     ;;
   # Armv5TE

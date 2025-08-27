@@ -7,7 +7,7 @@
 
 Semihosting for AArch64, Arm, RISC-V, MIPS32, MIPS64, and Xtensa.
 
-This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst) for more information on semihosting.
+This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) for more information on semihosting.
 
 APIs are categorized into the following four types:
 
@@ -36,9 +36,9 @@ The following target architectures are supported:
 
 | target_arch | Specification | `semihosting::sys` module | Note |
 | ----------- | ------------- | ------------------------- | ---- |
-| aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst) | `sys::arm_compat` | |
-| arm | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst) | `sys::arm_compat` | use `SVC` on A+R profile by default based on Arm's recommendation but it can be changed by [`trap-hlt` feature](#optional-features-trap-hlt). |
-| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/1.0-rc2/riscv-semihosting.adoc) | `sys::arm_compat` | |
+| aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) | `sys::arm_compat` | |
+| arm | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) | `sys::arm_compat` | use `SVC` on A+R profile by default based on Arm's recommendation but it can be changed by [`trap-hlt` feature](#optional-features-trap-hlt). |
+| riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/1.0/riscv-semihosting.adoc) | `sys::arm_compat` | |
 | xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
 | mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` | |
 
@@ -101,7 +101,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 - <a name="optional-features-trap-hlt"></a>**`trap-hlt`**<br>
   Arm-specific: Use HLT instruction on A+R profile.
 
-  [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2024Q3/semihosting/semihosting.rst#the-semihosting-interface) says:
+  [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#the-semihosting-interface) says:
 
   > The `HLT` encodings are new in version 2.0 of the semihosting specification.
   > Where possible, have semihosting callers continue to use the previously existing
