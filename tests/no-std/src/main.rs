@@ -58,7 +58,7 @@ fn run() {
         return;
     }
 
-    let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips) && !cfg!(host_linux);
+    let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips) && !cfg!(host_os = "linux");
     // TODO: return result?
     #[cfg(not(mips))]
     let now = experimental::time::SystemTime::now();
@@ -119,9 +119,8 @@ fn run() {
         drop(stderr2);
         let f1 = io::stdout().unwrap().as_fd().as_raw_fd();
         assert_eq!(io::stdout().unwrap().as_fd().as_raw_fd(), f1);
-        if cfg!(all(any(host_macos, host_windows), target_arch = "arm", target_feature = "rclass"))
-        {
-            // TODO(host_macos,host_windows): hang
+        if cfg!(all(not(host_os = "linux"), target_arch = "arm", target_feature = "rclass")) {
+            // TODO(macos,windows): hang
             return;
         }
 
