@@ -20,5 +20,6 @@ jobs:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       target: aarch64-unknown-linux-gnu
     permissions:
-      contents: write
+      contents: write # for taiki-e/create-gh-release-action
+      id-token: write # for rust-lang/crates-io-auth-action
     secrets: inherit
