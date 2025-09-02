@@ -13,5 +13,5 @@
   "panic-strategy": "abort",
   "relocation-model": "static",
   "target-endian": "big",
-  "target-pointer-width": "64"
+  "target-pointer-width": 64
 }
