@@ -73,9 +73,3 @@ macro_rules! dbg {
         ($($crate::dbg!($val)),+,)
     };
 }
-
-macro_rules! static_assert {
-    ($($tt:tt)*) => {
-        const _: () = assert!($($tt)*);
-    };
-}

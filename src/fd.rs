@@ -22,10 +22,12 @@ use crate::sys;
 pub type RawFd = ffi::c_int;
 
 // 16-bit targets has 16-bit c_int.
-#[cfg(not(target_pointer_width = "16"))]
-static_assert!(core::mem::size_of::<RawFd>() == core::mem::size_of::<u32>());
-#[cfg(target_pointer_width = "16")]
-static_assert!(core::mem::size_of::<RawFd>() == core::mem::size_of::<u16>());
+const _: () = {
+    #[cfg(not(target_pointer_width = "16"))]
+    assert!(core::mem::size_of::<RawFd>() == core::mem::size_of::<u32>());
+    #[cfg(target_pointer_width = "16")]
+    assert!(core::mem::size_of::<RawFd>() == core::mem::size_of::<u16>());
+};
 
 /// A borrowed file descriptor.
 ///
