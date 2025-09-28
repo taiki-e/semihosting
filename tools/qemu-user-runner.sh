@@ -50,7 +50,7 @@ case "${target}" in
     qemu_user arm -cpu cortex-m4
     ;;
   thumbv8m.base-*)
-    # TODO: As of QEMU 9.2, QEMU doesn't support -cpu cortex-m23
+    # TODO: As of QEMU 10.1, QEMU doesn't support -cpu cortex-m23
     qemu_user arm -cpu cortex-m33
     ;;
   thumbv8m.main-*)

@@ -14,6 +14,7 @@ default_targets=(
   # aarch64
   aarch64-unknown-none
   aarch64-unknown-none-softfloat
+  # aarch64_be-unknown-none-softfloat # TODO: QEMU exit with 1
 
   # arm
   # v4T
