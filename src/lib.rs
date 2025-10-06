@@ -254,6 +254,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 )]
 // docs.rs only (cfg is enabled by docs.rs, not build script)
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(docsrs, doc(auto_cfg = false))]
 
 // 64-bit architecture's 32-bit ABI (e.g., AArch64 ILP32 ABI) are also
 // unsupported yet (is there a semihosting interface defined for those ABIs?).
