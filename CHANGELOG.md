@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.21] - 2025-11-30
+
 - Fix build error on pre-1.80 Rust when `alloc` feature is enabled. ([adad165](https://github.com/taiki-e/semihosting/commit/adad165ae45d048c24bc984be80e236717b22815))
 
 ## [0.1.20] - 2025-03-19
@@ -118,7 +120,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.20...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.21...HEAD
+[0.1.21]: https://github.com/taiki-e/semihosting/compare/v0.1.20...v0.1.21
 [0.1.20]: https://github.com/taiki-e/semihosting/compare/v0.1.19...v0.1.20
 [0.1.19]: https://github.com/taiki-e/semihosting/compare/v0.1.18...v0.1.19
 [0.1.18]: https://github.com/taiki-e/semihosting/compare/v0.1.17...v0.1.18
