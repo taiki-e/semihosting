@@ -25,4 +25,6 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/publish-rust.yml@main
     with:
       version: ${{ inputs.version }}
+      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
+      target: aarch64-unknown-linux-gnu
     secrets: inherit
