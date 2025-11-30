@@ -12,7 +12,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
-- Fix build error on pre-1.80 Rust when `alloc` feature is enabled.
+- Fix build error on pre-1.80 Rust when `alloc` feature is enabled. ([adad165](https://github.com/taiki-e/semihosting/commit/adad165ae45d048c24bc984be80e236717b22815))
 
 ## [0.1.20] - 2025-03-19
 
