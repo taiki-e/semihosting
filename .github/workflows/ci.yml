@@ -171,6 +171,13 @@ jobs:
           printf '%s\n' 'C:\msys64\ucrt64\bin' >>"${GITHUB_PATH}"
           C:/msys64/ucrt64/bin/qemu-system-arm --version
         if: startsWith(matrix.os, 'windows')
+      # syn 2.0.107 & quote 1.0.42 requires Rust 1.68.
+      - run: |
+          cargo generate-lockfile
+          cargo update -p syn --precise 2.0.106
+          cargo update -p quote --precise 1.0.41
+        working-directory: tests/no-std
+        if: matrix.rust == '1.64'
       - run: tools/no-std.sh
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
