@@ -49,22 +49,22 @@ The host must be running an emulator or a debugger attached to the target.
 
 The following targets have been tested on CI. (qemu-system has been tested on Linux, macOS, and Windows hosts, and qemu-user on Linux host.)
 
-| target                              | exit | all-apis \[1] (system) | all-apis \[1] (user-mode) | panic-unwind (system \[2]) | note |
-| ----------------------------------- | ---- | ---------------------- | ------------------------- | -------------------------- | ---- |
-| `aarch64-unknown-none{,-softfloat}` | ✓    | ✓                      | ✓                         | ✓                          |      |
-| `{arm,thumb}v4t-none-eabi`          | ✓    |                        | ✓                         |                            |      |
-| `{arm,thumb}v5te-none-eabi`         | ✓    | ✓                      | ✓                         |                            |      |
-| `armv7a-none-eabi{,hf}`             | ✓    | ✓                      | ✓                         |                            |      |
-| `armv7r-none-eabi{,hf}`             | ✓    | ✓                      | ✓                         |                            |      |
-| `armebv7r-none-eabi{,hf}`           | ✓    |                        | ✓                         |                            |      |
-| `armv8r-none-eabihf`                | ✓    | ✓                      | ✓                         |                            |      |
-| `thumbv6m-none-eabi`                | ✓    | ✓                      | N/A                       |                            |      |
-| `thumbv7m-none-eabi`                | ✓    | ✓                      | N/A                       |                            |      |
-| `thumbv7em-none-eabi{,hf}`          | ✓    | ✓                      | N/A                       |                            |      |
-| `thumbv8m.base-none-eabi`           | ✓    | ✓                      | N/A                       |                            |      |
-| `thumbv8m.main-none-eabi{,hf}`      | ✓    | ✓                      | N/A                       |                            |      |
-| `riscv32*-unknown-none-elf`         | ✓    | ✓                      | ✓                         | ✓                          |      |
-| `riscv64*-unknown-none-elf`         | ✓    | ✓                      | ✓                         | ✓                          |      |
+| target                              | exit | all-apis \[1] (system) | all-apis \[1] (user-mode) | panic-unwind (system \[2]) | note      |
+| ----------------------------------- | ---- | ---------------------- | ------------------------- | -------------------------- | --------- |
+| `aarch64-unknown-none{,-softfloat}` | ✓    | ✓                      | ✓                         | ✓                          |           |
+| `{arm,thumb}v4t-none-eabi`          | ✓    |                        | ✓                         |                            |           |
+| `{arm,thumb}v5te-none-eabi`         | ✓    | ✓                      | ✓                         |                            |           |
+| `armv7a-none-eabi{,hf}`             | ✓    | ✓                      | ✓                         |                            |           |
+| `armv7r-none-eabi{,hf}`             | ✓    | ✓                      | ✓                         |                            |           |
+| `armebv7r-none-eabi{,hf}`           | ✓    |                        | ✓                         |                            |           |
+| `armv8r-none-eabihf`                | ✓    | ✓                      | ✓                         |                            |           |
+| `thumbv6m-none-eabi`                | ✓    | ✓                      | N/A                       |                            |           |
+| `thumbv7m-none-eabi`                | ✓    | ✓                      | N/A                       |                            |           |
+| `thumbv7em-none-eabi{,hf}`          | ✓    | ✓                      | N/A                       |                            |           |
+| `thumbv8m.base-none-eabi`           | ✓    | ✓                      | N/A                       |                            |           |
+| `thumbv8m.main-none-eabi{,hf}`      | ✓    | ✓                      | N/A                       |                            |           |
+| `riscv32*-unknown-none-elf`         | ✓    | ✓                      | ✓                         | ✓                          |           |
+| `riscv64*-unknown-none-elf`         | ✓    | ✓                      | ✓                         | ✓                          |           |
 | `mips{,el}-unknown-none`            | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
 | `mips64{,el}-unknown-none`          | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
 | `mipsisa32r6{,el}-unknown-none`     | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
