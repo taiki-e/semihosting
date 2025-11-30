@@ -391,9 +391,9 @@ impl Read for alloc::collections::VecDeque<u8> {
 
         // Use only the front buffer if it is big enough to fill `buf`, else use
         // the back buffer too.
-        match buf.split_at_mut_checked(front.len()) {
+        match split_at_mut_checked(buf, front.len()) {
             None => buf.copy_from_slice(&front[..buf.len()]),
-            Some((buf_front, buf_back)) => match back.split_at_checked(buf_back.len()) {
+            Some((buf_front, buf_back)) => match split_at_checked(back, buf_back.len()) {
                 Some((back, _)) => {
                     buf_front.copy_from_slice(front);
                     buf_back.copy_from_slice(back);
@@ -455,6 +455,20 @@ impl Read for alloc::collections::VecDeque<u8> {
     //     // SAFETY: We only append to the buffer
     //     unsafe { io::append_to_string(buf, |buf| self.read_to_end(buf)) }
     // }
+}
+// <[_]>::split_at_checked requires Rust 1.80.
+#[cfg(feature = "alloc")]
+#[inline]
+#[must_use]
+fn split_at_checked<T>(this: &[T], mid: usize) -> Option<(&[T], &[T])> {
+    if mid <= this.len() { Some(this.split_at(mid)) } else { None }
+}
+// <[_]>::split_at_mut_checked requires Rust 1.80.
+#[cfg(feature = "alloc")]
+#[inline]
+#[must_use]
+fn split_at_mut_checked<T>(this: &mut [T], mid: usize) -> Option<(&mut [T], &mut [T])> {
+    if mid <= this.len() { Some(this.split_at_mut(mid)) } else { None }
 }
 
 /// Write is implemented for `VecDeque<u8>` by appending to the `VecDeque`, growing it as needed.
