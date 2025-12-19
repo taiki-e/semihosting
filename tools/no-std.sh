@@ -22,7 +22,7 @@ default_targets=(
   thumbv4t-none-eabi
   # v5TE
   armv5te-none-eabi
-  thumbv5te-none-eabi
+  # thumbv5te-none-eabi # TODO: hang since nightly-2025-12-03
   # v7-A
   armv7a-none-eabi
   armv7a-none-eabihf
