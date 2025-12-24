@@ -68,7 +68,7 @@ pub unsafe fn init_start() {
     unsafe {
         core::arch::asm!("la sp, _stack");
     }
-    #[cfg(all(armv5te, feature = "qemu-system"))]
+    #[cfg(all(any(armv5te, armv6), feature = "qemu-system"))]
     unsafe {
         #[instruction_set(arm::a32)]
         #[inline]

@@ -97,6 +97,10 @@ case "${target}" in
   armv5te* | thumbv5te*)
     qemu_user arm -cpu arm926
     ;;
+  # Armv6
+  armv6* | thumbv6*)
+    qemu_user arm -cpu arm1176
+    ;;
   # RISC-V
   riscv32*)
     qemu_user riscv32

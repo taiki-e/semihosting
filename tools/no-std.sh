@@ -23,6 +23,8 @@ default_targets=(
   # v5TE
   armv5te-none-eabi
   # thumbv5te-none-eabi # TODO: hang since nightly-2025-12-03
+  armv6-none-eabi
+  # thumb6-none-eabi # TODO: hang
   # v7-A
   armv7a-none-eabi
   armv7a-none-eabihf
@@ -57,7 +59,7 @@ default_targets=(
   riscv32em-unknown-none-elf
   riscv32emc-unknown-none-elf
   # riscv64
-  riscv64i-unknown-none-elf # custom target
+  riscv64im-unknown-none-elf
   riscv64imac-unknown-none-elf
   riscv64gc-unknown-none-elf
 
@@ -153,6 +155,9 @@ run() {
   local args=(${pre_args[@]+"${pre_args[@]}"})
   local target_rustflags="${RUSTFLAGS:-}"
   if ! grep -Eq "^${target}$" <<<"${rustc_target_list}" || [[ -f "target-specs/${target}.json" ]]; then
+    if [[ "${target}" == "riscv64im-unknown-none-elf" ]]; then
+      target=riscv64i-unknown-none-elf # custom target
+    fi
     if [[ ! -f "target-specs/${target}.json" ]]; then
       info "target '${target}' not available on ${rustc_version} (skipped)"
       return 0

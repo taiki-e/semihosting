@@ -112,6 +112,10 @@ case "${target}" in
   armv5te* | thumbv5te*)
     qemu_system arm -M versatilepb -cpu arm926
     ;;
+  # Armv6
+  armv6* | thumbv6*)
+    qemu_system arm -M versatilepb -cpu arm1176
+    ;;
   # RISC-V
   riscv32*)
     qemu_system riscv32 -M virt

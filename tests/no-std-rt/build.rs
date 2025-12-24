@@ -8,7 +8,7 @@ use std::{
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=raspi");
-    println!("cargo:rustc-check-cfg=cfg(mclass,armv5te,armv4t)");
+    println!("cargo:rustc-check-cfg=cfg(mclass,armv6,armv5te,armv4t)");
 
     let target = &*env::var("TARGET").expect("TARGET not set");
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
@@ -38,6 +38,7 @@ fn main() {
                     println!("cargo:rustc-cfg=mclass");
                     fs::write(out_dir.join("memory.x"), include_bytes!("memory.x")).unwrap();
                 }
+                "v6" => println!("cargo:rustc-cfg=armv6"),
                 "v5te" => println!("cargo:rustc-cfg=armv5te"),
                 "v4t" => println!("cargo:rustc-cfg=armv4t"),
                 _ => {}
