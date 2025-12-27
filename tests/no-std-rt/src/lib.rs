@@ -30,8 +30,21 @@ macro_rules! entry {
         }
     };
 }
-#[cfg(feature = "qemu-system")]
-#[cfg(any(target_arch = "aarch64"))]
+#[cfg(all(use_aarch32_rt, feature = "qemu-system"))]
+#[doc(hidden)]
+pub use aarch32_rt::{entry as aarch32_rt_entry, *};
+#[cfg(all(use_aarch32_rt, feature = "qemu-system"))]
+#[macro_export]
+macro_rules! entry {
+    ($entry_fn:ident) => {
+        extern crate semihosting_no_std_test_rt as aarch32_rt;
+        #[::semihosting_no_std_test_rt::aarch32_rt_entry]
+        fn main() -> ! {
+            ::semihosting::process::Termination::report($entry_fn()).exit_process()
+        }
+    };
+}
+#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
@@ -44,8 +57,9 @@ macro_rules! entry {
         }
     };
 }
-#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[cfg(not(mclass))]
+#[cfg(not(all(use_aarch32_rt, feature = "qemu-system")))]
+#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
@@ -59,8 +73,9 @@ macro_rules! entry {
         }
     };
 }
-#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[cfg(not(mclass))]
+#[cfg(not(all(use_aarch32_rt, feature = "qemu-system")))]
+#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
 #[doc(hidden)]
 #[inline(always)]
 pub unsafe fn init_start() {

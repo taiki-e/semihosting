@@ -22,9 +22,9 @@ default_targets=(
   thumbv4t-none-eabi
   # v5TE
   armv5te-none-eabi
-  # thumbv5te-none-eabi # TODO: hang since nightly-2025-12-03
+  thumbv5te-none-eabi
   armv6-none-eabi
-  # thumb6-none-eabi # TODO: hang
+  thumb6-none-eabi
   # v7-A
   armv7a-none-eabi
   armv7a-none-eabihf
@@ -197,6 +197,14 @@ run() {
         # pre-17 LLD doesn't support big-endian Arm
         target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
       fi
+      ;;
+    thumbv5* | thumbv6-*)
+      case "${runner}" in
+        qemu-system)
+          linker=link.x
+          target_rustflags+=" -C link-arg=-T${linker}"
+          ;;
+      esac
       ;;
     thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*)
       case "${runner}" in
