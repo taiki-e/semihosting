@@ -14,7 +14,6 @@ FLEN
 fstat
 heapinfo
 IFCHR
-integratorcp
 Ireason
 IRGRP
 IROTH
@@ -32,7 +31,6 @@ IXGRP
 IXOTH
 IXUSR
 lseek
-musicpal
 nlink
 norvc
 nsec
@@ -48,7 +46,6 @@ rdev
 RDONLY
 RDWR
 readc
-realview
 rustfilt
 sdbbp
 Seekable
