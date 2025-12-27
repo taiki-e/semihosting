@@ -45,16 +45,11 @@ fn run() {
         experimental::panic::catch_unwind(|| b()).unwrap_err();
     }
 
-    // TODO
-    if cfg!(armv4t) && cfg!(feature = "qemu-system")
-        || cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system")
-    {
-        if cfg!(armv4t) {
-        } else {
-            println!("this message does not print...");
-            io::stdout().unwrap_err();
-            io::stderr().unwrap_err();
-        }
+    // TODO: https://github.com/taiki-e/semihosting/issues/18
+    if cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system") {
+        println!("this message does not print...");
+        io::stdout().unwrap_err();
+        io::stderr().unwrap_err();
         return;
     }
 
@@ -119,7 +114,7 @@ fn run() {
         drop(stderr2);
         let f1 = io::stdout().unwrap().as_fd().as_raw_fd();
         assert_eq!(io::stdout().unwrap().as_fd().as_raw_fd(), f1);
-        if cfg!(all(not(host_os = "linux"), target_arch = "arm", rclass)) {
+        if cfg!(all(not(host_os = "linux"), rclass)) {
             // TODO(macos,windows): hang
             return;
         }
@@ -264,7 +259,7 @@ fn run() {
     {
         // sys_*
         println!("sys_clock: {}", sys_clock().unwrap());
-        if cfg!(not(all(target_arch = "arm", rclass))) {
+        if cfg!(not(rclass)) {
             println!("sys_elapsed: {}", sys_elapsed().unwrap());
         }
         // TODO: sys_heapinfo
@@ -277,7 +272,7 @@ fn run() {
         assert_eq!(sys_iserror(isize::MIN), true);
         // println!("{}", sys_readc() as char); // only works on qemu-user
         println!("sys_system: {}", sys_system(c!("pwd")));
-        if cfg!(not(all(target_arch = "arm", rclass))) {
+        if cfg!(not(rclass)) {
             println!("sys_tickfreq: {}", sys_tickfreq().unwrap());
             println!("sys_time: {}", sys_time().unwrap());
         }

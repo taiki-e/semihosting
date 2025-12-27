@@ -25,6 +25,16 @@ cortex-m-rt = "0.7"
 cortex-m-rt = "0.7"
 
 # TODO: consider using aarch32-rt on other aarch32 targets
+[target.'armv4t-none-eabi'.dependencies]
+aarch32-rt = { optional = true, git = "https://github.com/rust-embedded/aarch32.git", rev = "885d39a" }
+[target.'armv5te-none-eabi'.dependencies]
+aarch32-rt = { optional = true, git = "https://github.com/rust-embedded/aarch32.git", rev = "885d39a" }
+[target.'armv6-none-eabi'.dependencies]
+aarch32-rt = { optional = true, git = "https://github.com/rust-embedded/aarch32.git", rev = "885d39a" }
+[target.'armv6-none-eabihf'.dependencies]
+aarch32-rt = { optional = true, git = "https://github.com/rust-embedded/aarch32.git", rev = "885d39a" }
+[target.'thumbv4t-none-eabi'.dependencies]
+aarch32-rt = { optional = true, git = "https://github.com/rust-embedded/aarch32.git", rev = "885d39a" }
 [target.'thumbv5te-none-eabi'.dependencies]
 aarch32-rt = { optional = true, git = "https://github.com/rust-embedded/aarch32.git", rev = "885d39a" }
 [target.'thumbv6-none-eabi'.dependencies]

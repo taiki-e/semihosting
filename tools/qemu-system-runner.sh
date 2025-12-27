@@ -100,13 +100,7 @@ case "${target}" in
     ;;
   # Armv4T
   armv4t* | thumbv4t*)
-    # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'
-    # all passed: N/A # TODO
-    # exit-only passed:
-    # - sx1, sx1-v1 (OMAP310)
-    # - collie (SA-1110)
-    # not worked: N/A
-    qemu_system arm -M sx1
+    qemu_system arm -M versatilepb -cpu ti925t
     ;;
   # Armv5TE
   armv5te* | thumbv5te*)

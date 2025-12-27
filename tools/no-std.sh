@@ -23,7 +23,9 @@ default_targets=(
   # v5TE
   armv5te-none-eabi
   thumbv5te-none-eabi
+  # v6
   armv6-none-eabi
+  armv6-none-eabihf
   thumb6-none-eabi
   # v7-A
   armv7a-none-eabi
@@ -186,25 +188,19 @@ run() {
 
   local test_dir=tests/no-std
   case "${target}" in
-    armv4t* | thumbv4t*)
-      if [[ -n "${CI:-}" ]] && [[ "${runner}" == "qemu-system" ]] && [[ "$(uname -s)" == "Linux" ]]; then
-        # Old QEMU we used in CI doesn't work on this case
-        return 0
-      fi
-      ;;
-    armebv7r*)
-      if [[ "${llvm_version}" -lt 17 ]]; then
-        # pre-17 LLD doesn't support big-endian Arm
-        target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
-      fi
-      ;;
-    thumbv5* | thumbv6-*)
+    aarch64* | arm64* | riscv*)
       case "${runner}" in
         qemu-system)
           linker=link.x
           target_rustflags+=" -C link-arg=-T${linker}"
           ;;
       esac
+      ;;
+    armebv7r*)
+      if [[ "${llvm_version}" -lt 17 ]]; then
+        # pre-17 LLD doesn't support big-endian Arm
+        target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+      fi
       ;;
     thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*)
       case "${runner}" in
@@ -219,7 +215,7 @@ run() {
           ;;
       esac
       ;;
-    aarch64* | arm64* | riscv*)
+    armv[456]* | thumbv[456]*)
       case "${runner}" in
         qemu-system)
           linker=link.x
