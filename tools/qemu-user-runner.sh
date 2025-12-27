@@ -84,13 +84,6 @@ case "${target}" in
     ;;
   # Armv4T
   armv4t* | thumbv4t*)
-    # qemu-system-arm -cpu help | grep -E '9.*t|sa1'
-    # all passed:
-    # - ti925t (ARM9TDMI)
-    # exit-only passed:
-    # - sa1110, sa1100 (StrongARM)
-    # not worked: N/A
-    # https://github.com/qemu/qemu/blob/v10.1.0/target/arm/tcg/cpu32.c#L783
     qemu_user arm -cpu ti925t
     ;;
   # Armv5TE

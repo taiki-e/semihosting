@@ -85,13 +85,14 @@ case "${target}" in
     ;;
   # Cortex-A (AArch32)
   armv7a* | armebv7a*)
-    qemu_system arm -M xilinx-zynq-a9
+    qemu_system arm -M versatileab -cpu cortex-a8
     ;;
   # Cortex-R (AArch32)
+  armv7r*hf | armebv7r*hf)
+    qemu_system arm -M versatileab -cpu cortex-r5f
+    ;;
   armv7r* | armebv7r*)
-    # TODO: As of QEMU 8.2, qemu-system-arm doesn't support Cortex-R machine.
-    # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (Armv8-R AArch32)
-    qemu_system arm -M xilinx-zynq-a9
+    qemu_system arm -M versatileab -cpu cortex-r5
     ;;
   armv8r* | armebv8r*)
     # TODO: As of QEMU 8.2, qemu-system-arm doesn't support Cortex-R machine.
@@ -100,13 +101,7 @@ case "${target}" in
     ;;
   # Armv4T
   armv4t* | thumbv4t*)
-    # qemu-system-arm -M help | grep -E '9.*T|SA-|OMAP310'
-    # all passed: N/A # TODO
-    # exit-only passed:
-    # - sx1, sx1-v1 (OMAP310)
-    # - collie (SA-1110)
-    # not worked: N/A
-    qemu_system arm -M sx1
+    qemu_system arm -M versatilepb -cpu ti925t
     ;;
   # Armv5TE
   armv5te* | thumbv5te*)

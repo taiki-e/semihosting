@@ -52,12 +52,12 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | target                                    | exit | all-apis \[1] (system) | all-apis \[1] (user-mode) | panic-unwind (system \[2]) | note      |
 | ----------------------------------------- | ---- | ---------------------- | ------------------------- | -------------------------- | --------- |
 | `aarch64-unknown-none{,-softfloat}`       | ✓    | ✓                      | ✓                         | ✓                          |           |
-| `{arm,thumb}v4t-none-eabi`                | ✓    |                        | ✓                         |                            |           |
+| `{arm,thumb}v4t-none-eabi`                | ✓    | ✓                      | ✓                         |                            |           |
 | `{arm,thumb}v5te-none-eabi`               | ✓    | ✓                      | ✓                         |                            |           |
 | `{arm,thumb}v6-none-eabi`                 | ✓    | ✓                      | ✓                         |                            |           |
 | `armv7a-none-eabi{,hf}`                   | ✓    | ✓                      | ✓                         |                            |           |
 | `armv7r-none-eabi{,hf}`                   | ✓    | ✓                      | ✓                         |                            |           |
-| `armebv7r-none-eabi{,hf}`                 | ✓    |                        | ✓                         |                            |           |
+| `armebv7r-none-eabi{,hf}`                 | ✓    |                        | ✓                         |                            | \[3]      |
 | `armv8r-none-eabihf`                      | ✓    | ✓                      | ✓                         |                            |           |
 | `thumbv6m-none-eabi`                      | ✓    | ✓                      | N/A                       |                            |           |
 | `thumbv7m-none-eabi`                      | ✓    | ✓                      | N/A                       |                            |           |
@@ -66,15 +66,16 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `thumbv8m.main-none-eabi{,hf}`            | ✓    | ✓                      | N/A                       |                            |           |
 | `riscv32*-unknown-none-elf`               | ✓    | ✓                      | ✓                         | ✓                          |           |
 | `riscv64*-unknown-none-elf`               | ✓    | ✓                      | ✓                         | ✓                          |           |
-| `mips{,el}-unknown-none`                  | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
-| `mips64{,el}-unknown-none`                | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
-| `mipsisa32r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
-| `mipsisa64r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[3] \[4] |
+| `mips{,el}-unknown-none`                  | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
+| `mips64{,el}-unknown-none`                | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
+| `mipsisa32r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
+| `mipsisa64r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 
 \[1] `stdio`, `fs`, `time`, and `args`.<br>
 \[2] I'm not sure how to test panic-unwind on qemu-user.<br>
-\[3] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
-\[4] It seems [unsupported on QEMU 8.0+](https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0).<br>
+\[3] QEMU's big-endian 32-bit Arm support in [broken on system mode](https://github.com/taiki-e/semihosting/issues/18).<br>
+\[4] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
+\[5] It seems [unsupported on QEMU 8.0+](https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0).<br>
 
 ## Optional features
 

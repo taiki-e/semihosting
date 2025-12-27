@@ -8,7 +8,7 @@ use std::{
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=raspi");
-    println!("cargo:rustc-check-cfg=cfg(mclass,armv6,armv5te,use_aarch32_rt)");
+    println!("cargo:rustc-check-cfg=cfg(cortex_m_rt,aarch32_rt)");
 
     let target = &*env::var("TARGET").expect("TARGET not set");
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
@@ -35,14 +35,12 @@ fn main() {
             subarch = subarch.split('.').next().unwrap(); // ignore .base/.main suffix
             match subarch {
                 "v6m" | "v7em" | "v7m" | "v8m" => {
-                    println!("cargo:rustc-cfg=mclass");
+                    println!("cargo:rustc-cfg=cortex_m_rt");
                     fs::write(out_dir.join("memory.x"), include_bytes!("arm-mclass-memory.x"))
                         .unwrap();
                 }
-                "v6" if target.starts_with("arm") => println!("cargo:rustc-cfg=armv6"),
-                "v5te" if target.starts_with("arm") => println!("cargo:rustc-cfg=armv5te"),
-                "v5te" | "v6" if target.starts_with("thumb") => {
-                    println!("cargo:rustc-cfg=use_aarch32_rt");
+                "v4t" | "v5te" | "v6" | "v7a" | "v7r" if cfg!(feature = "qemu-system") => {
+                    println!("cargo:rustc-cfg=aarch32_rt");
                     fs::write(out_dir.join("memory.x"), include_bytes!("arm-versatileab-memory.x"))
                         .unwrap();
                 }

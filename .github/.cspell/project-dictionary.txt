@@ -36,7 +36,6 @@ musicpal
 nlink
 norvc
 nsec
-OMAP
 openocd
 opensbi
 pcnet
@@ -58,7 +57,6 @@ slli
 srai
 subarch
 syscall
-TDMI
 Tensilica
 tickfreq
 ucrt
