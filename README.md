@@ -52,6 +52,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | target                                    | exit | all-apis \[1] (system) | all-apis \[1] (user-mode) | panic-unwind (system \[2]) | note      |
 | ----------------------------------------- | ---- | ---------------------- | ------------------------- | -------------------------- | --------- |
 | `aarch64-unknown-none{,-softfloat}`       | ✓    | ✓                      | ✓                         | ✓                          |           |
+| `aarch64_be-unknown-none-softfloat`       | ✓    |                        | ✓                         | ✓                          |           |
 | `{arm,thumb}v4t-none-eabi`                | ✓    | ✓                      | ✓                         |                            |           |
 | `{arm,thumb}v5te-none-eabi`               | ✓    | ✓                      | ✓                         |                            |           |
 | `{arm,thumb}v6-none-eabi`                 | ✓    | ✓                      | ✓                         |                            |           |

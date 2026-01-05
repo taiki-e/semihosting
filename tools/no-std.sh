@@ -14,7 +14,7 @@ default_targets=(
   # aarch64
   aarch64-unknown-none
   aarch64-unknown-none-softfloat
-  # aarch64_be-unknown-none-softfloat # TODO: QEMU exit with 1
+  aarch64_be-unknown-none-softfloat
 
   # arm
   # v4T
@@ -188,6 +188,15 @@ run() {
 
   local test_dir=tests/no-std
   case "${target}" in
+    aarch64_be*)
+      case "${runner}" in
+        qemu-system)
+          # TODO: QEMU exit with 1
+          info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
+          return 0
+          ;;
+      esac
+      ;;
     aarch64* | arm64* | riscv*)
       case "${runner}" in
         qemu-system)
