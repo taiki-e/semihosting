@@ -8,6 +8,7 @@ cd -- "$(dirname -- "$0")"/..
 
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
+#    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
 
 # rustc -Z unstable-options --print all-target-specs-json | jq -r '. | to_entries[] | if .value.os then empty else .key end'
 default_targets=(
@@ -287,6 +288,7 @@ run() {
 
     if [[ -n "${nightly}" ]]; then
       case "${runner}" in
+        # TODO: Skip user mode due to "rust-lld: error: undefined symbol: __eh_frame".
         qemu-system)
           case "${target}" in
             riscv??e* | riscv32imafc-*) ;; # TODO: not yet supported by unwinding
