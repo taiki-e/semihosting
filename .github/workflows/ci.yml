@@ -125,11 +125,11 @@ jobs:
           sudo cp -r -- qemu-system/qemu/. /usr/local/
           rm -rf -- ./qemu-system
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
-          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1 # TODO: "qemu-armeb: Error mapping file: Operation not permitted" error in 8.2-9.1
+          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user
           mkdir -p -- qemu-user
           docker cp -- qemu-user:/usr/bin qemu-user/bin
           docker rm -f -- qemu-user >/dev/null
-          sudo mv -- qemu-user/bin/qemu-* /usr/bin/
+          sudo mv -- qemu-user/bin/qemu-* /usr/local/bin/
           rm -rf -- ./qemu-user
           if [[ "${{ matrix.rust }}" == "stable" ]]; then
             retry espup install --targets esp32
