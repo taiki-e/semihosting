@@ -79,6 +79,7 @@ jobs:
       matrix:
         include:
           - rust: '1.64'
+          - rust: '1.83'
           - rust: stable
           - rust: beta
           - rust: nightly
@@ -158,6 +159,8 @@ jobs:
         working-directory: tests/no-std
         if: matrix.rust == '1.64'
       - run: tools/no-std.sh
+        env:
+          ALL_TARGETS_MUST_BE_AVAILABLE: ${{ matrix.rust == 'nightly' || '' }}
       - run: TEST_RUNNER=qemu-user tools/no-std.sh
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: cargo +esp build --target xtensa-esp32-none-elf -Z build-std=core,alloc --features "${TEST_FEATURES},openocd-semihosting"

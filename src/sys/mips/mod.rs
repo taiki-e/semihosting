@@ -4,7 +4,8 @@
 //!
 //! Refs:
 //! - Unified Hosting Interface. MD01069 Reference Manual
-//! - <https://github.com/qemu/qemu/blob/v10.1.0/target/mips/tcg/system/mips-semi.c>
+//! - <https://github.com/qemu/qemu/blob/v7.2.0/target/mips/tcg/sysemu/mips-semi.c>
+//! - <https://github.com/qemu/qemu/blob/v10.2.0/target/mips/tcg/system/mips-semi.c>
 
 #![allow(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)] // TODO
 
@@ -53,7 +54,7 @@ pub const S_IRWXU: i32 = 0o700;
 #[non_exhaustive]
 pub enum SeekWhence {
     // Unified Hosting Interface. MD01069 Reference Manual says SEEK_* are defined as follows,
-    // but QEMU (7.2) uses Linux's SEEK_* number.
+    // but QEMU (as of 7.2) uses Linux's SEEK_* number.
     // SEEK_SET = 0x0001,
     // SEEK_CUR = 0x0002,
     // SEEK_END = 0x0004,

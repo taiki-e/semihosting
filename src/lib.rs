@@ -49,29 +49,31 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | target                                    | exit | all-apis \[1] (system) | all-apis \[1] (user-mode) | panic-unwind (system \[2]) | note      |
 | ----------------------------------------- | ---- | ---------------------- | ------------------------- | -------------------------- | --------- |
 | `aarch64-unknown-none{,-softfloat}`       | ✓    | ✓                      | ✓                         | ✓                          |           |
-| `aarch64_be-unknown-none-softfloat`       | ✓    |                        | ✓                         | ✓                          |           |
+| `aarch64_be-unknown-none{,-softfloat}`    | ✓    |                        | ✓                         | ✓                          | \[3]      |
 | `{arm,thumb}v4t-none-eabi`                | ✓    | ✓                      | ✓                         |                            |           |
 | `{arm,thumb}v5te-none-eabi`               | ✓    | ✓                      | ✓                         |                            |           |
-| `{arm,thumb}v6-none-eabi`                 | ✓    | ✓                      | ✓                         |                            |           |
-| `armv7a-none-eabi{,hf}`                   | ✓    | ✓                      | ✓                         |                            |           |
-| `armv7r-none-eabi{,hf}`                   | ✓    | ✓                      | ✓                         |                            |           |
+| `{arm,thumb}v6-none-eabi{,hf}`            | ✓    | ✓                      | ✓                         |                            |           |
+| `{arm,thumb}v7a-none-eabi{,hf}`           | ✓    | ✓                      | ✓                         |                            |           |
+| `{arm,thumb}v7r-none-eabi{,hf}`           | ✓    | ✓                      | ✓                         |                            |           |
 | `armebv7r-none-eabi{,hf}`                 | ✓    |                        | ✓                         |                            | \[3]      |
-| `armv8r-none-eabihf`                      | ✓    | ✓                      | ✓                         |                            |           |
-| `thumbv6m-none-eabi`                      | ✓    | ✓                      | N/A                       |                            |           |
-| `thumbv7m-none-eabi`                      | ✓    | ✓                      | N/A                       |                            |           |
-| `thumbv7em-none-eabi{,hf}`                | ✓    | ✓                      | N/A                       |                            |           |
-| `thumbv8m.base-none-eabi`                 | ✓    | ✓                      | N/A                       |                            |           |
-| `thumbv8m.main-none-eabi{,hf}`            | ✓    | ✓                      | N/A                       |                            |           |
+| `{arm,thumb}v8r-none-eabihf`              | ✓    | ✓                      | ✓                         |                            |           |
+| `armebv8r-none-eabihf`                    | ✓    |                        | ✓                         |                            | \[3]      |
+| `thumbv6m-none-eabi`                      | ✓    | ✓                      | ✓                         |                            |           |
+| `thumbv7m-none-eabi`                      | ✓    | ✓                      | ✓                         |                            |           |
+| `thumbv7em-none-eabi{,hf}`                | ✓    | ✓                      | ✓                         |                            |           |
+| `thumbv8m.base-none-eabi`                 | ✓    | ✓                      | ✓                         |                            |           |
+| `thumbv8m.main-none-eabi{,hf}`            | ✓    | ✓                      | ✓                         |                            |           |
 | `riscv32*-unknown-none-elf`               | ✓    | ✓                      | ✓                         | ✓                          |           |
 | `riscv64*-unknown-none-elf`               | ✓    | ✓                      | ✓                         | ✓                          |           |
 | `mips{,el}-unknown-none`                  | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
+| `mips{,el}-mti-none-elf`                  | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mips64{,el}-unknown-none`                | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mipsisa32r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mipsisa64r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 
 \[1] `stdio`, `fs`, `time`, and `args`.<br>
 \[2] I'm not sure how to test panic-unwind on qemu-user.<br>
-\[3] QEMU's big-endian 32-bit Arm support in [broken on system mode](https://github.com/taiki-e/semihosting/issues/18).<br>
+\[3] QEMU's big-endian Arm/AArch64 support in [broken on system mode](https://github.com/taiki-e/semihosting/issues/18).<br>
 \[4] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
 \[5] It seems [unsupported on QEMU 8.0+](https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0).<br>
 

@@ -55,7 +55,7 @@ fi
 qemu_system() {
   qemu_arch="$1"
   shift
-
+  "qemu-system-${qemu_arch}" --version
   "qemu-system-${qemu_arch}" "$@" "${args[@]}"
 }
 
@@ -77,26 +77,25 @@ case "${target}" in
     qemu_system arm -M lm3s6965evb -cpu cortex-m4
     ;;
   thumbv8m.base-*)
-    # TODO: As of QEMU 10.1, QEMU doesn't support -cpu cortex-m23
+    # TODO: As of QEMU 10.2, QEMU doesn't support -cpu cortex-m23
     qemu_system arm -M lm3s6965evb -cpu cortex-m33
     ;;
   thumbv8m.main-*)
     qemu_system arm -M lm3s6965evb -cpu cortex-m33
     ;;
   # Cortex-A (AArch32)
-  armv7a* | armebv7a*)
-    qemu_system arm -M xilinx-zynq-a9
+  armv7a* | armebv7a* | thumbv7a*)
+    qemu_system arm -M xilinx-zynq-a9 -cpu cortex-a9
     ;;
   # Cortex-R (AArch32)
-  armv7r* | armebv7r*)
-    # TODO: As of QEMU 8.2, qemu-system-arm doesn't support Cortex-R machine.
-    # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (Armv8-R AArch32)
-    qemu_system arm -M xilinx-zynq-a9
+  armv7r*hf | armebv7r*hf | thumbv7r*hf)
+    qemu_system arm -M versatilepb -cpu cortex-r5f
     ;;
-  armv8r* | armebv8r*)
-    # TODO: As of QEMU 8.2, qemu-system-arm doesn't support Cortex-R machine.
-    # TODO: mps3-an536 added in QEMU 9.0 is Cortex-R52 board (Armv8-R AArch32)
-    qemu_system arm -M xilinx-zynq-a9
+  armv7r* | armebv7r* | thumbv7r*)
+    qemu_system arm -M versatilepb -cpu cortex-r5
+    ;;
+  armv8r* | armebv8r* | thumbv8r*)
+    qemu_system arm -M mps3-an536 -cpu cortex-r52
     ;;
   # Armv4T
   armv4t* | thumbv4t*)

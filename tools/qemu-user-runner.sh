@@ -24,11 +24,8 @@ done
 qemu_user() {
   qemu_arch="$1"
   shift
-  if type -P "qemu-${qemu_arch}" >/dev/null; then
-    "qemu-${qemu_arch}" "$@" "${args[@]}"
-  else
-    "qemu-${qemu_arch}-static" "$@" "${args[@]}"
-  fi
+  "qemu-${qemu_arch}" --version
+  "qemu-${qemu_arch}" "$@" "${args[@]}"
 }
 
 case "${target}" in
@@ -50,33 +47,33 @@ case "${target}" in
     qemu_user arm -cpu cortex-m4
     ;;
   thumbv8m.base-*)
-    # TODO: As of QEMU 10.1, QEMU doesn't support -cpu cortex-m23
+    # TODO: As of QEMU 10.2, QEMU doesn't support -cpu cortex-m23
     qemu_user arm -cpu cortex-m33
     ;;
   thumbv8m.main-*)
     qemu_user arm -cpu cortex-m33
     ;;
   # Cortex-A (AArch32)
-  armv7a*)
+  armv7a* | thumbv7a*)
     qemu_user arm -cpu cortex-a9
     ;;
   armebv7a*)
     qemu_user armeb -cpu cortex-a9
     ;;
   # Cortex-R (AArch32)
-  armv7r*hf)
+  armv7r*hf | thumbv7r*hf)
     qemu_user arm -cpu cortex-r5f
     ;;
   armebv7r*hf)
     qemu_user armeb -cpu cortex-r5f
     ;;
-  armv7r*)
+  armv7r* | thumbv7r*)
     qemu_user arm -cpu cortex-r5
     ;;
   armebv7r*)
     qemu_user armeb -cpu cortex-r5
     ;;
-  armv8r*)
+  armv8r* | thumbv8r*)
     qemu_user arm -cpu cortex-r52
     ;;
   armebv8r*)

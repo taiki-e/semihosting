@@ -15,6 +15,7 @@ default_targets=(
   # aarch64
   aarch64-unknown-none
   aarch64-unknown-none-softfloat
+  aarch64_be-unknown-none # custom target
   aarch64_be-unknown-none-softfloat
 
   # arm
@@ -27,18 +28,23 @@ default_targets=(
   # v6
   armv6-none-eabi
   armv6-none-eabihf
-  thumb6-none-eabi
+  # thumbv6-none-eabi # TODO: "rustc-LLVM ERROR: Cannot select: intrinsic %llvm.arm.hint" will be fixed in https://github.com/rust-lang/rust/pull/150138
   # v7-A
   armv7a-none-eabi
   armv7a-none-eabihf
+  thumbv7a-none-eabi   # custom target
+  thumbv7a-none-eabihf # custom target
   # v7-R
   armv7r-none-eabi
   armv7r-none-eabihf
   armebv7r-none-eabi
   armebv7r-none-eabihf
+  thumbv7r-none-eabi   # custom target
+  thumbv7r-none-eabihf # custom target
   # v8-R
   armv8r-none-eabihf
   armebv8r-none-eabihf # custom target
+  thumbv8r-none-eabihf # custom target
   # v6-M
   thumbv6m-none-eabi
   # v7-M
@@ -68,7 +74,9 @@ default_targets=(
 
   # mips32r2
   mips-unknown-none # custom target
+  mips-mti-none-elf
   mipsel-unknown-none
+  mipsel-mti-none-elf
   # mips32r6
   mipsisa32r6-unknown-none   # custom target
   mipsisa32r6el-unknown-none # custom target
@@ -135,6 +143,8 @@ if [[ -z "${is_custom_toolchain}" ]]; then
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | grep -E '^release:' | cut -d' ' -f2)
+rustc_minor_version="${rustc_version#*.}"
+rustc_minor_version="${rustc_minor_version%%.*}"
 llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
 llvm_version="${llvm_version%%.*}"
 target_dir=$(pwd)/target
@@ -162,6 +172,9 @@ run() {
       target=riscv64i-unknown-none-elf # custom target
     fi
     if [[ ! -f "target-specs/${target}.json" ]]; then
+      if [[ -n "${ALL_TARGETS_MUST_BE_AVAILABLE:-}" ]]; then
+        bail "target '${target}' not available on ${rustc_version}"
+      fi
       info "target '${target}' not available on ${rustc_version} (skipped)"
       return 0
     fi
@@ -192,44 +205,44 @@ run() {
     aarch64_be*)
       case "${runner}" in
         qemu-system)
-          # TODO: QEMU exit with 1
+          # TODO: QEMU exit with 1: https://github.com/taiki-e/semihosting/issues/18#issuecomment-3707232586
           info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
           return 0
           ;;
       esac
       ;;
-    aarch64* | arm64* | riscv*)
+    armv7a* | thumbv7a*) ;;
+    aarch64* | arm* | thumb* | riscv*)
       case "${runner}" in
         qemu-system)
+          case "${target}" in
+            armv7r* | armebv7r*)
+              # aarch32-rt requires Rust 1.83.
+              if [[ "${rustc_minor_version}" -lt 83 ]]; then
+                info "testing ${target} on ${rustc_version} is not supported (skipped)"
+                return 0
+              fi
+              ;;
+            armv8r* | armebv8r* | thumbv8r*)
+              # -machine mps3-an536 requires QEMU 9.0.
+              if qemu-system-arm --version | grep -Eq "QEMU emulator version [0-8]\."; then
+                info "QEMU doesn't support machine for Armv8-R (${target}) on QEMU pre-9.0 (skipped)"
+                return 0
+              fi
+              ;;
+          esac
           linker=link.x
           target_rustflags+=" -C link-arg=-T${linker}"
           ;;
-      esac
-      ;;
-    armebv7r*)
-      if [[ "${llvm_version}" -lt 17 ]]; then
-        # pre-17 LLD doesn't support big-endian Arm
-        target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
-      fi
-      ;;
-    thumbv6m* | thumbv7m* | thumbv7em* | thumbv8m*)
-      case "${runner}" in
-        qemu-system)
-          linker=link.x
-          target_rustflags+=" -C link-arg=-T${linker}"
-          ;;
-        # TODO: qemu-arm: ../../accel/tcg/translate-all.c:1381: page_set_flags: Assertion `end - 1 <= GUEST_ADDR_MAX' failed.
         qemu-user)
-          info "QEMU doesn't support Cortex-M (${target}) with user-mode (skipped)"
-          return 0
-          ;;
-      esac
-      ;;
-    armv[456]* | thumbv[456]*)
-      case "${runner}" in
-        qemu-system)
-          linker=link.x
-          target_rustflags+=" -C link-arg=-T${linker}"
+          case "${target}" in
+            armebv7r*)
+              if [[ "${llvm_version}" -lt 17 ]]; then
+                # pre-17 LLD doesn't support big-endian Arm
+                target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+              fi
+              ;;
+          esac
           ;;
       esac
       ;;
