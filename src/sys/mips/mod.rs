@@ -243,7 +243,16 @@ pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> Result<()> {
     }
 }
 
-// TODO: UHI_PLOG
+pub fn mips_plog(msg: &CStr) -> Result<usize> {
+    let (res, errno) = unsafe { syscall1_readonly(OperationCode::UHI_PLOG, ParamRegR::c_str(msg)) };
+    if res.int() == -1 {
+        Err(from_errno(errno))
+    } else {
+        debug_assert_eq!(res.usize(), msg.to_bytes().len());
+        Ok(res.usize())
+    }
+}
+
 // TODO: UHI_ASSERT
 
 pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<usize> {

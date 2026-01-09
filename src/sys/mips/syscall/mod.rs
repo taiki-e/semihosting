@@ -36,12 +36,12 @@ impl OperationCode {
     pub const UHI_ARGC: Self = Self(9);
     pub const UHI_ARGNLEN: Self = Self(10);
     pub const UHI_ARGN: Self = Self(11);
-    // const UHI_RAMRANGE : Self = Self(12); // QEMU (as of 7.2) doesn't support this
-    // const UHI_PLOG : Self = Self(13); // TODO
-    // const UHI_ASSERT : Self = Self(14); // TODO
-    // const UHI_EXCEPTION : Self = Self(15); // QEMU (as of 7.2) doesn't support this
-    pub const UHI_PREAD: Self = Self(19);
-    pub const UHI_PWRITE: Self = Self(20);
-    pub const UHI_LINK: Self = Self(22);
-    // const UHI_BOOT_FAIL : Self = Self(23); // QEMU (as of 7.2) doesn't support this
+    // pub const UHI_RAMRANGE: Self = Self(12); // QEMU (as of 7.2) doesn't support this
+    pub const UHI_PLOG: Self = Self(13);
+    // pub const UHI_ASSERT: Self = Self(14); // TODO
+    // pub const UHI_EXCEPTION: Self = Self(15); // QEMU (as of 7.2) doesn't support this
+    pub const UHI_PREAD: Self = Self(19); // QEMU (as of 7.2) doesn't support this
+    pub const UHI_PWRITE: Self = Self(20); // QEMU (as of 7.2) doesn't support this
+    pub const UHI_LINK: Self = Self(22); // QEMU (as of 7.2) doesn't support this
+    // pub const UHI_BOOT_FAIL: Self = Self(23); // QEMU (as of 7.2) doesn't support this
 }

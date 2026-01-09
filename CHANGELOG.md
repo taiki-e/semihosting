@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `sys::mips::mips_plog` (almost equivalent to `sys::arm_compat::sys_write0`).
+
 ## [0.1.21] - 2025-11-30
 
 - Fix build error on pre-1.80 Rust when `alloc` feature is enabled. ([adad165](https://github.com/taiki-e/semihosting/commit/adad165ae45d048c24bc984be80e236717b22815))

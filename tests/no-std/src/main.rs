@@ -302,7 +302,13 @@ fn run() {
         println!("ok");
     }
     #[cfg(mips)]
-    {}
+    {
+        println!("test sys::mips ... ");
+        print!("mips_plog: ");
+        mips_plog(c!("bc\n")).unwrap();
+        // TODO(mips): mips_assert
+        println!("ok");
+    }
 
     #[cfg(not(mips))]
     println!("elapsed: {:?}", now.elapsed().unwrap());
