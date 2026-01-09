@@ -81,11 +81,10 @@ jobs:
           - rust: '1.64'
           - rust: stable
           - rust: beta
-          # Test pre-8.0 QEMU for mips
           - rust: nightly
-            os: ubuntu-22.04 # QEMU 6.2
+          # Test pre-8.0 QEMU for MIPS.
           - rust: nightly
-            os: ubuntu-24.04 # QEMU 8.2
+            qemu-system: '7.2'
           # The behavior of semihosting somewhat depends on the behavior of the host system.
           - rust: nightly
             os: ubuntu-24.04-arm # QEMU 8.2
@@ -113,40 +112,18 @@ jobs:
             done
             "$@"
           }
-          apt_packages=(
-            qemu-system-arm
-            qemu-system-misc
-          )
-          if [[ "${{ matrix.rust }}" == "nightly"* ]]; then
-            apt_packages+=(
-              qemu-system-mips
-            )
-          fi
           if [[ "${{ matrix.rust }}" == "1.64" ]]; then
             # pre-17 LLD doesn't support big-endian arm
-            apt_packages+=(
-              binutils-arm-none-eabi
-            )
+            retry sudo apt-get -o Acquire::Retries=10 -qq update
+            retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends binutils-arm-none-eabi
           fi
-          retry sudo apt-get -o Acquire::Retries=10 -qq update
-          retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends "${apt_packages[@]}"
-          # APT's qemu package doesn't provide firmware for riscv32 and mips:
-          # https://packages.ubuntu.com/en/jammy/all/qemu-system-data/filelist
-          opensbi_version=1.8 # https://github.com/riscv-software-src/opensbi/releases
-          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused "https://github.com/riscv-software-src/opensbi/releases/download/v${opensbi_version}/opensbi-${opensbi_version}-rv-bin.tar.xz" \
-            | tar xJf -
-          sudo mv -- "opensbi-${opensbi_version}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.bin" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.bin
-          sudo mv -- "opensbi-${opensbi_version}-rv-bin/share/opensbi/ilp32/generic/firmware/fw_dynamic.elf" /usr/share/qemu/opensbi-riscv32-generic-fw_dynamic.elf
-          rm -rf -- "opensbi-${opensbi_version}-rv-bin"
-          retry git clone --depth 1 --filter=tree:0 --no-checkout https://github.com/qemu/qemu.git
-          cd -- qemu
-          git sparse-checkout init
-          printf '!/*\n' >>.git/info/sparse-checkout
-          printf '/pc-bios/\n' >>.git/info/sparse-checkout
-          git checkout
-          sudo mv -- pc-bios/{efi-pcnet.rom,vgabios-cirrus.bin} /usr/share/qemu/
-          cd -- ..
-          rm -rf -- qemu
+          # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-system
+          retry docker create --name qemu-system ghcr.io/taiki-e/qemu-system:"${QEMU_SYSTEM_VERSION}"
+          mkdir -p -- qemu-system
+          docker cp -- qemu-system:/qemu qemu-system/qemu
+          docker rm -f -- qemu-system >/dev/null
+          sudo cp -r -- qemu-system/qemu/. /usr/local/
+          rm -rf -- ./qemu-system
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
           retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user:8.1 # TODO: "qemu-armeb: Error mapping file: Operation not permitted" error in 8.2-9.1
           mkdir -p -- qemu-user
@@ -161,6 +138,7 @@ jobs:
           qemu-arm --version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QEMU_SYSTEM_VERSION: ${{ matrix.qemu-system || 'latest' }}
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
           brew install qemu

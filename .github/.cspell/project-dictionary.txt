@@ -35,8 +35,6 @@ nlink
 norvc
 nsec
 openocd
-opensbi
-pcnet
 plog
 pread
 pwrite
@@ -60,7 +58,6 @@ ucrt
 unseekable
 versatileab
 versatilepb
-vgabios
 virt
 writec
 WRONLY
