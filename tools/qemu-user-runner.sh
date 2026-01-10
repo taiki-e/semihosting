@@ -24,8 +24,11 @@ done
 qemu_user() {
   qemu_arch="$1"
   shift
-  "qemu-${qemu_arch}" --version
-  "qemu-${qemu_arch}" "$@" "${args[@]}"
+  (
+    set -x
+    "qemu-${qemu_arch}" --version
+    "qemu-${qemu_arch}" "$@" "${args[@]}"
+  )
 }
 
 case "${target}" in

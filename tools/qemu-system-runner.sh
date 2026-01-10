@@ -13,26 +13,21 @@ target="$1"
 shift
 
 bin="$1"
-args=(-display none -kernel "${bin}")
+args=(
+  -display none
+  -kernel "${bin}"
+)
 semihosting_args=("$@")
 
+semi_config=''
 if [[ -n "${QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED:-}" ]]; then
-  semi_config=''
   for arg in "${semihosting_args[@]}"; do
-    if [[ -n "${semi_config}" ]]; then
-      semi_config+=','
-    fi
     if [[ "${arg}" == *' '* ]] || [[ "${arg}" == *$'\t'* ]]; then
-      semi_config+="arg='${arg}'"
+      semi_config+=",arg='${arg}'"
     else
-      semi_config+="arg=${arg}"
+      semi_config+=",arg=${arg}"
     fi
   done
-  if [[ -n "${semi_config}" ]]; then
-    args+=(-semihosting-config "${semi_config}")
-  else
-    args+=(-semihosting)
-  fi
 else
   arg_string=''
   for arg in "${semihosting_args[@]}"; do
@@ -46,17 +41,24 @@ else
     fi
   done
   if [[ -n "${arg_string}" ]]; then
-    args+=(-semihosting-config "arg=${arg_string}")
-  else
-    args+=(-semihosting)
+    semi_config+=",arg=${arg_string}"
   fi
+fi
+semi_config="${semi_config#,}"
+if [[ -n "${semi_config}" ]]; then
+  args+=(-semihosting-config "${semi_config}")
+else
+  args+=(-semihosting)
 fi
 
 qemu_system() {
   qemu_arch="$1"
   shift
-  "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" --version
-  "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" "$@" "${args[@]}"
+  (
+    set -x
+    "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" --version
+    "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" "$@" "${args[@]}"
+  )
 }
 
 export QEMU_AUDIO_DRV=none
