@@ -61,6 +61,8 @@ use self::mips as arch;
 )]
 pub mod mips;
 
+#[cfg(feature = "args")]
+pub(crate) mod env;
 mod errno;
 mod reg;
 #[cfg(feature = "time")]
