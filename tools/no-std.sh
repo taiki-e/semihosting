@@ -9,6 +9,7 @@ cd -- "$(dirname -- "$0")"/..
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
+#    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir [+toolchain] [target]...
 
 # rustc -Z unstable-options --print all-target-specs-json | jq -r '. | to_entries[] | if .value.os then empty else .key end'
 default_targets=(
@@ -225,7 +226,7 @@ run() {
               ;;
             armv8r* | armebv8r* | thumbv8r*)
               # -machine mps3-an536 requires QEMU 9.0.
-              if qemu-system-arm --version | grep -Eq "QEMU emulator version [0-8]\."; then
+              if "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-arm" --version | grep -Eq "QEMU emulator version [0-8]\."; then
                 info "QEMU doesn't support machine for Armv8-R (${target}) on QEMU pre-9.0 (skipped)"
                 return 0
               fi
@@ -250,7 +251,7 @@ run() {
       case "${runner}" in
         qemu-system)
           # On QEMU 8.0+, QEMU doesn't seem to support semihosting for MIPS. https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0
-          if qemu-system-mips --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
+          if "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
             info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
             return 0
           fi

@@ -55,8 +55,8 @@ fi
 qemu_system() {
   qemu_arch="$1"
   shift
-  "qemu-system-${qemu_arch}" --version
-  "qemu-system-${qemu_arch}" "$@" "${args[@]}"
+  "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" --version
+  "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" "$@" "${args[@]}"
 }
 
 export QEMU_AUDIO_DRV=none
