@@ -26,7 +26,7 @@ fn main() {
         format!(
             "\
             const EXPECTED_BIN_PATH: &str = r\"{sep}{target}{sep}{profile}{sep}no-std-test\";\n\
-            #[cfg(not(mips))]
+            #[cfg(not(mips))]\n\
             const EXPECTED_DURATION_SINCE_UNIX_EPOCH: Duration = Duration::from_secs({duration_since_unix_epoch});\n\
             "
         ),
