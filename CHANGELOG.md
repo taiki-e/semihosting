@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.22] - 2026-01-10
+
 - Add `sys::mips::mips_plog` (almost equivalent to `sys::arm_compat::sys_write0`). ([7a3cde1](https://github.com/taiki-e/semihosting/commit/7a3cde189ec8760df93cb51afc0996f4edc664ad))
 
 - Improve `io::ErrorKind` detection on MIPS. ([911e563](https://github.com/taiki-e/semihosting/commit/911e563abbb57b0ba6e4ad19260427f8f7a340c7))
@@ -128,7 +130,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.21...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.22...HEAD
+[0.1.22]: https://github.com/taiki-e/semihosting/compare/v0.1.21...v0.1.22
 [0.1.21]: https://github.com/taiki-e/semihosting/compare/v0.1.20...v0.1.21
 [0.1.20]: https://github.com/taiki-e/semihosting/compare/v0.1.19...v0.1.20
 [0.1.19]: https://github.com/taiki-e/semihosting/compare/v0.1.18...v0.1.19
