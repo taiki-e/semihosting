@@ -230,9 +230,9 @@ impl Error {
         Self { repr: Repr::SimpleMessage(msg) }
     }
 
-    // TODO: provide new,other when alloc feature is enabled?
+    // TODO(io,alloc): provide new,other when alloc feature is enabled?
 
-    // TODO: last_os_error: Arm semihosting has sys_errno, but MIPS UHI doesn't.
+    // TODO(io): last_os_error: Arm semihosting has sys_errno, but MIPS UHI doesn't.
 
     /// Creates a new instance of an `Error` from a particular OS error code.
     #[inline]
@@ -282,7 +282,7 @@ impl fmt::Debug for Repr {
                 .debug_struct("Os")
                 .field("code", &code)
                 .field("kind", &sys::decode_error_kind(*code))
-                // TODO
+                // TODO(io)
                 // .field("message", &sys::os::error_string(code))
                 .finish(),
             // Self::Custom(c) => fmt::Debug::fmt(&c, fmt),
@@ -300,7 +300,7 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.repr {
             Repr::Os(code) => {
-                // TODO
+                // TODO(io)
                 // let detail = sys::os::error_string(code);
                 // write!(f, "{detail} (os error {code})")
                 let detail = sys::decode_error_kind(code);

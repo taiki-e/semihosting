@@ -92,7 +92,7 @@ pub struct SystemTime(time::SystemTime);
 pub struct SystemTimeError(Duration);
 
 impl Instant {
-    // TODO: return result?
+    // TODO(time): return result?
     /// Returns an instant corresponding to "now".
     #[must_use]
     pub fn now() -> Self {
@@ -218,7 +218,7 @@ impl SystemTime {
     /// [std]: https://doc.rust-lang.org/std/time/struct.SystemTime.html#associatedconstant.UNIX_EPOCH
     pub const UNIX_EPOCH: Self = Self(time::UNIX_EPOCH);
 
-    // TODO: return result?
+    // TODO(time): return result?
     /// Returns the system time corresponding to "now".
     #[must_use]
     pub fn now() -> Self {

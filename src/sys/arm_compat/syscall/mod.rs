@@ -12,7 +12,7 @@ mod arch;
 
 pub use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};
 
-/// Semihosting operation numbers.
+/// Semihosting operation number.
 ///
 /// - `0x00-0x31` Used by Arm.
 /// - `0x32-0xFF` Reserved for future use by Arm.

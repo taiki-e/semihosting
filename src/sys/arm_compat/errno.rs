@@ -8,7 +8,7 @@
 // supported by QEMU (i.e, Linux, macOS, FreeBSD, NetBSD, OpenBSD, Windows).
 // https://www.qemu.org/docs/master/about/build-platforms.html
 
-// TODO: should we expose this as public API of `sys` module?
+// TODO(sys): should we expose this as public API of `sys` module?
 
 #![allow(dead_code)]
 

@@ -22,7 +22,7 @@ pub fn args<const BUF_SIZE: usize>() -> io::Result<Args<BUF_SIZE>> {
     sys::args_bytes().map(Args)
 }
 
-#[allow(clippy::copy_iterator)] // TODO
+#[allow(clippy::copy_iterator)] // TODO(args)
 impl<'a, const BUF_SIZE: usize> Iterator for &'a Args<BUF_SIZE> {
     type Item = Result<&'a str, str::Utf8Error>;
     fn next(&mut self) -> Option<Self::Item> {
