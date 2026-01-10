@@ -90,6 +90,10 @@ impl<'a> ParamRegR<'a> {
         Self(ptr.cast::<c_void>(), PhantomData)
     }
     #[inline]
+    pub fn ref_<T>(r: &'a T) -> Self {
+        Self::ptr(r)
+    }
+    #[inline]
     pub fn buf<T>(buf: &'a [T]) -> Self {
         Self::ptr(buf.as_ptr())
     }
@@ -109,10 +113,6 @@ impl<'a> ParamRegR<'a> {
     #[inline]
     pub fn block(b: &'a [ParamRegR<'_>]) -> Self {
         Self::ptr(b.as_ptr())
-    }
-    #[inline]
-    pub fn ref_<T>(r: &'a T) -> Self {
-        Self::ptr(r)
     }
 }
 
