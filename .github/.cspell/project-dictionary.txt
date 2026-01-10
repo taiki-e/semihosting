@@ -3,6 +3,8 @@ argnlen
 balign
 bkpt
 blksize
+CENTI
+CENTISECONDS
 CMDLINE
 CREAT
 demangle
@@ -32,6 +34,7 @@ IXOTH
 IXUSR
 lseek
 nlink
+nondecreasing
 norvc
 nsec
 openocd

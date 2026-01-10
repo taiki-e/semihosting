@@ -12,6 +12,14 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `experimental::time::Instant`.
+
+- Re-export `core::time::{Duration,TryFromFloatSecsError}` in `experimental::time`.
+
+- Implement `core::error::Error` for `experimental::time::SystemTimeError`.
+
+- Documentation improvements.
+
 ## [0.1.22] - 2026-01-10
 
 - Add `sys::mips::mips_plog` (almost equivalent to `sys::arm_compat::sys_write0`). ([7a3cde1](https://github.com/taiki-e/semihosting/commit/7a3cde189ec8760df93cb51afc0996f4edc664ad))

@@ -8,8 +8,6 @@
 use core::ptr;
 use core::str;
 
-#[cfg(arm_compat)]
-use semihosting::sys::arm_compat::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
@@ -19,13 +17,13 @@ use semihosting::{
     io::{self, IsTerminal as _, Read as _, Seek as _, Write as _},
     print, println,
 };
+#[cfg(arm_compat)]
+use semihosting::{
+    experimental::time::{Duration, Instant, SystemTime},
+    sys::arm_compat::*,
+};
 
-// Use \ on Windows host to work around https://github.com/rust-lang/rust/issues/75075 / https://github.com/rust-lang/cargo/issues/13919.
-// (Fixed in Rust 1.84: https://github.com/rust-lang/rust/pull/125205)
-#[cfg(not(host_os = "windows"))]
-include!(concat!(env!("OUT_DIR"), "/expected-bin-path"));
-#[cfg(host_os = "windows")]
-include!(concat!(env!("OUT_DIR"), "\\expected-bin-path"));
+include!(concat!(env!("OUT_DIR"), "/expected"));
 
 semihosting_no_std_test_rt::entry!(run_main);
 #[cfg(feature = "panic-unwind")]
@@ -65,7 +63,14 @@ fn run() {
     let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips);
     // TODO: return result?
     #[cfg(not(mips))]
-    let now = experimental::time::SystemTime::now();
+    let instant_now = Instant::now();
+    #[cfg(not(mips))]
+    let system_time_now = SystemTime::now();
+    #[cfg(not(mips))]
+    {
+        let d = system_time_now.duration_since(SystemTime::UNIX_EPOCH).unwrap();
+        assert!(d >= EXPECTED_DURATION_SINCE_UNIX_EPOCH, "{d:?}");
+    }
     {
         print!("test io ... ");
         // TODO
@@ -311,7 +316,10 @@ fn run() {
     }
 
     #[cfg(not(mips))]
-    println!("elapsed: {:?}", now.elapsed().unwrap());
+    {
+        println!("instant_elapsed: {:?}", instant_now.elapsed());
+        println!("system_time_elapsed: {:?}", system_time_now.elapsed().unwrap());
+    }
 }
 
 #[cfg(feature = "panic-unwind")]
