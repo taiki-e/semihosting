@@ -19,9 +19,9 @@ pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
     next_fn: for<'a> fn(&'a ArgsBytes<BUF_SIZE>) -> Option<&'a [u8]>,
 }
 
-pub(crate) fn next_from_cmdline<'a, const BUF_SIZE: usize>(
-    args: &'a ArgsBytes<BUF_SIZE>,
-) -> Option<&'a [u8]> {
+pub(crate) fn next_from_cmdline<const BUF_SIZE: usize>(
+    args: &ArgsBytes<BUF_SIZE>,
+) -> Option<&[u8]> {
     if args.next.get() >= args.size {
         return None;
     }
@@ -77,9 +77,7 @@ cfg_sel!({
             let mut cmdline_block = CommandLine { ptr: buf.as_mut_ptr(), size: BUF_SIZE - 1 };
             // SAFETY: pointer to the buffer is valid because we got it from a reference,
             // and we've passed valid size (buffer size - 1 for nul byte).
-            unsafe {
-                sys_get_cmdline(&mut cmdline_block)?;
-            }
+            unsafe { sys_get_cmdline(&mut cmdline_block)? }
             debug_assert!(!cmdline_block.ptr.is_null());
             if cmdline_block.size > BUF_SIZE - 1 || buf[BUF_SIZE - 1] != NUL {
                 return Err(io::ErrorKind::ArgumentListTooLong.into());
@@ -117,9 +115,7 @@ cfg_sel!({
                 next_fn: if argc == 1 { next_from_cmdline } else { next_from_args },
             })
         }
-        fn next_from_args<'a, const BUF_SIZE: usize>(
-            args: &'a ArgsBytes<BUF_SIZE>,
-        ) -> Option<&'a [u8]> {
+        fn next_from_args<const BUF_SIZE: usize>(args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
             if args.next.get() >= args.size {
                 return None;
             }
@@ -146,9 +142,7 @@ cfg_sel!({
             }
         }
         #[inline]
-        pub(crate) fn next<'a, const BUF_SIZE: usize>(
-            args: &'a ArgsBytes<BUF_SIZE>,
-        ) -> Option<&'a [u8]> {
+        pub(crate) fn next<const BUF_SIZE: usize>(args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
             (args.next_fn)(args)
         }
     }
@@ -157,9 +151,7 @@ cfg_sel!({
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             Err(io::ErrorKind::Unsupported.into())
         }
-        pub(crate) fn next<'a, const BUF_SIZE: usize>(
-            _args: &'a ArgsBytes<BUF_SIZE>,
-        ) -> Option<&'a [u8]> {
+        pub(crate) fn next<const BUF_SIZE: usize>(_args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
             unreachable!()
         }
     }

@@ -8,30 +8,32 @@
 use core::ptr;
 use core::str;
 
+#[cfg(not(mips))]
+use semihosting::experimental::time::{Duration, Instant, SystemTime};
+#[cfg(arm_compat)]
+use semihosting::sys::arm_compat::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
-    c, dbg, experimental,
+    c, dbg,
+    experimental::env,
     fd::AsFd as _,
     fs,
     io::{self, IsTerminal as _, Read as _, Seek as _, Write as _},
     print, println,
 };
-#[cfg(arm_compat)]
-use semihosting::{
-    experimental::time::{Duration, Instant, SystemTime},
-    sys::arm_compat::*,
-};
+#[cfg(feature = "panic-unwind")]
+use semihosting::{experimental::panic, process};
 
 include!(concat!(env!("OUT_DIR"), "/expected"));
 
 semihosting_no_std_test_rt::entry!(run_main);
 #[cfg(feature = "panic-unwind")]
-fn run_main() -> semihosting::process::ExitCode {
+fn run_main() -> process::ExitCode {
     unsafe { allocator::init_global_allocator() }
-    match experimental::panic::catch_unwind(run) {
-        Ok(()) => semihosting::process::ExitCode::SUCCESS,
-        Err(_) => semihosting::process::ExitCode::from(101_u8),
+    match panic::catch_unwind(run) {
+        Ok(()) => process::ExitCode::SUCCESS,
+        Err(_) => process::ExitCode::from(101_u8),
     }
 }
 #[cfg(not(feature = "panic-unwind"))]
@@ -48,8 +50,8 @@ fn run() {
         fn b() {
             a()
         }
-        experimental::panic::catch_unwind(|| a()).unwrap_err();
-        experimental::panic::catch_unwind(|| b()).unwrap_err();
+        panic::catch_unwind(|| a()).unwrap_err();
+        panic::catch_unwind(|| b()).unwrap_err();
     }
 
     // TODO: https://github.com/taiki-e/semihosting/issues/18
@@ -262,7 +264,7 @@ fn run() {
             unsafe { sys_get_cmdline(&mut cmdline_block).unwrap() }
             println!("sys_get_cmdline: '{}'", str::from_utf8(&buf[..cmdline_block.size]).unwrap());
         }
-        let args = experimental::env::args::<BUF_SIZE>().unwrap();
+        let args = env::args::<BUF_SIZE>().unwrap();
         let program = (&args).next().unwrap().unwrap();
         assert_eq!(&program[program.len() - EXPECTED_BIN_PATH.len()..], EXPECTED_BIN_PATH);
         assert_eq!((&args).next().unwrap().unwrap(), "a");
