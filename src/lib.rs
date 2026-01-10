@@ -24,9 +24,9 @@ APIs are categorized into the following four types:
 - Helpers that are useful when using this library.
   - `c!`: `CStr` literal macro. (Since Rust 1.77, this macro is soft-deprecated in favor of C string literals (`c"..."`).)
 
-- `semihosting::sys` module, which provides low-level access to platform-specific semihosting interfaces.
+- `semihosting::sys` module provides low-level access to platform-specific semihosting interfaces.
 
-- `semihosting::experimental` module, which provides experimental APIs. See [optional features](#optional-features) for more.
+- `semihosting::experimental` module provides experimental APIs. See [optional features](#optional-features) for more.
 
 Additionally, this library provides a panic handler for semihosting, `-C panic=unwind` support, backtrace support, via [optional features](#optional-features).
 
