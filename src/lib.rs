@@ -315,6 +315,9 @@ use core::sync::atomic;
 use portable_atomic as atomic;
 
 #[macro_use]
+mod utils;
+
+#[macro_use]
 mod macros;
 
 #[macro_use]
@@ -342,29 +345,6 @@ pub mod sys;
 mod sealed {
     #[allow(unknown_lints, unnameable_types)] // Not public API. unnameable_types is available on Rust 1.79+
     pub trait Sealed {}
-}
-
-// This module provides core::ptr strict_provenance/exposed_provenance polyfill for pre-1.84 rustc.
-#[allow(dead_code)]
-mod ptr {
-    #[cfg(not(semihosting_no_strict_provenance))]
-    #[allow(unused_imports)]
-    pub(crate) use core::ptr::{with_exposed_provenance, with_exposed_provenance_mut};
-
-    #[cfg(semihosting_no_strict_provenance)]
-    #[inline(always)]
-    #[must_use]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    pub(crate) fn with_exposed_provenance<T>(addr: usize) -> *const T {
-        addr as *const T
-    }
-    #[cfg(semihosting_no_strict_provenance)]
-    #[inline(always)]
-    #[must_use]
-    #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
-    pub(crate) fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
-        addr as *mut T
-    }
 }
 
 // Not public API.

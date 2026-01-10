@@ -94,6 +94,8 @@ mod sys {
 
     use core::{fmt, time::Duration};
 
+    use crate::io;
+
     const NSEC_PER_SEC: u64 = 1_000_000_000;
     pub(crate) const UNIX_EPOCH: SystemTime = SystemTime { t: Timespec::zero() };
 
@@ -212,40 +214,33 @@ mod sys {
         }
     }
 
-    #[cfg(any(
-        target_arch = "aarch64",
-        target_arch = "arm",
-        target_arch = "riscv32",
-        target_arch = "riscv64",
-        all(target_arch = "xtensa", feature = "openocd-semihosting"),
-    ))]
-    mod inner {
-        use super::{Nanoseconds, SystemTime, Timespec};
-        use crate::{io, sys::arm_compat::sys_time};
+    cfg_sel!({
+        #[cfg(any(
+            target_arch = "aarch64",
+            target_arch = "arm",
+            target_arch = "riscv32",
+            target_arch = "riscv64",
+            all(target_arch = "xtensa", feature = "openocd-semihosting"),
+        ))]
+        {
+            use crate::sys::arm_compat::sys_time;
 
-        impl SystemTime {
-            pub(crate) fn now() -> io::Result<Self> {
-                // SYS_TIME doesn't have Y2038 problem (although it still has Y2106 problem): https://github.com/ARM-software/abi-aa/commit/d281283bf3dcec4d4ebf9e5646020d77904904e1
-                Ok(Self {
-                    t: Timespec { tv_sec: sys_time()? as u64 as i64, tv_nsec: Nanoseconds(0) },
-                })
+            impl SystemTime {
+                pub(crate) fn now() -> io::Result<Self> {
+                    // SYS_TIME doesn't have Y2038 problem (although it still has Y2106 problem): https://github.com/ARM-software/abi-aa/commit/d281283bf3dcec4d4ebf9e5646020d77904904e1
+                    Ok(Self {
+                        t: Timespec { tv_sec: sys_time()? as u64 as i64, tv_nsec: Nanoseconds(0) },
+                    })
+                }
             }
         }
-    }
-    #[cfg(any(
-        target_arch = "mips",
-        target_arch = "mips32r6",
-        target_arch = "mips64",
-        target_arch = "mips64r6",
-    ))]
-    mod inner {
-        use super::SystemTime;
-        use crate::io;
-
-        impl SystemTime {
-            pub(crate) fn now() -> io::Result<Self> {
-                Err(io::ErrorKind::Unsupported.into())
+        #[cfg(else)]
+        {
+            impl SystemTime {
+                pub(crate) fn now() -> io::Result<Self> {
+                    Err(io::ErrorKind::Unsupported.into())
+                }
             }
         }
-    }
+    });
 }
