@@ -174,7 +174,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   - This feature is experimental (tracking issue: [#3](https://github.com/taiki-e/semihosting/issues/3))
     and outside of the normal semver guarantees and minor or patch versions of semihosting may make
     breaking changes to them at any time.
-  - This requires nightly compiler.
+  - This currently requires nightly compiler.
   - This implicitly enables the `alloc` and `panic-handler` features.
   - This uses atomic CAS. You need to use `portable-atomic` feature together if your target doesn't support atomic CAS (e.g., RISC-V without A-extension).
   - When enabling this feature, you may need to rebuild the standard library with
@@ -191,7 +191,6 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   - This feature is experimental (tracking issue: [#3](https://github.com/taiki-e/semihosting/issues/3))
     and outside of the normal semver guarantees and minor or patch versions of semihosting may make
     breaking changes to them at any time.
-  - This requires nightly compiler.
   - This implicitly enables the `stdio` feature.
   - When enabling this, it is recommended to also enable the `panic-unwind` feature. Otherwise, a decent backtrace will not be displayed at this time. (Using [`-C force-unwind-tables`](https://doc.rust-lang.org/rustc/codegen-options/index.html#force-unwind-tables) may work, but has not been tested yet.)
   - Currently, the backtrace generated is not human-readable.
