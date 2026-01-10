@@ -12,9 +12,13 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
-- Add `sys::mips::mips_plog` (almost equivalent to `sys::arm_compat::sys_write0`).
+- Add `sys::mips::mips_plog` (almost equivalent to `sys::arm_compat::sys_write0`). ([7a3cde1](https://github.com/taiki-e/semihosting/commit/7a3cde189ec8760df93cb51afc0996f4edc664ad))
 
-- Improve `io::ErrorKind` detection on MIPS.
+- Improve `io::ErrorKind` detection on MIPS. ([911e563](https://github.com/taiki-e/semihosting/commit/911e563abbb57b0ba6e4ad19260427f8f7a340c7))
+
+- Enable [release immutability](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
+
+- Documentation improvements.
 
 ## [0.1.21] - 2025-11-30
 
