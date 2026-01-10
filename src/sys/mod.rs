@@ -63,6 +63,8 @@ pub mod mips;
 
 mod errno;
 mod reg;
+#[cfg(feature = "time")]
+pub(crate) mod time;
 
 #[cfg(feature = "fs")]
 pub(crate) use self::arch::fs;
