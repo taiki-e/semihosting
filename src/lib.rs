@@ -311,16 +311,20 @@ extern crate self as semihosting;
 #[cfg(test)]
 extern crate std;
 
-#[cfg(feature = "panic-unwind")]
-#[cfg(not(feature = "portable-atomic"))]
-use core::sync::atomic;
-
-#[cfg(feature = "panic-unwind")]
-#[cfg(feature = "portable-atomic")]
-use portable_atomic as atomic;
-
 #[macro_use]
 mod utils;
+
+#[cfg(feature = "panic-unwind")]
+cfg_sel!({
+    #[cfg(feature = "portable-atomic")]
+    {
+        use portable_atomic as atomic;
+    }
+    #[cfg(else)]
+    {
+        use core::sync::atomic;
+    }
+});
 
 #[macro_use]
 mod macros;
