@@ -8,6 +8,10 @@
 use core::ptr;
 use core::str;
 
+#[cfg(not(mips))]
+use semihosting::experimental::time::{Duration, Instant, SystemTime};
+#[cfg(arm_compat)]
+use semihosting::sys::arm_compat::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
@@ -16,11 +20,6 @@ use semihosting::{
     fs,
     io::{self, IsTerminal as _, Read as _, Seek as _, Write as _},
     print, println,
-};
-#[cfg(arm_compat)]
-use semihosting::{
-    experimental::time::{Duration, Instant, SystemTime},
-    sys::arm_compat::*,
 };
 
 include!(concat!(env!("OUT_DIR"), "/expected"));
@@ -189,12 +188,12 @@ fn run() {
         #[cfg(mips)]
         println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
         let mut buf = [0; 4];
-        if cfg!(mips) {
-            let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
-            assert!(errno == 22 || errno == 9, "{}", errno);
-        } else {
+        if cfg!(arm_compat) {
             // TODO(arm_compat): if no read permission, Arm semihosting handles it like eof.
             assert_eq!(file.read(&mut buf[..]).unwrap(), 0);
+        } else {
+            let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
+            assert!(errno == 22 || errno == 9, "{}", errno);
         }
         assert_eq!(
             file.seek(io::SeekFrom::End(-200)).unwrap_err().kind(),

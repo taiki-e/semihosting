@@ -18,7 +18,9 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 - Implement `core::error::Error` for `experimental::time::SystemTimeError`.
 
-- Expose `sys::mips::syscall::ParamRegR::ref_` on MIPS.
+- Add `sys::arm_compat::syscall::ParamRegR::c_str_len`.
+
+- Add `sys::mips::syscall::ParamRegR::ref_`.
 
 - Documentation improvements.
 

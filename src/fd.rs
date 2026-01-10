@@ -14,12 +14,12 @@
 
 #![allow(clippy::undocumented_unsafe_blocks)] // TODO
 
-use core::{ffi, fmt, marker::PhantomData, mem::ManuallyDrop};
+use core::{ffi::c_int, fmt, marker::PhantomData, mem::ManuallyDrop};
 
 use crate::sys;
 
 /// Raw file descriptors.
-pub type RawFd = ffi::c_int;
+pub type RawFd = c_int;
 
 // 16-bit targets has 16-bit c_int.
 const _: () = {

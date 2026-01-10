@@ -17,7 +17,7 @@ use crate::{fd::AsFd as _, io, sys};
 ///
 /// [`std::io::stdin`]: https://doc.rust-lang.org/std/io/fn.stdin.html
 pub fn stdin() -> io::Result<Stdin> {
-    sys::stdin().map(Stdin)
+    sys::stdio::stdin().map(Stdin)
 }
 /// Constructs a new handle to the standard output of the current process.
 ///
@@ -30,7 +30,7 @@ pub fn stdin() -> io::Result<Stdin> {
 ///
 /// [`std::io::stdout`]: https://doc.rust-lang.org/std/io/fn.stdout.html
 pub fn stdout() -> io::Result<Stdout> {
-    sys::stdout().map(Stdout)
+    sys::stdio::stdout().map(Stdout)
 }
 /// Constructs a new handle to the standard error of the current process.
 ///
@@ -43,21 +43,21 @@ pub fn stdout() -> io::Result<Stdout> {
 ///
 /// [`std::io::stderr`]: https://doc.rust-lang.org/std/io/fn.stderr.html
 pub fn stderr() -> io::Result<Stderr> {
-    sys::stderr().map(Stderr)
+    sys::stdio::stderr().map(Stderr)
 }
 
 /// A handle to the standard input stream of a process.
 ///
 /// Created by the [`io::stdin`] method.
-pub struct Stdin(sys::StdioFd);
+pub struct Stdin(sys::stdio::StdioFd);
 /// A handle to the standard output stream of a process.
 ///
 /// Created by the [`io::stdout`] method.
-pub struct Stdout(sys::StdioFd);
+pub struct Stdout(sys::stdio::StdioFd);
 /// A handle to the standard error stream of a process.
 ///
 /// Created by the [`io::stderr`] method.
-pub struct Stderr(sys::StdioFd);
+pub struct Stderr(sys::stdio::StdioFd);
 
 impl_as_fd!(Stdin, Stdout, Stderr);
 // TODO: std provides io trait implementations on &Std{in,out,err} as they uses locks.
@@ -115,7 +115,7 @@ macro_rules! impl_is_terminal {
             #[inline]
             fn is_terminal(&self) -> bool {
                 use crate::fd::AsFd as _;
-                crate::sys::is_terminal(self.as_fd())
+                crate::sys::stdio::is_terminal(self.as_fd())
             }
         }
     )*}

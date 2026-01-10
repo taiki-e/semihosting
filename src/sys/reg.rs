@@ -111,6 +111,10 @@ impl<'a> ParamRegR<'a> {
 ))]
 impl<'a> ParamRegR<'a> {
     #[inline]
+    pub fn c_str_len(s: &CStr) -> Self {
+        Self::usize(s.to_bytes().len())
+    }
+    #[inline]
     pub fn block(b: &'a [ParamRegR<'_>]) -> Self {
         Self::ptr(b.as_ptr())
     }
