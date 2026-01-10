@@ -103,10 +103,8 @@ cfg_sel!({
                 if start + len > BUF_SIZE {
                     return Err(io::ErrorKind::ArgumentListTooLong.into());
                 }
-                unsafe {
-                    mips_argn(i, buf.as_mut_ptr().add(start))?;
-                    start += len;
-                }
+                unsafe { mips_argn(i, buf.as_mut_ptr().add(start))? }
+                start += len;
             }
             Ok(ArgsBytes {
                 buf,

@@ -71,8 +71,8 @@ cfg_sel!({
 /// Raw semihosting call with a parameter that will be read + modified by the host
 #[inline]
 pub unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetReg {
+    let r;
     unsafe {
-        let r;
         asm!(
             trap!(),
             inout("r0") number.0 as usize => r, // OPERATION NUMBER REGISTER => RETURN REGISTER
@@ -81,15 +81,15 @@ pub unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetR
             inout("r1") parameter.0 => _, // PARAMETER REGISTER
             options(nostack, preserves_flags),
         );
-        RetReg(r)
     }
+    RetReg(r)
 }
 
 /// Raw semihosting call with a parameter that will be read (but not modified) by the host
 #[inline]
 pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>) -> RetReg {
+    let r;
     unsafe {
-        let r;
         asm!(
             trap!(),
             inout("r0") number.0 as usize => r, // OPERATION NUMBER REGISTER => RETURN REGISTER
@@ -98,6 +98,6 @@ pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>
             inout("r1") parameter.0 => _, // PARAMETER REGISTER
             options(nostack, preserves_flags, readonly),
         );
-        RetReg(r)
     }
+    RetReg(r)
 }

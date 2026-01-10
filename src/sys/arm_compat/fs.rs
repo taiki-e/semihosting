@@ -67,8 +67,6 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: io::SeekFrom) -> Result<u64> {
     };
     // sys_seek may succeed without this guard, but make the behavior consistent with other platforms.
     let abs_pos = isize::try_from(abs_pos).map_err(|_| Error::from_raw_os_error(errno::EINVAL))?;
-    unsafe {
-        sys_seek(fd, abs_pos as usize)?;
-    }
+    unsafe { sys_seek(fd, abs_pos as usize)? }
     Ok(abs_pos as u64)
 }

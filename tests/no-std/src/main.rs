@@ -259,13 +259,8 @@ fn run() {
         {
             let mut buf = [0; BUF_SIZE];
             let mut cmdline_block = CommandLine { ptr: buf.as_mut_ptr(), size: BUF_SIZE - 1 };
-            unsafe {
-                sys_get_cmdline(&mut cmdline_block).unwrap();
-                println!(
-                    "sys_get_cmdline: '{}'",
-                    str::from_utf8(&buf[..cmdline_block.size]).unwrap()
-                );
-            }
+            unsafe { sys_get_cmdline(&mut cmdline_block).unwrap() }
+            println!("sys_get_cmdline: '{}'", str::from_utf8(&buf[..cmdline_block.size]).unwrap());
         }
         let args = experimental::env::args::<BUF_SIZE>().unwrap();
         let program = (&args).next().unwrap().unwrap();

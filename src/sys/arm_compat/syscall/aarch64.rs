@@ -7,8 +7,8 @@ use super::{OperationNumber, ParamRegR, ParamRegW, RetReg};
 /// Raw semihosting call with a parameter that will be read + modified by the host
 #[inline]
 pub unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetReg {
+    let r;
     unsafe {
-        let r;
         asm!(
             "hlt 0xF000",
             in("w0") number.0, // OPERATION NUMBER REGISTER
@@ -18,15 +18,15 @@ pub unsafe fn syscall(number: OperationNumber, parameter: ParamRegW<'_>) -> RetR
             lateout("x0") r, // RETURN REGISTER
             options(nostack, preserves_flags),
         );
-        RetReg(r)
     }
+    RetReg(r)
 }
 
 /// Raw semihosting call with a parameter that will be read (but not modified) by the host
 #[inline]
 pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>) -> RetReg {
+    let r;
     unsafe {
-        let r;
         asm!(
             "hlt 0xF000",
             in("w0") number.0, // OPERATION NUMBER REGISTER
@@ -36,6 +36,6 @@ pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>
             lateout("x0") r, // RETURN REGISTER
             options(nostack, preserves_flags, readonly),
         );
-        RetReg(r)
     }
+    RetReg(r)
 }
