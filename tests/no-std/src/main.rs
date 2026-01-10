@@ -8,10 +8,14 @@
 use core::ptr;
 use core::str;
 
+#[cfg(not(any(m68k, mips)))]
+use semihosting::experimental::time::Instant;
 #[cfg(not(mips))]
-use semihosting::experimental::time::{Duration, Instant, SystemTime};
+use semihosting::experimental::time::{Duration, SystemTime};
 #[cfg(arm_compat)]
 use semihosting::sys::arm_compat::*;
+// #[cfg(m68k)]
+// use semihosting::sys::m68k::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
@@ -61,10 +65,12 @@ fn run() {
 
     let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips);
     // TODO: return result?
-    #[cfg(not(mips))]
+    #[cfg(not(any(m68k, mips)))]
     let instant_now = Instant::now();
+    #[cfg(not(m68k))]
     #[cfg(not(mips))]
     let system_time_now = SystemTime::now();
+    #[cfg(not(m68k))]
     #[cfg(not(mips))]
     {
         let d = system_time_now.duration_since(SystemTime::UNIX_EPOCH).unwrap();
@@ -77,6 +83,7 @@ fn run() {
         // assert_eq!(core::mem::size_of::<io::Result<()>(), core::mem::size_of::<u64>());
         println!("ok");
     }
+    #[cfg(not(m68k))]
     {
         print!("test io::stdio ... ");
         let mut stdout1 = io::stdout().unwrap();
@@ -152,6 +159,7 @@ fn run() {
         dbg!(());
         println!("ok");
     }
+    #[cfg(not(m68k))]
     {
         print!("test fs ... ");
         let path_a = c!("a.txt");
@@ -251,6 +259,7 @@ fn run() {
         assert_eq!(fs::File::open(path_a).unwrap_err().kind(), io::ErrorKind::NotFound);
         println!("ok");
     }
+    #[cfg(not(m68k))]
     {
         println!("test env::args ... ");
         const BUF_SIZE: usize = 256;
@@ -313,12 +322,22 @@ fn run() {
         // TODO(mips): mips_assert
         println!("ok");
     }
-
-    #[cfg(not(mips))]
+    #[cfg(m68k)]
     {
-        println!("instant_elapsed: {:?}", instant_now.elapsed());
-        println!("system_time_elapsed: {:?}", system_time_now.elapsed().unwrap());
+        // TODO
     }
+
+    #[cfg(not(any(m68k, mips)))]
+    println!("instant_elapsed: {:?}", instant_now.elapsed());
+    #[cfg(not(m68k))]
+    #[cfg(not(mips))]
+    println!("system_time_elapsed: {:?}", system_time_now.elapsed().unwrap());
+}
+
+#[cfg(m68k)]
+#[no_mangle]
+extern "C" fn abort() -> ! {
+    semihosting::process::abort()
 }
 
 #[cfg(feature = "panic-unwind")]

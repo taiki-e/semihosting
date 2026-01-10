@@ -13,7 +13,10 @@ target="$1"
 shift
 
 bin="$1"
-args=(-display none -kernel "${bin}")
+args=(-monitor none
+  -serial none
+  -net none
+  -nographic -kernel "${bin}")
 semihosting_args=("$@")
 
 if [[ -n "${QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED:-}" ]]; then
@@ -29,9 +32,9 @@ if [[ -n "${QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED:-}" ]]; then
     fi
   done
   if [[ -n "${semi_config}" ]]; then
-    args+=(-semihosting-config "${semi_config}")
+    args+=(-semihosting-config "chardev=stdio0,${semi_config}")
   else
-    args+=(-semihosting)
+    args+=(-semihosting-config "chardev=stdio0")
   fi
 else
   arg_string=''
@@ -46,9 +49,9 @@ else
     fi
   done
   if [[ -n "${arg_string}" ]]; then
-    args+=(-semihosting-config "arg=${arg_string}")
+    args+=(-semihosting-config "chardev=stdio0,arg=${arg_string}")
   else
-    args+=(-semihosting)
+    args+=(-semihosting-config "chardev=stdio0")
   fi
 fi
 
@@ -140,6 +143,10 @@ case "${target}" in
     ;;
   mipsisa64r6el-*)
     qemu_system mips64el -M malta -cpu I6400
+    ;;
+  # m68k
+  m68k*)
+    qemu_system m68k -chardev stdio,id=stdio0,mux=on -machine virt -cpu m68020
     ;;
   *) bail "unrecognized target ${target}" ;;
 esac

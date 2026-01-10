@@ -4,14 +4,14 @@ use std::{env, fs, path::PathBuf, time::SystemTime};
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rustc-check-cfg=cfg(mips,arm_compat)");
+    println!("cargo:rustc-check-cfg=cfg(m68k,mips,arm_compat)");
 
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
 
-    if target_arch.starts_with("mips") {
-        println!("cargo:rustc-cfg=mips");
-    } else {
-        println!("cargo:rustc-cfg=arm_compat");
+    match target_arch {
+        "m68k" => println!("cargo:rustc-cfg=m68k"),
+        _ if target_arch.starts_with("mips") => println!("cargo:rustc-cfg=mips"),
+        _ => println!("cargo:rustc-cfg=arm_compat"),
     }
 
     let target = env::var("TARGET").expect("TARGET not set");

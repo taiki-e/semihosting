@@ -87,6 +87,10 @@ default_targets=(
   # mips64r6
   mipsisa64r6-unknown-none   # custom target
   mipsisa64r6el-unknown-none # custom target
+
+  # m68k
+  m68k-unknown-linux-gnu
+  # m68k-unknown-none-elf
 )
 
 x() {
@@ -263,6 +267,20 @@ run() {
         # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
         qemu-user)
           info "QEMU doesn't support semihosting for MIPS (${target}) with user-mode (skipped)"
+          return 0
+          ;;
+      esac
+      ;;
+    m68k*)
+      case "${runner}" in
+        qemu-system)
+          target_rustflags+=" -C target-cpu=M68020 -C opt-level=s -C panic=abort -C link-arg=-nostartfiles"
+          args+=(-Z build-std-features=compiler-builtins-mem)
+          ;;
+        # As of QEMU 10.2, QEMU doesn't support semihosting for m68k with user-mode.
+        # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
+        qemu-user)
+          info "QEMU doesn't support semihosting for m68k (${target}) with user-mode (skipped)"
           return 0
           ;;
       esac

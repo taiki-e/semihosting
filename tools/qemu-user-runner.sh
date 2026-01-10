@@ -100,5 +100,7 @@ case "${target}" in
     ;;
   # MIPS
   mips*) bail "QEMU doesn't support semihosting for MIPS (${target}) with user-mode" ;;
+  # m68k
+  m68k*) bail "QEMU doesn't support semihosting for m68k (${target}) with user-mode" ;;
   *) bail "unrecognized target ${target}" ;;
 esac

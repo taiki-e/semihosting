@@ -27,6 +27,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips32r6",
             target_arch = "mips64",
             target_arch = "mips64r6",
+            target_arch = "m68k",
         )))]
         errno::E2BIG => ArgumentListTooLong,
         // errno::EADDRINUSE => AddrInUse,
@@ -40,6 +41,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ECONNRESET => ConnectionReset,
         // errno::EDEADLK => Deadlock,
@@ -56,12 +58,26 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ELOOP => __FilesystemLoop,
         errno::ENOENT => NotFound,
+        #[cfg(not(target_arch = "m68k"))]
         errno::ENOMEM => OutOfMemory,
         errno::ENOSPC => StorageFull,
-        // errno::ENOSYS => Unsupported,
+        #[cfg(not(any(
+            target_arch = "aarch64",
+            target_arch = "arm",
+            target_arch = "riscv32",
+            target_arch = "riscv64",
+            all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )))]
+        errno::ENOSYS => Unsupported,
+        #[cfg(not(target_arch = "m68k"))]
         errno::EMLINK => TooManyLinks,
         #[cfg(not(any(
             target_arch = "aarch64",
@@ -77,6 +93,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ENETDOWN => NetworkDown,
         #[cfg(not(any(
@@ -85,6 +102,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ENETUNREACH => NetworkUnreachable,
         #[cfg(not(any(
@@ -93,10 +111,12 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ENOTCONN => NotConnected,
         errno::ENOTDIR => NotADirectory,
         // errno::ENOTEMPTY => DirectoryNotEmpty,
+        #[cfg(not(target_arch = "m68k"))]
         errno::EPIPE => BrokenPipe,
         errno::EROFS => ReadOnlyFilesystem,
         errno::ESPIPE => NotSeekable,
@@ -107,6 +127,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ETIMEDOUT => TimedOut,
         #[cfg(not(any(
@@ -115,8 +136,10 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         errno::ETXTBSY => ExecutableFileBusy,
+        #[cfg(not(target_arch = "m68k"))]
         errno::EXDEV => CrossesDevices,
         // errno::EINPROGRESS => __InProgress,
         // errno::EOPNOTSUPP => Unsupported,
@@ -131,6 +154,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "riscv32",
             target_arch = "riscv64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "m68k",
         )))]
         x if x == errno::EAGAIN || x == errno::EWOULDBLOCK => WouldBlock,
         _ => Other,

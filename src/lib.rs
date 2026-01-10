@@ -259,6 +259,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
         target_arch = "mips32r6",
         target_arch = "mips64",
         target_arch = "mips64r6",
+        target_arch = "m68k",
         target_arch = "xtensa",
     ),
     feature(asm_experimental_arch)
@@ -281,6 +282,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     target_arch = "mips32r6",
     all(target_arch = "mips64", target_pointer_width = "64"),
     all(target_arch = "mips64r6", target_pointer_width = "64"),
+    target_arch = "m68k",
     target_arch = "xtensa",
 )))]
 compile_error!(

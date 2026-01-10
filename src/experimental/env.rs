@@ -37,6 +37,7 @@ impl<const BUF_SIZE: usize> fmt::Debug for Args<BUF_SIZE> {
     }
 }
 
+#[cfg_attr(target_arch = "m68k", allow(dead_code))]
 mod sys {
     use core::cell::Cell;
 

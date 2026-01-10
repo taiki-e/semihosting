@@ -40,5 +40,7 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 
 [profile.dev]
 opt-level = "s"
+lto = true
 
 [profile.release]
+lto = true

@@ -524,6 +524,28 @@ mod sys {
                 }
             }
         }
+        #[cfg(target_arch = "m68k")]
+        {
+            use crate::sys::m68k::hosted_gettimeofday;
+
+            const NANOS_PER_MICRO: i64 = 1_000;
+
+            impl SystemTime {
+                pub(crate) fn now() -> io::Result<Self> {
+                    let timeval = hosted_gettimeofday()?;
+                    // HOSTED_GETTIMEOFDAY doesn't have Y2038 problem (although it still has Y2106 problem)
+                    let tv_sec = timeval.tv_sec as u64 as i64;
+                    // HOSTED_GETTIMEOFDAY returns microseconds.
+                    let tv_nsec = Nanoseconds((timeval.tv_usec * NANOS_PER_MICRO) as u64 as u32);
+                    Ok(Self { t: Timespec { tv_sec, tv_nsec } })
+                }
+            }
+            impl Instant {
+                pub(crate) fn now() -> io::Result<Self> {
+                    Err(io::ErrorKind::Unsupported.into())
+                }
+            }
+        }
         #[cfg(else)]
         {
             impl SystemTime {

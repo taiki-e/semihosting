@@ -54,11 +54,47 @@ impl<'a> ParamRegW<'a> {
     target_arch = "riscv32",
     target_arch = "riscv64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
+    target_arch = "m68k",
 ))]
 impl<'a> ParamRegW<'a> {
     #[inline]
     pub fn block(b: &'a mut [ParamRegW<'_>]) -> Self {
+        #[cfg(target_arch = "m68k")]
+        debug_assert!(b.len() >= 2);
         Self::ptr(b.as_mut_ptr())
+    }
+}
+#[cfg(target_arch = "m68k")]
+impl<'a> ParamRegW<'a> {
+    #[inline]
+    pub fn const_ptr<T>(ptr: *const T) -> Self {
+        Self(ptr.cast::<c_void>() as *mut c_void, PhantomData)
+    }
+    #[inline]
+    pub fn imm_ref<T>(r: &'a T) -> Self {
+        Self::const_ptr(r)
+    }
+    #[inline]
+    pub fn imm_buf<T>(buf: &'a [T]) -> Self {
+        Self::const_ptr(buf.as_ptr())
+    }
+    #[inline]
+    pub fn c_str(s: &'a CStr) -> Self {
+        Self::const_ptr(s.as_ptr())
+    }
+    #[inline]
+    pub fn c_str_len(s: &CStr) -> Self {
+        Self::usize(s.to_bytes().len())
+    }
+    #[inline]
+    pub(crate) fn uninit() -> Self {
+        // TODO: use real uninit
+        Self::usize(0)
+    }
+    #[inline]
+    #[must_use]
+    pub fn to_ret(&self) -> RetReg {
+        RetReg(self.0)
     }
 }
 

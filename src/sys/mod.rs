@@ -61,6 +61,12 @@ use self::mips as arch;
 )]
 pub mod mips;
 
+#[cfg(target_arch = "m68k")]
+use self::m68k as arch;
+#[cfg(any(all(doc, docsrs), target_arch = "m68k"))]
+#[cfg_attr(docsrs, doc(cfg(target_arch = "m68k")))]
+pub mod m68k;
+
 mod errno;
 mod reg;
 
