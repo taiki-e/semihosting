@@ -51,7 +51,7 @@ pub(crate) fn open(path: &CStr, options: &crate::fs::OpenOptions) -> Result<Owne
     sys_open(path, mode)
 }
 
-// TODO: Arm semihosting doesn't provide Large-file support (LFS).
+// TODO(arm_compat): Arm semihosting doesn't provide Large-file support (LFS).
 #[allow(clippy::cast_possible_wrap, clippy::cast_sign_loss)]
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: io::SeekFrom) -> Result<u64> {
     let abs_pos = match pos {

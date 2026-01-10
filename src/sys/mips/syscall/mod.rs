@@ -39,7 +39,7 @@ impl OperationCode {
     pub const UHI_ARGN: Self = Self(11);
     // pub const UHI_RAMRANGE: Self = Self(12); // QEMU (as of 7.2) doesn't support this
     pub const UHI_PLOG: Self = Self(13);
-    // pub const UHI_ASSERT: Self = Self(14); // TODO
+    // pub const UHI_ASSERT: Self = Self(14); // TODO(mips)
     // pub const UHI_EXCEPTION: Self = Self(15); // QEMU (as of 7.2) doesn't support this
     pub const UHI_PREAD: Self = Self(19); // QEMU (as of 7.2) doesn't support this
     pub const UHI_PWRITE: Self = Self(20); // QEMU (as of 7.2) doesn't support this

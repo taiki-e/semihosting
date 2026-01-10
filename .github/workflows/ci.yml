@@ -78,8 +78,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - rust: '1.64'
-          - rust: '1.83'
+          - rust: '1.64' # LLVM 14
+          # - rust: '1.69' # LLVM 15
+          # - rust: '1.72' # LLVM 16
+          # - rust: '1.77' # LLVM 17
+          # - rust: '1.81' # LLVM 18
+          - rust: '1.83' # LLVM 19
+          # - rust: '1.86' # LLVM 19
+          # - rust: '1.90' # LLVM 20
           - rust: stable
           - rust: beta
           - rust: nightly
@@ -88,7 +94,7 @@ jobs:
             qemu-system: '7.2'
           # The behavior of semihosting somewhat depends on the behavior of the host system.
           - rust: nightly
-            os: ubuntu-24.04-arm # QEMU 8.2
+            os: ubuntu-24.04-arm
           - rust: nightly
             os: macos-latest
           - rust: nightly

@@ -61,7 +61,7 @@ fn run() {
     }
 
     let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips);
-    // TODO: return result?
+    // TODO(time): return result?
     #[cfg(not(mips))]
     let instant_now = Instant::now();
     #[cfg(not(mips))]
@@ -73,7 +73,7 @@ fn run() {
     }
     {
         print!("test io ... ");
-        // TODO
+        // TODO(io)
         // assert_eq!(core::mem::size_of::<io::Error>(), core::mem::size_of::<u64>());
         // assert_eq!(core::mem::size_of::<io::Result<()>(), core::mem::size_of::<u64>());
         println!("ok");

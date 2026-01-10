@@ -75,6 +75,8 @@ cfg_sel!({
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             let mut buf = [0; BUF_SIZE];
             let mut cmdline_block = CommandLine { ptr: buf.as_mut_ptr(), size: BUF_SIZE - 1 };
+            // SAFETY: pointer to the buffer is valid because we got it from a reference,
+            // and we've passed valid size (buffer size - 1 for nul byte).
             unsafe {
                 sys_get_cmdline(&mut cmdline_block)?;
             }
@@ -103,6 +105,8 @@ cfg_sel!({
                 if start + len > BUF_SIZE {
                     return Err(io::ErrorKind::ArgumentListTooLong.into());
                 }
+                // SAFETY: pointer is valid because we got it from a reference,
+                // and we've checked that the buffer has enough size.
                 unsafe { mips_argn(i, buf.as_mut_ptr().add(start))? }
                 start += len;
             }

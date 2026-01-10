@@ -68,7 +68,7 @@ pub enum SeekWhence {
 }
 
 #[allow(missing_docs)]
-#[allow(clippy::exhaustive_structs)]
+#[allow(clippy::exhaustive_structs)] // TODO(semver)
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct uhi_stat {
@@ -134,6 +134,7 @@ pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
 }
 pub(crate) use self::mips_close as close;
 
+// TODO(sys): Add uninit variant?
 /// UHI_READ
 pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     let len = buf.len();
@@ -240,8 +241,9 @@ pub fn mips_plog(msg: &CStr) -> Result<usize> {
     }
 }
 
-// TODO: UHI_ASSERT
+// TODO(mips): UHI_ASSERT
 
+// TODO(sys): Add uninit variant?
 /// UHI_PREAD
 pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<usize> {
     let len = buf.len();

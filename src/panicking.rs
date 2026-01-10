@@ -10,9 +10,9 @@ fn _panic(_info: &core::panic::PanicInfo<'_>) -> ! {
     #[cfg(feature = "panic-unwind")]
     {
         use crate::atomic::Ordering;
-        // TODO: PANICKED is global, so if panics occur concurrently on thread 1 and thread 2 this
-        // could be mistakenly thought to be a double panic. However, I'm not sure if there is a way
-        // to handle that well without thread local.
+        // TODO(panic-unwind): PANICKED is global, so if panics occur concurrently on thread 1 and
+        // thread 2 this could be mistakenly thought to be a double panic. However, I'm not sure if
+        // there is a way to handle that well without thread local.
         if crate::experimental::panic::PANICKED.fetch_add(1, Ordering::AcqRel) != 0 {
             #[cfg(feature = "stdio")]
             eprintln!("panic during panic, aborting");

@@ -9,7 +9,7 @@
 
 // Based on nightly-2025-02-19's std::io module.
 
-// TODO: io utilities e.g., Cursor?
+// TODO(io): io utilities e.g., Cursor?
 
 pub use self::error::{Error, ErrorKind, RawOsError, Result};
 #[macro_use]
@@ -61,6 +61,7 @@ pub trait Read {
     /// [std]: https://doc.rust-lang.org/std/io/trait.Read.html#tymethod.read
     fn read(&mut self, buf: &mut [u8]) -> Result<usize>;
 
+    // TODO(io,alloc)
     // /// Read all bytes until EOF in this source, placing them into `buf`.
     // ///
     // /// See [`std::io::Read::read_to_end` documentation][std] for details.
@@ -70,7 +71,7 @@ pub trait Read {
     // fn read_to_end(&mut self, buf: &mut Vec<u8>) -> Result<usize> {
     //     default_read_to_end(self, buf)
     // }
-
+    //
     // /// Read all bytes until EOF in this source, appending them to `buf`.
     // ///
     // /// See [`std::io::Read::read_to_string` documentation][std] for details.
@@ -231,7 +232,7 @@ pub enum SeekFrom {
     /// It is possible to seek beyond the end of an object, but it's an error to
     /// seek before byte 0.
     End(i64),
-    // TODO: It appears that SeekFrom::Current cannot be implemented with APIs provided by Arm semihosting...
+    // TODO(arm_compat): It appears that SeekFrom::Current cannot be implemented with APIs provided by Arm semihosting...
     // /// Sets the offset to the current position plus the specified number of
     // /// bytes.
     // ///

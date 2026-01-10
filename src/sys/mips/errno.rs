@@ -2,7 +2,7 @@
 
 // Values are defined in the appendix of Reference Manual.
 
-// TODO: should we expose this as public API of `sys` module?
+// TODO(sys): should we expose this as public API of `sys` module?
 
 #![allow(dead_code)]
 

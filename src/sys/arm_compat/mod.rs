@@ -102,7 +102,7 @@ pub enum OpenMode {
 }
 
 #[allow(missing_docs)]
-#[allow(clippy::exhaustive_structs)]
+#[allow(clippy::exhaustive_structs)] // TODO(semver)
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct HeapInfo {
@@ -113,7 +113,7 @@ pub struct HeapInfo {
 }
 
 #[allow(missing_docs)]
-#[allow(clippy::exhaustive_structs)]
+#[allow(clippy::exhaustive_structs)] // TODO(semver)
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct CommandLine {
@@ -264,7 +264,7 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> Result<OwnedFd> {
     }
 }
 
-// TODO: Add read_uninit?
+// TODO(sys,semver): Add init variant?
 /// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> Result<usize> {
     let len = buf.len();
@@ -281,7 +281,7 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     use core::slice;
 
     let len = buf.len();
-    // SAFETY: transmuting initialized u8 to MaybeUninit<u8> is always safe.
+    // SAFETY: transmuting initialized `&mut [u8]` to `&mut [MaybeUninit<u8>]` is safe unless uninitialized byte will be written to resulting slice.
     let buf = unsafe { slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
     sys_read(fd, buf)
 }
@@ -311,7 +311,7 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> Result<()> {
     if res.usize() == 0 { Ok(()) } else { Err(Error::from_raw_os_error(sys_errno())) }
 }
 
-// TODO: resolve safety
+// TODO(arm_compat): resolve safety
 // > The effect of seeking outside the current extent of the file object is undefined.
 /// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-seek-0x0a)
 pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> Result<()> {
@@ -334,7 +334,7 @@ pub fn sys_tickfreq() -> Result<usize> {
 }
 
 /// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-time-0x11)
-#[allow(clippy::unnecessary_wraps)] // TODO: change in next breaking release?
+#[allow(clippy::unnecessary_wraps)] // TODO(semver): change in next breaking release?
 pub fn sys_time() -> Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TIME) };
     Ok(res.usize())
