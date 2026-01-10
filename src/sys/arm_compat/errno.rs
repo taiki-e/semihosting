@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-// For now, this only includes values matched in all host platforms supported by QEMU.
+// https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-errno-0x13
+// > Whether `errno` is set or not, and to what value, is entirely host-specific,
+// > except where the ISO C standard defines the behavior.
+//
+// For now, this only includes values matched in all host platforms officially
+// supported by QEMU (i.e, Linux, macOS, FreeBSD, NetBSD, OpenBSD, Windows).
 // https://www.qemu.org/docs/master/about/build-platforms.html
 
 // TODO: should we expose this as public API of `sys` module?
@@ -20,14 +25,15 @@ pub(crate) const ENOEXEC: c_int = 8;
 pub(crate) const EBADF: c_int = 9;
 pub(crate) const ECHILD: c_int = 10;
 
-// pub(crate) const EAGAIN: c_int = 11; // linux-like, windows
+// pub(crate) const EAGAIN: c_int = 11; // linux, solarish, windows
+// pub(crate) const EWOULDBLOCK: c_int = EAGAIN; // linux, solarish
 // pub(crate) const EDEADLK: c_int = 11; // bsd-like
 
 pub(crate) const ENOMEM: c_int = 12;
 pub(crate) const EACCES: c_int = 13;
 pub(crate) const EFAULT: c_int = 14;
 
-// pub(crate) const ENOTBLK: c_int = 15; // linux-like, bsd-like
+// pub(crate) const ENOTBLK: c_int = 15; // linux, solarish, bsd-like
 
 pub(crate) const EBUSY: c_int = 16;
 pub(crate) const EEXIST: c_int = 17;
@@ -40,7 +46,7 @@ pub(crate) const ENFILE: c_int = 23;
 pub(crate) const EMFILE: c_int = 24;
 pub(crate) const ENOTTY: c_int = 25;
 
-// pub(crate) const ETXTBSY: c_int = 26; // linux-like, bsd-like
+// pub(crate) const ETXTBSY: c_int = 26; // linux, solarish, bsd-like
 
 pub(crate) const EFBIG: c_int = 27;
 pub(crate) const ENOSPC: c_int = 28;
@@ -50,3 +56,13 @@ pub(crate) const EMLINK: c_int = 31;
 pub(crate) const EPIPE: c_int = 32;
 pub(crate) const EDOM: c_int = 33;
 pub(crate) const ERANGE: c_int = 34;
+
+// pub(crate) const EAGAIN: c_int = 35; // bsd-like
+// pub(crate) const EWOULDBLOCK: c_int = EAGAIN; // bsd-like
+
+// pub(crate) const EDEADLK: c_int = 36; // windows
+// pub(crate) const EDEADLOCK: c_int = EDEADLK; // windows
+
+// pub(crate) const ETXTBSY: c_int = 139; // windows
+
+// pub(crate) const EWOULDBLOCK: c_int = 140; // windows

@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use core::ffi;
+
 use crate::{
     io::{self, RawOsError},
     sys::arch::errno,
 };
 
 #[inline]
-pub(crate) fn is_interrupted(errno: i32) -> bool {
-    errno == errno::EINTR
+pub(crate) fn is_interrupted(errno: RawOsError) -> bool {
+    errno as ffi::c_int == errno::EINTR
 }
 
-// From https://github.com/rust-lang/rust/blob/1.84.0/library/std/src/sys/pal/unix/mod.rs#L245.
+// Adapted from https://github.com/rust-lang/rust/blob/1.92.0/library/std/src/sys/pal/unix/mod.rs#L235.
 pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
     #[allow(clippy::enum_glob_use)]
     use io::ErrorKind::*;
-    match errno {
+    match errno as ffi::c_int {
         #[cfg(not(any(
             target_arch = "mips",
             target_arch = "mips32r6",
@@ -42,15 +44,39 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
         errno::EINTR => Interrupted,
         errno::EINVAL => InvalidInput,
         errno::EISDIR => IsADirectory,
-        // errno::ELOOP => FilesystemLoop, // unstable
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))] // TODO
+        errno::ELOOP => __FilesystemLoop,
         errno::ENOENT => NotFound,
         errno::ENOMEM => OutOfMemory,
         errno::ENOSPC => StorageFull,
         // errno::ENOSYS => Unsupported,
         errno::EMLINK => TooManyLinks,
-        // errno::ENAMETOOLONG => InvalidFilename,
-        // errno::ENETDOWN => NetworkDown,
-        // errno::ENETUNREACH => NetworkUnreachable,
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))] // TODO
+        errno::ENAMETOOLONG => InvalidFilename,
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))] // TODO
+        errno::ENETDOWN => NetworkDown,
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))] // TODO
+        errno::ENETUNREACH => NetworkUnreachable,
         #[cfg(any(
             target_arch = "mips",
             target_arch = "mips32r6",
@@ -71,9 +97,16 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips64r6",
         ))] // TODO
         errno::ETIMEDOUT => TimedOut,
-        // errno::ETXTBSY => ExecutableFileBusy,
+        #[cfg(any(
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        ))] // TODO
+        errno::ETXTBSY => ExecutableFileBusy,
         errno::EXDEV => CrossesDevices,
-        // errno::EINPROGRESS => InProgress, // unstable
+        // errno::EINPROGRESS => __InProgress,
+        // errno::EOPNOTSUPP => Unsupported,
         errno::EACCES | errno::EPERM => PermissionDenied,
 
         // These two constants can have the same value on some systems,
