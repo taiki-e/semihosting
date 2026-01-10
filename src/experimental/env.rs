@@ -26,7 +26,7 @@ pub fn args<const BUF_SIZE: usize>() -> io::Result<Args<BUF_SIZE>> {
 impl<'a, const BUF_SIZE: usize> Iterator for &'a Args<BUF_SIZE> {
     type Item = Result<&'a str, str::Utf8Error>;
     fn next(&mut self) -> Option<Self::Item> {
-        let arg = (&self.0).next()?;
+        let arg = sys::next(&self.0)?;
         Some(str::from_utf8(arg))
     }
 }
@@ -45,20 +45,20 @@ mod sys {
     const NUL: u8 = b'\0';
 
     pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
-        pub(super) buf: [u8; BUF_SIZE],
-        pub(super) next: Cell<usize>,
-        pub(super) size: usize,
+        buf: [u8; BUF_SIZE],
+        next: Cell<usize>,
+        size: usize,
         #[cfg(any(
             target_arch = "mips",
             target_arch = "mips32r6",
             target_arch = "mips64",
             target_arch = "mips64r6",
         ))]
-        next_fn: for<'a> fn(&mut &'a ArgsBytes<BUF_SIZE>) -> Option<&'a [u8]>,
+        next_fn: for<'a> fn(&'a ArgsBytes<BUF_SIZE>) -> Option<&'a [u8]>,
     }
 
-    fn next_from_cmdline<'a, const BUF_SIZE: usize>(
-        args: &mut &'a ArgsBytes<BUF_SIZE>,
+    pub(crate) fn next_from_cmdline<'a, const BUF_SIZE: usize>(
+        args: &'a ArgsBytes<BUF_SIZE>,
     ) -> Option<&'a [u8]> {
         if args.next.get() >= args.size {
             return None;
@@ -98,15 +98,6 @@ mod sys {
         Some(&args.buf[start..end.unwrap_or_else(|| args.next.get())])
     }
 
-    #[allow(clippy::copy_iterator)] // TODO
-    impl<'a, const BUF_SIZE: usize> Iterator for &'a ArgsBytes<BUF_SIZE> {
-        type Item = &'a [u8];
-        #[inline]
-        fn next(&mut self) -> Option<Self::Item> {
-            next(self)
-        }
-    }
-
     cfg_sel!({
         #[cfg(any(
             target_arch = "aarch64",
@@ -116,7 +107,7 @@ mod sys {
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         ))]
         {
-            use self::next_from_cmdline as next;
+            pub(crate) use self::next_from_cmdline as next;
             use crate::sys::arm_compat::{CommandLine, sys_get_cmdline};
 
             pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
@@ -163,7 +154,7 @@ mod sys {
                 })
             }
             fn next_from_args<'a, const BUF_SIZE: usize>(
-                args: &mut &'a ArgsBytes<BUF_SIZE>,
+                args: &'a ArgsBytes<BUF_SIZE>,
             ) -> Option<&'a [u8]> {
                 if args.next.get() >= args.size {
                     return None;
@@ -191,8 +182,8 @@ mod sys {
                 }
             }
             #[inline]
-            fn next<'a, const BUF_SIZE: usize>(
-                args: &mut &'a ArgsBytes<BUF_SIZE>,
+            pub(crate) fn next<'a, const BUF_SIZE: usize>(
+                args: &'a ArgsBytes<BUF_SIZE>,
             ) -> Option<&'a [u8]> {
                 (args.next_fn)(args)
             }
@@ -202,8 +193,8 @@ mod sys {
             pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
                 Err(io::ErrorKind::Unsupported.into())
             }
-            fn next<'a, const BUF_SIZE: usize>(
-                _args: &mut &'a ArgsBytes<BUF_SIZE>,
+            pub(crate) fn next<'a, const BUF_SIZE: usize>(
+                _args: &'a ArgsBytes<BUF_SIZE>,
             ) -> Option<&'a [u8]> {
                 unreachable!()
             }
