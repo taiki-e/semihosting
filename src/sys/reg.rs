@@ -14,7 +14,6 @@ use crate::{
 
 /// PARAMETER REGISTER (read-write)
 #[allow(missing_debug_implementations)]
-#[allow(clippy::exhaustive_structs)]
 #[repr(transparent)]
 pub struct ParamRegW<'a>(pub(crate) *mut c_void, PhantomData<&'a mut ()>);
 impl<'a> ParamRegW<'a> {
@@ -64,7 +63,6 @@ impl<'a> ParamRegW<'a> {
 
 /// PARAMETER REGISTER (read-only)
 #[allow(missing_debug_implementations)]
-#[allow(clippy::exhaustive_structs)]
 #[repr(transparent)]
 pub struct ParamRegR<'a>(pub(crate) *const c_void, PhantomData<&'a ()>);
 impl<'a> ParamRegR<'a> {
@@ -111,6 +109,10 @@ impl<'a> ParamRegR<'a> {
 ))]
 impl<'a> ParamRegR<'a> {
     #[inline]
+    pub fn c_str_len(s: &CStr) -> Self {
+        Self::usize(s.to_bytes().len())
+    }
+    #[inline]
     pub fn block(b: &'a [ParamRegR<'_>]) -> Self {
         Self::ptr(b.as_ptr())
     }
@@ -119,7 +121,6 @@ impl<'a> ParamRegR<'a> {
 /// RETURN REGISTER
 #[derive(Clone, Copy)]
 #[allow(missing_debug_implementations)]
-#[allow(clippy::exhaustive_structs)]
 #[repr(transparent)]
 pub struct RetReg(pub(crate) *mut c_void);
 impl RetReg {
