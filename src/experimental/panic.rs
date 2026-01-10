@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+//! Panic support.
+//!
+//! This module is a subset of the [`std::panic`] module.
+//!
+//! [`std::panic`]: https://doc.rust-lang.org/std/panic/index.html
+
 use alloc::boxed::Box;
 use core::any::Any;
 

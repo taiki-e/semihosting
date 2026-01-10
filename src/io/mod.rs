@@ -20,7 +20,6 @@ mod impls;
 #[cfg(feature = "stdio")]
 pub use self::stdio::{IsTerminal, Stderr, Stdin, Stdout, stderr, stdin, stdout};
 #[cfg(feature = "stdio")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 mod stdio;
 
 use core::fmt;
@@ -68,7 +67,6 @@ pub trait Read {
     // ///
     // /// [std]: https://doc.rust-lang.org/std/io/trait.Read.html#method.read_to_end
     // #[cfg(feature = "alloc")]
-    // #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     // fn read_to_end(&mut self, buf: &mut Vec<u8>) -> Result<usize> {
     //     default_read_to_end(self, buf)
     // }
@@ -79,7 +77,6 @@ pub trait Read {
     // ///
     // /// [std]: https://doc.rust-lang.org/std/io/trait.Read.html#method.read_to_string
     // #[cfg(feature = "alloc")]
-    // #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     // fn read_to_string(&mut self, buf: &mut String) -> Result<usize> {
     //     default_read_to_string(self, buf)
     // }

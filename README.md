@@ -30,6 +30,9 @@ APIs are categorized into the following four types:
 - `semihosting::sys` module provides low-level access to platform-specific semihosting interfaces.
 
 - `semihosting::experimental` module provides experimental APIs. See [optional features](#optional-features) for more.
+  - `env`: Provide `args`.
+  - `time`: Provide `Instant` and `SystemTime`.
+  - `panic`: Provide `catch_unwind`.
 
 Additionally, this library provides a panic handler for semihosting, `-C panic=unwind` support, backtrace support, via [optional features](#optional-features).
 

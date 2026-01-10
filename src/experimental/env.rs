@@ -1,5 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+//! Inspection and manipulation of the process's environment.
+//!
+//! This module is a subset of the [`std::env`] module, with [some differences](https://github.com/taiki-e/semihosting/issues/1).
+//!
+//! [`std::env`]: https://doc.rust-lang.org/std/env/index.html
+
 #![allow(clippy::undocumented_unsafe_blocks)] // TODO
 
 use core::{fmt, str};

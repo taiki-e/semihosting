@@ -27,6 +27,7 @@ use crate::{
     io::{Error, RawOsError, Result},
 };
 
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 #[non_exhaustive]
@@ -55,6 +56,7 @@ pub enum ExitReason {
 }
 
 // Refs: https://github.com/openocd-org/openocd/blob/HEAD/src/target/semihosting_common.c
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
 #[non_exhaustive]
@@ -97,6 +99,7 @@ pub enum OpenMode {
     RDWR_APPEND_BINARY = 11,
 }
 
+#[allow(missing_docs)]
 #[allow(clippy::exhaustive_structs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
@@ -107,6 +110,7 @@ pub struct HeapInfo {
     pub stack_limit: *mut c_void,
 }
 
+#[allow(missing_docs)]
 #[allow(clippy::exhaustive_structs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]

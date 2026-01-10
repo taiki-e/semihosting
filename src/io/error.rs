@@ -60,7 +60,6 @@ impl Error {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl From<alloc::ffi::NulError> for Error {
     /// Converts a [`alloc::ffi::NulError`] into a [`Error`].
     fn from(_: alloc::ffi::NulError) -> Error {
@@ -69,7 +68,6 @@ impl From<alloc::ffi::NulError> for Error {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl From<alloc::collections::TryReserveError> for Error {
     /// Converts `TryReserveError` to an error with [`ErrorKind::OutOfMemory`].
     ///

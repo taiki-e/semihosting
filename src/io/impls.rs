@@ -95,7 +95,6 @@ impl<S: ?Sized + Seek> Seek for &mut S {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<R: ?Sized + Read> Read for alloc::boxed::Box<R> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
@@ -131,7 +130,6 @@ impl<R: ?Sized + Read> Read for alloc::boxed::Box<R> {
     // }
 }
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<W: ?Sized + Write> Write for alloc::boxed::Box<W> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
@@ -163,7 +161,6 @@ impl<W: ?Sized + Write> Write for alloc::boxed::Box<W> {
     }
 }
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<S: ?Sized + Seek> Seek for alloc::boxed::Box<S> {
     #[inline]
     fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
@@ -341,7 +338,6 @@ impl Write for &mut [u8] {
 /// Write is implemented for `Vec<u8>` by appending to the vector.
 /// The vector will grow as needed.
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl Write for alloc::vec::Vec<u8> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
@@ -374,7 +370,6 @@ impl Write for alloc::vec::Vec<u8> {
 
 /// Read is implemented for `VecDeque<u8>` by consuming bytes from the front of the `VecDeque`.
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl Read for alloc::collections::VecDeque<u8> {
     /// Fill `buf` with the contents of the "front" slice as returned by
     /// [`as_slices`][`alloc::collections::VecDeque::as_slices`]. If the contained byte slices of the `VecDeque` are
@@ -473,7 +468,6 @@ fn split_at_mut_checked<T>(this: &mut [T], mid: usize) -> Option<(&mut [T], &mut
 
 /// Write is implemented for `VecDeque<u8>` by appending to the `VecDeque`, growing it as needed.
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl Write for alloc::collections::VecDeque<u8> {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {

@@ -27,6 +27,9 @@ APIs are categorized into the following four types:
 - `semihosting::sys` module provides low-level access to platform-specific semihosting interfaces.
 
 - `semihosting::experimental` module provides experimental APIs. See [optional features](#optional-features) for more.
+  - `env`: Provide `args`.
+  - `time`: Provide `Instant` and `SystemTime`.
+  - `panic`: Provide `catch_unwind`.
 
 Additionally, this library provides a panic handler for semihosting, `-C panic=unwind` support, backtrace support, via [optional features](#optional-features).
 
@@ -262,7 +265,10 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 )]
 // docs.rs only (cfg is enabled by docs.rs, not build script)
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![cfg_attr(docsrs, doc(auto_cfg = false))]
+#![cfg_attr(
+    docsrs,
+    doc(auto_cfg(hide(semihosting_no_duration_checked_float, semihosting_no_error_in_core)))
+)]
 
 // 64-bit architecture's 32-bit ABI (e.g., AArch64 ILP32 ABI) are also
 // unsupported yet (is there a semihosting interface defined for those ABIs?).
@@ -329,11 +335,8 @@ pub mod fd;
 pub mod io;
 
 #[cfg(any(feature = "args", feature = "panic-unwind", feature = "time"))]
-// Skip doc(cfg) due to rustdoc doesn't handle nested doc(cfg) well.
-// #[cfg_attr(docsrs, doc(cfg(any(feature = "args", feature = "panic-unwind", feature = "time"))))]
 pub mod experimental;
 #[cfg(feature = "fs")]
-#[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 pub mod fs;
 #[cfg(feature = "panic-handler")]
 mod panicking;

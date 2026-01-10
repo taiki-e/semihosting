@@ -4,6 +4,9 @@
 //!
 //! This module contains basic methods to manipulate the contents of the host filesystem.
 //!
+//! This module is a subset of the [`std::fs`] module except that [`CStr`] is used for the path
+//! instead of [`Path`].
+//!
 //! [`Path`] is not available in `core`, so this module uses [`CStr`] instead in the API where
 //! `std` uses [`Path`]. When creating a path from a string literal, it is recommended to use the
 //! C string literals (`c"..."`, available since Rust 1.77) or [c!](c!()) macro.
@@ -17,9 +20,6 @@
 //! fs::write(c!("b.txt"), "123")?;
 //! # Ok::<(), semihosting::io::Error>(())
 //! ```
-//!
-//! This module is a subset of the [`std::fs`] module except that [`CStr`] is used for the path
-//! instead of [`Path`].
 //!
 //! # Platform-specific behavior
 //!

@@ -76,6 +76,7 @@ impl OperationNumber {
     /// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-tickfreq-0x31)
     pub const SYS_TICKFREQ: Self = Self(0x31);
 
+    #[allow(missing_docs)]
     #[inline] // inline to help compiler to remove assertion
     pub const fn user_defined(number: u32) -> Self {
         assert!(number >= 0x100 && number <= 0x1FF);

@@ -28,27 +28,32 @@ use crate::{
     io::{Error, Result},
 };
 
-pub const O_RDONLY: i32 = 0x0;
-pub const O_WRONLY: i32 = 0x1;
-pub const O_RDWR: i32 = 0x2;
-pub const O_APPEND: i32 = 0x8;
-pub const O_CREAT: i32 = 0x200;
-pub const O_TRUNC: i32 = 0x400;
-pub const O_EXCL: i32 = 0x800;
+#[allow(missing_docs)]
+mod consts {
+    pub const O_RDONLY: i32 = 0x0;
+    pub const O_WRONLY: i32 = 0x1;
+    pub const O_RDWR: i32 = 0x2;
+    pub const O_APPEND: i32 = 0x8;
+    pub const O_CREAT: i32 = 0x200;
+    pub const O_TRUNC: i32 = 0x400;
+    pub const O_EXCL: i32 = 0x800;
 
-pub const S_IXOTH: i32 = 0o1;
-pub const S_IWOTH: i32 = 0o2;
-pub const S_IROTH: i32 = 0o4;
-pub const S_IRWXO: i32 = 0o7;
-pub const S_IXGRP: i32 = 0o10;
-pub const S_IWGRP: i32 = 0o20;
-pub const S_IRGRP: i32 = 0o40;
-pub const S_IRWXG: i32 = 0o70;
-pub const S_IXUSR: i32 = 0o100;
-pub const S_IWUSR: i32 = 0o200;
-pub const S_IRUSR: i32 = 0o400;
-pub const S_IRWXU: i32 = 0o700;
+    pub const S_IXOTH: i32 = 0o1;
+    pub const S_IWOTH: i32 = 0o2;
+    pub const S_IROTH: i32 = 0o4;
+    pub const S_IRWXO: i32 = 0o7;
+    pub const S_IXGRP: i32 = 0o10;
+    pub const S_IWGRP: i32 = 0o20;
+    pub const S_IRGRP: i32 = 0o40;
+    pub const S_IRWXG: i32 = 0o70;
+    pub const S_IXUSR: i32 = 0o100;
+    pub const S_IWUSR: i32 = 0o200;
+    pub const S_IRUSR: i32 = 0o400;
+    pub const S_IRWXU: i32 = 0o700;
+}
+pub use self::consts::*;
 
+#[allow(missing_docs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(i32)]
 #[non_exhaustive]
@@ -63,6 +68,7 @@ pub enum SeekWhence {
     SEEK_END = 2,
 }
 
+#[allow(missing_docs)]
 #[allow(clippy::exhaustive_structs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
@@ -90,6 +96,7 @@ pub(crate) fn from_errno(res: RetReg) -> Error {
     Error::from_raw_os_error(res.errno())
 }
 
+/// UHI_EXIT
 #[allow(clippy::cast_sign_loss)]
 pub fn mips_exit(code: i32) {
     unsafe {
@@ -98,6 +105,7 @@ pub fn mips_exit(code: i32) {
 }
 pub(crate) use self::mips_exit as exit;
 
+/// UHI_OPEN
 #[allow(clippy::cast_sign_loss)]
 pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> Result<OwnedFd> {
     let (res, errno) = unsafe {
@@ -139,6 +147,7 @@ pub(crate) fn should_close(fd: &OwnedFd) -> bool {
     fd.as_raw_fd() as ffi::c_uint > STDERR_FILENO as ffi::c_uint
 }
 
+/// UHI_CLOSE
 pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_CLOSE, ParamRegR::raw_fd(fd)) };
@@ -151,6 +160,7 @@ pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
 }
 pub(crate) use self::mips_close as close;
 
+/// UHI_READ
 pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
     let len = buf.len();
     let (res, errno) = unsafe {
@@ -171,6 +181,7 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> Result<usize> {
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_read as read;
 
+/// UHI_WRITE
 pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
     let (res, errno) = unsafe {
         syscall3_readonly(
@@ -190,6 +201,7 @@ pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> Result<usize> {
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_write as write;
 
+/// UHI_LSEEK
 pub unsafe fn mips_lseek(fd: BorrowedFd<'_>, offset: isize, whence: SeekWhence) -> Result<usize> {
     let (res, errno) = unsafe {
         syscall3_readonly(
@@ -202,12 +214,14 @@ pub unsafe fn mips_lseek(fd: BorrowedFd<'_>, offset: isize, whence: SeekWhence) 
     if res.int() == -1 { Err(from_errno(errno)) } else { Ok(res.usize()) }
 }
 
+/// UHI_UNLINK
 pub fn mips_unlink(path: &CStr) -> Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_UNLINK, ParamRegR::c_str(path)) };
     if res.usize() == 0 { Ok(()) } else { Err(from_errno(errno)) }
 }
 
+/// UHI_FSTAT
 pub fn mips_fstat(fd: BorrowedFd<'_>) -> Result<uhi_stat> {
     let mut buf: uhi_stat = unsafe { mem::zeroed() };
     let (res, errno) =
@@ -220,18 +234,21 @@ pub(crate) fn is_terminal(fd: BorrowedFd<'_>) -> bool {
     matches!(mips_fstat(fd), Ok(stat) if stat.st_mode & S_IFCHR != 0)
 }
 
+/// UHI_ARGC
 pub fn mips_argc() -> usize {
     let (res, _errno) = unsafe { syscall0(OperationCode::UHI_ARGC) };
     debug_assert!(!res.int().is_negative(), "{}", res.int());
     res.usize()
 }
 
+/// UHI_ARGNLEN
 pub fn mips_argnlen(n: usize) -> Result<usize> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_ARGNLEN, ParamRegR::usize(n)) };
     if res.int() == -1 { Err(from_errno(errno)) } else { Ok(res.usize()) }
 }
 
+/// UHI_ARGN
 pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> Result<()> {
     let (res, errno) =
         unsafe { syscall2(OperationCode::UHI_ARGN, ParamRegW::usize(n), ParamRegW::ptr(buf)) };
@@ -243,6 +260,7 @@ pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> Result<()> {
     }
 }
 
+/// UHI_PLOG
 pub fn mips_plog(msg: &CStr) -> Result<usize> {
     let (res, errno) = unsafe { syscall1_readonly(OperationCode::UHI_PLOG, ParamRegR::c_str(msg)) };
     if res.int() == -1 {
@@ -255,6 +273,7 @@ pub fn mips_plog(msg: &CStr) -> Result<usize> {
 
 // TODO: UHI_ASSERT
 
+/// UHI_PREAD
 pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<usize> {
     let len = buf.len();
     let (res, errno) = unsafe {
@@ -274,6 +293,7 @@ pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> Result<u
     }
 }
 
+/// UHI_PWRITE
 pub fn mips_pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: usize) -> Result<usize> {
     let (res, errno) = unsafe {
         syscall4_readonly(
@@ -292,6 +312,7 @@ pub fn mips_pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: usize) -> Result<usiz
     }
 }
 
+/// UHI_LINK
 pub fn mips_link(old: &CStr, new: &CStr) -> Result<()> {
     let (res, errno) = unsafe {
         syscall2_readonly(OperationCode::UHI_LINK, ParamRegR::c_str(old), ParamRegR::c_str(new))

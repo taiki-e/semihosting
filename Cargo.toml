@@ -13,8 +13,8 @@ Semihosting for AArch64, Arm, RISC-V, MIPS32, MIPS64, and Xtensa.
 """
 
 [package.metadata.docs.rs]
-# NB: sync with env.TEST_FEATURES in .github/workflows/ci.yml
-features = ["alloc", "stdio", "fs", "args", "time"]
+# NB: sync with env.TEST_FEATURES in .github/workflows/ci.yml (excluding panic-unwind feature)
+features = ["alloc", "stdio", "fs", "args", "time", "panic-unwind"]
 # Building documentation on any architectures that support Arm semihosting with
 # the above cfg will show all APIs with proper doc(cfg).
 targets = ["aarch64-unknown-linux-gnu"]

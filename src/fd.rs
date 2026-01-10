@@ -168,7 +168,6 @@ impl AsFd for OwnedFd {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<T: ?Sized + AsFd> AsFd for alloc::boxed::Box<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {
@@ -176,7 +175,6 @@ impl<T: ?Sized + AsFd> AsFd for alloc::boxed::Box<T> {
     }
 }
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 impl<T: ?Sized + AsFd> AsFd for alloc::rc::Rc<T> {
     #[inline]
     fn as_fd(&self) -> BorrowedFd<'_> {

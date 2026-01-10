@@ -24,6 +24,7 @@ pub use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};
 /// Semihosting operation code.
 #[derive(Debug, Clone, Copy)]
 pub struct OperationCode(usize);
+#[allow(missing_docs)]
 impl OperationCode {
     pub const UHI_EXIT: Self = Self(1);
     pub const UHI_OPEN: Self = Self(2);

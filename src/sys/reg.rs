@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#![allow(missing_docs)]
+
 use core::{
     ffi::{CStr, c_int, c_void},
     marker::PhantomData,

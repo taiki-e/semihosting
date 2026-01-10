@@ -3,7 +3,6 @@
 #![allow(missing_docs)] // TODO
 
 #[cfg(feature = "stdio")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 #[macro_export]
 macro_rules! print {
     ($($tt:tt)*) => {
@@ -14,7 +13,6 @@ macro_rules! print {
     };
 }
 #[cfg(feature = "stdio")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 #[macro_export]
 macro_rules! println {
     ($($tt:tt)*) => {
@@ -26,7 +24,6 @@ macro_rules! println {
 }
 
 #[cfg(feature = "stdio")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 #[macro_export]
 macro_rules! eprint {
     ($($tt:tt)*) => {
@@ -37,7 +34,6 @@ macro_rules! eprint {
     };
 }
 #[cfg(feature = "stdio")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 #[macro_export]
 macro_rules! eprintln {
     ($($tt:tt)*) => {
@@ -49,7 +45,6 @@ macro_rules! eprintln {
 }
 
 #[cfg(feature = "stdio")]
-#[cfg_attr(docsrs, doc(cfg(feature = "stdio")))]
 #[macro_export]
 macro_rules! dbg {
     () => {
