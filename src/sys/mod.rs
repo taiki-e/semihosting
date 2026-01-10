@@ -71,10 +71,10 @@ pub(crate) mod time;
 #[cfg(feature = "fs")]
 pub(crate) use self::arch::fs;
 #[cfg(feature = "stdio")]
-pub(crate) use self::arch::{StdioFd, is_terminal, stderr, stdin, stdout};
+pub(crate) use self::arch::stdio;
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::arch::{read, write};
 pub(crate) use self::{
-    arch::{close, exit, should_close},
+    arch::{close, exit},
     errno::{decode_error_kind, is_interrupted},
 };

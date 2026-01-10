@@ -12,12 +12,11 @@
 pub(crate) mod errno;
 #[cfg(feature = "fs")]
 pub(crate) mod fs;
+#[cfg(feature = "stdio")]
+pub(crate) mod stdio;
 pub mod syscall;
 
-use core::{
-    ffi::{self, CStr},
-    mem,
-};
+use core::{ffi::CStr, mem};
 
 use self::syscall::{
     OperationCode, ParamRegR, ParamRegW, RetReg, syscall0, syscall1_readonly, syscall2,
@@ -121,31 +120,6 @@ pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> Result<OwnedFd> {
         None => Err(from_errno(errno)),
     }
 }
-#[cfg(feature = "stdio")]
-const STDIN_FILENO: RawFd = 0; // /dev/stdin
-#[cfg(feature = "stdio")]
-const STDOUT_FILENO: RawFd = 1; // /dev/stdout
-const STDERR_FILENO: RawFd = 2; // /dev/stderr
-#[cfg(feature = "stdio")]
-pub(crate) type StdioFd = BorrowedFd<'static>;
-#[cfg(feature = "stdio")]
-pub(crate) fn stdin() -> Result<StdioFd> {
-    Ok(unsafe { BorrowedFd::borrow_raw(STDIN_FILENO) })
-}
-#[cfg(feature = "stdio")]
-pub(crate) fn stdout() -> Result<StdioFd> {
-    Ok(unsafe { BorrowedFd::borrow_raw(STDOUT_FILENO) })
-}
-#[cfg(feature = "stdio")]
-pub(crate) fn stderr() -> Result<StdioFd> {
-    Ok(unsafe { BorrowedFd::borrow_raw(STDERR_FILENO) })
-}
-#[inline]
-#[allow(clippy::cast_sign_loss)]
-pub(crate) fn should_close(fd: &OwnedFd) -> bool {
-    // In UHI, stdio streams are open by default, and shouldn't closed.
-    fd.as_raw_fd() as ffi::c_uint > STDERR_FILENO as ffi::c_uint
-}
 
 /// UHI_CLOSE
 pub unsafe fn mips_close(fd: RawFd) -> Result<()> {
@@ -227,11 +201,6 @@ pub fn mips_fstat(fd: BorrowedFd<'_>) -> Result<uhi_stat> {
     let (res, errno) =
         unsafe { syscall2(OperationCode::UHI_FSTAT, ParamRegW::fd(fd), ParamRegW::ref_(&mut buf)) };
     if res.usize() == 0 { Ok(buf) } else { Err(from_errno(errno)) }
-}
-#[cfg(feature = "stdio")]
-pub(crate) fn is_terminal(fd: BorrowedFd<'_>) -> bool {
-    const S_IFCHR: u32 = 0x2000;
-    matches!(mips_fstat(fd), Ok(stat) if stat.st_mode & S_IFCHR != 0)
 }
 
 /// UHI_ARGC
