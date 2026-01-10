@@ -104,7 +104,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   location to stderr.
 
 - <a name="optional-features-trap-hlt"></a>**`trap-hlt`**<br>
-  Arm-specific: Use HLT instruction on A+R profile.
+  Arm-specific: Use HLT instruction (except for M-profile architecture).
 
   [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#the-semihosting-interface) says:
 
@@ -121,7 +121,8 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
 
   Based on the Arm's recommendation, this is implemented as an optional feature.
 
-  Enabling this feature on architectures other than Arm A+R profile will result in a compile error.
+  Note:
+  - Enabling this feature on architectures other than Arm or on Arm M-profile architecture will result in a compile error.
 
 - <a name="optional-features-openocd-semihosting"></a>**`openocd-semihosting`**<br>
   Xtensa-specific: Use OpenOCD Semihosting.
@@ -131,9 +132,12 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   - Tensilica ISS SIMCALL used in Cadence tools and [QEMU](https://www.qemu.org/docs/master/about/emulation.html#supported-targets).
   - Arm-semihosting-compatible semihosting interface used in [OpenOCD](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) and [probe-rs](https://github.com/probe-rs/probe-rs/pull/2303). (This crate calls it "OpenOCD Semihosting", which is the same as the option name in [newlib-esp32](https://github.com/espressif/newlib-esp32/blob/esp-4.3.0_20240530/libgloss/xtensa/syscalls.c#L21).)
 
+  When this feature is enabled, this crate uses the latter interface.
+
   This crate does not currently support SIMCALL-based semihosting, but users need to explicitly enable the feature to avoid accidentally selecting a different one than one actually want to use.
 
-  Enabling this feature on architectures other than Xtensa will result in a compile error.
+  Note:
+  - Enabling this feature on architectures other than Xtensa will result in a compile error.
 
 - **`portable-atomic`**<br>
   Use [portable-atomic]'s atomic types.

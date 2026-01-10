@@ -27,64 +27,19 @@ allowed_external_types = [
 [lib]
 doc-scrape-examples = false
 
+# Please read the documentation before using optional features:
+# https://github.com/taiki-e/semihosting#optional-features
 [features]
-# Use `alloc`.
 alloc = []
-
-# Enable `semihosting::io::{stdin,stdout,stderr}` and `semihosting::{print*,eprint*,dbg}`.
 stdio = []
-
-# Enable `semihosting::fs`.
 fs = []
-
-# Enable `semihosting::experimental::env::args`.
-#
-# Note: This feature is experimental and outside of the normal semver guarantees and
-# minor or patch versions of semihosting may make breaking changes to them at any time.
 args = []
-
-# Enable `semihosting::experimental::time`.
-#
-# Note: This feature is experimental and outside of the normal semver guarantees and
-# minor or patch versions of semihosting may make breaking changes to them at any time.
 time = []
-
-# Provide panic handler based on `semihosting::process::exit`.
-#
-# If the `stdio` feature is enabled, this attempt to output panic message and
-# location to stderr.
 panic-handler = []
-
-# Provide `-C panic=unwind` support for panic handler and enable
-# `semihosting::experimental::panic::catch_unwind`.
-#
-# See readme for details.
-#
-# Note: This feature is experimental and outside of the normal semver guarantees and
-# minor or patch versions of semihosting may make breaking changes to them at any time.
 panic-unwind = ["alloc", "panic-handler", "unwinding", "unwinding/fde-static", "unwinding/panic", "unwinding/personality"]
-
-# Provide backtrace support for panic handler.
-#
-# See readme for details.
-#
-# Note: This feature is experimental and outside of the normal semver guarantees and
-# minor or patch versions of semihosting may make breaking changes to them at any time.
 backtrace = ["stdio", "unwinding", "unwinding/hide-trace"]
-
-# Use portable-atomic's atomic types.
-#
-# See readme for details.
 portable-atomic = ["dep:portable-atomic"]
-
-# Arm-specific: Use HLT instruction on A+R profile.
-#
-# See readme for details.
 trap-hlt = []
-
-# Xtensa-specific: Use OpenOCD Semihosting.
-#
-# See readme for details.
 openocd-semihosting = []
 
 [dependencies]
