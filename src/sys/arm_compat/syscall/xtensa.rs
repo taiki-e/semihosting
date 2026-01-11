@@ -45,6 +45,64 @@ pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>
 }
 
 #[inline]
+pub(crate) unsafe fn syscall_param_unchanged(
+    number: OperationNumber,
+    parameter: ParamRegW<'_>,
+) -> RetReg {
+    let ret;
+    #[cfg(not(debug_assertions))]
+    unsafe {
+        asm!(
+            trap!(),
+            inout("a2") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            in("a3") parameter.0, // PARAMETER REGISTER
+            options(nostack, preserves_flags),
+        );
+    }
+    #[cfg(debug_assertions)]
+    unsafe {
+        let param_new;
+        asm!(
+            trap!(),
+            inout("a2") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            inout("a3") parameter.0 => param_new, // PARAMETER REGISTER
+            options(nostack, preserves_flags),
+        );
+        assert_eq!(parameter.0, param_new);
+    }
+    RetReg(ret)
+}
+
+#[inline]
+pub(crate) unsafe fn syscall_param_unchanged_readonly(
+    number: OperationNumber,
+    parameter: ParamRegR<'_>,
+) -> RetReg {
+    let ret;
+    #[cfg(not(debug_assertions))]
+    unsafe {
+        asm!(
+            trap!(),
+            inout("a2") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            in("a3") parameter.0, // PARAMETER REGISTER
+            options(nostack, preserves_flags, readonly),
+        );
+    }
+    #[cfg(debug_assertions)]
+    unsafe {
+        let param_new;
+        asm!(
+            trap!(),
+            inout("a2") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            inout("a3") parameter.0 => param_new, // PARAMETER REGISTER
+            options(nostack, preserves_flags, readonly),
+        );
+        assert_eq!(parameter.0, param_new);
+    }
+    RetReg(ret)
+}
+
+#[inline]
 pub(crate) unsafe fn syscall_noreturn_readonly(
     number: OperationNumber,
     parameter: ParamRegR<'_>,

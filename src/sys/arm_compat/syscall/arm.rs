@@ -12,7 +12,7 @@ cfg_sel!({
         // T32
         macro_rules! trap {
             () => {
-                "bkpt 0xAB"
+                "bkpt 0xAB" // .inst 0xBEAB
             };
         }
     }
@@ -55,14 +55,14 @@ cfg_sel!({
         #[cfg(any(target_feature = "thumb-mode", semihosting_target_feature = "thumb-mode"))]
         macro_rules! trap {
             () => {
-                "svc 0xAB"
+                "svc 0xAB" // .inst 0xDFAB
             };
         }
         // A32
         #[cfg(not(any(target_feature = "thumb-mode", semihosting_target_feature = "thumb-mode")))]
         macro_rules! trap {
             () => {
-                "svc 0x123456"
+                "svc 0x123456" // .inst 0xEF123456
             };
         }
     }
@@ -98,6 +98,64 @@ pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>
             inout("r1") parameter.0 => _, // PARAMETER REGISTER
             options(nostack, preserves_flags, readonly),
         );
+    }
+    RetReg(ret)
+}
+
+#[inline]
+pub(crate) unsafe fn syscall_param_unchanged(
+    number: OperationNumber,
+    parameter: ParamRegW<'_>,
+) -> RetReg {
+    let ret;
+    #[cfg(not(debug_assertions))]
+    unsafe {
+        asm!(
+            trap!(),
+            inout("r0") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            in("r1") parameter.0, // PARAMETER REGISTER
+            options(nostack, preserves_flags),
+        );
+    }
+    #[cfg(debug_assertions)]
+    unsafe {
+        let param_new;
+        asm!(
+            trap!(),
+            inout("r0") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            inout("r1") parameter.0 => param_new, // PARAMETER REGISTER
+            options(nostack, preserves_flags),
+        );
+        assert_eq!(parameter.0, param_new);
+    }
+    RetReg(ret)
+}
+
+#[inline]
+pub(crate) unsafe fn syscall_param_unchanged_readonly(
+    number: OperationNumber,
+    parameter: ParamRegR<'_>,
+) -> RetReg {
+    let ret;
+    #[cfg(not(debug_assertions))]
+    unsafe {
+        asm!(
+            trap!(),
+            inout("r0") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            in("r1") parameter.0, // PARAMETER REGISTER
+            options(nostack, preserves_flags, readonly),
+        );
+    }
+    #[cfg(debug_assertions)]
+    unsafe {
+        let param_new;
+        asm!(
+            trap!(),
+            inout("r0") number.0 => ret, // OPERATION NUMBER REGISTER => RETURN REGISTER
+            inout("r1") parameter.0 => param_new, // PARAMETER REGISTER
+            options(nostack, preserves_flags, readonly),
+        );
+        assert_eq!(parameter.0, param_new);
     }
     RetReg(ret)
 }

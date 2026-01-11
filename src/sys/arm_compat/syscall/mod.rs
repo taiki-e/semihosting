@@ -9,8 +9,10 @@
 #[cfg_attr(target_arch = "xtensa", path = "xtensa.rs")]
 mod arch;
 
-pub(crate) use self::arch::syscall_noreturn_readonly;
 pub use self::arch::{syscall, syscall_readonly};
+pub(crate) use self::arch::{
+    syscall_noreturn_readonly, syscall_param_unchanged, syscall_param_unchanged_readonly,
+};
 pub use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};
 
 /// Semihosting operation number.
@@ -63,19 +65,19 @@ impl OperationNumber {
     pub const SYS_GET_CMDLINE: Self = Self(0x15);
     /// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-heapinfo-0x16)
     pub const SYS_HEAPINFO: Self = Self(0x16);
-    // #[deprecated = "obsoleted in semihosting specification version 2.0"]
-    //  pub const angel_SWIreason_EnterSVC : Self = Self(0x17);
     /// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-0x18)
     #[doc(alias = "angel_SWIreason_ReportException")] // old name
     pub const SYS_EXIT: Self = Self(0x18);
-    // #[deprecated = "obsoleted in semihosting specification version 2.0"]
-    //  pub const angelSWI_Reason_SyncCacheRange : Self = Self(0x19);
     /// [SYS_EXIT_EXTENDED (0x20)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit_extended-0x20)
     pub const SYS_EXIT_EXTENDED: Self = Self(0x20);
     /// [SYS_ELAPSED (0x30)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-elapsed-0x30)
     pub const SYS_ELAPSED: Self = Self(0x30);
     /// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-tickfreq-0x31)
     pub const SYS_TICKFREQ: Self = Self(0x31);
+    // https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#the-semihosting-interface
+    // > Previous versions of the semihosting specification included the operation numbers
+    // > 0x17 (angel_SWIreason_EnterSVC) and 0x19 (angelSWI_Reason_SyncCacheRange).
+    // > These semihosting operation numbers are now reserved, and are not to be used or implemented.
 
     #[allow(missing_docs)]
     #[inline] // inline to help compiler to remove assertion
@@ -91,4 +93,11 @@ pub unsafe fn syscall0(number: OperationNumber) -> RetReg {
     // In most operations that don't have parameters, such as SYS_ERRNO, and
     // SYS_CLOCK, the PARAMETER REGISTER must be zero.
     unsafe { syscall_readonly(number, ParamRegR::unsigned(0)) }
+}
+/// `syscall_param_unchanged_readonly(number, null)`
+#[inline]
+pub(crate) unsafe fn syscall0_param_unchanged(number: OperationNumber) -> RetReg {
+    // In most operations that don't have parameters, such as SYS_ERRNO, and
+    // SYS_CLOCK, the PARAMETER REGISTER must be zero.
+    unsafe { syscall_param_unchanged_readonly(number, ParamRegR::unsigned(0)) }
 }

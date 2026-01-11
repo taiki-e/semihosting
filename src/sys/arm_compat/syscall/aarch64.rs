@@ -6,7 +6,7 @@ use super::{OperationNumber, ParamRegR, ParamRegW, RetReg};
 
 macro_rules! trap {
     () => {
-        "hlt 0xF000"
+        "hlt 0xF000" // .inst 0xD45E0000
     };
 }
 
@@ -42,6 +42,68 @@ pub unsafe fn syscall_readonly(number: OperationNumber, parameter: ParamRegR<'_>
             lateout("x0") ret, // RETURN REGISTER
             options(nostack, preserves_flags, readonly),
         );
+    }
+    RetReg(ret)
+}
+
+#[inline]
+pub(crate) unsafe fn syscall_param_unchanged(
+    number: OperationNumber,
+    parameter: ParamRegW<'_>,
+) -> RetReg {
+    let ret;
+    #[cfg(not(debug_assertions))]
+    unsafe {
+        asm!(
+            trap!(),
+            in("w0") number.0, // OPERATION NUMBER REGISTER
+            in("x1") parameter.0, // PARAMETER REGISTER
+            lateout("x0") ret, // RETURN REGISTER
+            options(nostack, preserves_flags),
+        );
+    }
+    #[cfg(debug_assertions)]
+    unsafe {
+        let param_new;
+        asm!(
+            trap!(),
+            in("w0") number.0, // OPERATION NUMBER REGISTER
+            inout("x1") parameter.0 => param_new, // PARAMETER REGISTER
+            lateout("x0") ret, // RETURN REGISTER
+            options(nostack, preserves_flags),
+        );
+        assert_eq!(parameter.0, param_new);
+    }
+    RetReg(ret)
+}
+
+#[inline]
+pub(crate) unsafe fn syscall_param_unchanged_readonly(
+    number: OperationNumber,
+    parameter: ParamRegR<'_>,
+) -> RetReg {
+    let ret;
+    #[cfg(not(debug_assertions))]
+    unsafe {
+        asm!(
+            trap!(),
+            in("w0") number.0, // OPERATION NUMBER REGISTER
+            in("x1") parameter.0, // PARAMETER REGISTER
+            lateout("x0") ret, // RETURN REGISTER
+            options(nostack, preserves_flags, readonly),
+        );
+    }
+    #[cfg(debug_assertions)]
+    unsafe {
+        let param_new;
+        asm!(
+            trap!(),
+            in("w0") number.0, // OPERATION NUMBER REGISTER
+            inout("x1") parameter.0 => param_new, // PARAMETER REGISTER
+            lateout("x0") ret, // RETURN REGISTER
+            options(nostack, preserves_flags, readonly),
+        );
+        assert_eq!(parameter.0, param_new);
     }
     RetReg(ret)
 }

@@ -30,6 +30,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 - Optimize `experimental::env::args`.
 
+- Optimize various semihosting calls on AArch64, Arm, RISC-V, Xtensa.
+
 - Documentation improvements.
 
 ## [0.1.22] - 2026-01-10

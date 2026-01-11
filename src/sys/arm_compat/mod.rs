@@ -24,8 +24,9 @@ use core::{
 };
 
 use self::syscall::{
-    OperationNumber, ParamRegR, ParamRegW, syscall, syscall_noreturn_readonly, syscall_readonly,
-    syscall0,
+    OperationNumber, ParamRegR, ParamRegW, syscall, syscall_noreturn_readonly,
+    syscall_param_unchanged, syscall_param_unchanged_readonly, syscall_readonly,
+    syscall0_param_unchanged,
 };
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
@@ -133,18 +134,29 @@ fn from_errno() -> io::Error {
 
 /// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10)
 pub fn sys_clock() -> io::Result<usize> {
-    let res = unsafe { syscall0(OperationNumber::SYS_CLOCK) };
-    if res.signed() == -1 { Err(from_errno()) } else { Ok(res.unsigned()) }
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | other           | -1              |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    let ret = unsafe { syscall0_param_unchanged(OperationNumber::SYS_CLOCK) };
+    if ret.signed() == -1 { Err(from_errno()) } else { Ok(ret.unsigned()) }
 }
 
 /// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-close-0x02)
 pub unsafe fn sys_close(fd: RawFd) -> io::Result<()> {
     let block = [ParamRegR::raw_fd(fd)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_CLOSE, ParamRegR::block(&block)) };
-    if res.unsigned() == 0 {
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | -1              |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block              | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_CLOSE, ParamRegR::block(&block))
+    };
+    if ret.unsigned() == 0 {
         Ok(())
     } else {
-        debug_assert_eq!(res.signed(), -1);
+        debug_assert_eq!(ret.signed(), -1);
         Err(from_errno())
     }
 }
@@ -155,19 +167,28 @@ pub fn sys_elapsed() -> io::Result<u64> {
     // On 32-bit, the parameter is a pointer to two 32-bit field data block
     // On 64-bit, the parameter is a pointer to one 64-bit field data block
     let mut block = [0_u64];
-    let res = unsafe { syscall(OperationNumber::SYS_ELAPSED, ParamRegW::ref_(&mut block)) };
-    if res.unsigned() == 0 {
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | -1              |                 |
+    // | PARAMETER REGISTER | - (unchanged)   | -1              |                 |
+    // | block              | updated         | - (unmentioned) |                 |
+    let ret = unsafe { syscall(OperationNumber::SYS_ELAPSED, ParamRegW::ref_(&mut block)) };
+    if ret.unsigned() == 0 {
         Ok(block[0])
     } else {
-        debug_assert_eq!(res.signed(), -1);
+        debug_assert_eq!(ret.signed(), -1);
         Err(from_errno())
     }
 }
 
 /// [SYS_ERRNO (0x13)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-errno-0x13)
 pub fn sys_errno() -> io::RawOsError {
-    let res = unsafe { syscall0(OperationNumber::SYS_ERRNO) };
-    res.errno()
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | updated         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | param_unchanged |
+    let ret = unsafe { syscall0_param_unchanged(OperationNumber::SYS_ERRNO) };
+    ret.errno()
 }
 
 /// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-0x18)
@@ -184,6 +205,11 @@ pub fn sys_exit(reason: ExitReason) {
     // > RDI_Execute request or equivalent. In this case, execution continues
     // > with the registers as they were on entry to the operation, or as
     // > subsequently modified by the debugger.
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | ?               |                 |
+    // | PARAMETER REGISTER | ?               |                 |
+    // | block              | - (unmentioned) | readonly        |
     unsafe {
         syscall_readonly(OperationNumber::SYS_EXIT, arg);
     }
@@ -225,6 +251,11 @@ pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
     // On 64-bit system, SYS_EXIT_EXTENDED call is identical to the behavior of the mandatory SYS_EXIT.
     #[cfg(target_pointer_width = "64")]
     let number = OperationNumber::SYS_EXIT;
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | ?               |                 |
+    // | PARAMETER REGISTER | ?               |                 |
+    // | block              | - (unmentioned) | readonly        |
     unsafe {
         syscall_readonly(number, ParamRegR::block(&block));
     }
@@ -233,8 +264,15 @@ pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
 /// [SYS_FLEN (0x0C)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-flen-0x0c)
 pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
     let block = [ParamRegR::fd(fd)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_FLEN, ParamRegR::block(&block)) };
-    if res.signed() == -1 { Err(from_errno()) } else { Ok(res.unsigned()) }
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | other           | -1              |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block              | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_FLEN, ParamRegR::block(&block))
+    };
+    if ret.signed() == -1 { Err(from_errno()) } else { Ok(ret.unsigned()) }
 }
 
 /// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
@@ -245,14 +283,21 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
 #[deprecated(note = "use safe sys_get_cmdline_uninit instead")] // TODO(semver): Remove
 pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
     let len = cmdline.size;
-    let res = unsafe { syscall(OperationNumber::SYS_GET_CMDLINE, ParamRegW::ref_(cmdline)) };
-    if res.unsigned() == 0 {
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | -1              |                 |
+    // | PARAMETER REGISTER | - (unchanged)   | - (unmentioned) | param_unchanged |
+    // | cmdline / ptr      | updated         | - (unmentioned) |                 |
+    let ret = unsafe {
+        syscall_param_unchanged(OperationNumber::SYS_GET_CMDLINE, ParamRegW::ref_(cmdline))
+    };
+    if ret.unsigned() == 0 {
         debug_assert!(!cmdline.ptr.is_null());
         let size = cmdline.size;
         debug_assert!(size < len); // len contains trailing nul
         Ok(())
     } else {
-        debug_assert_eq!(res.signed(), -1);
+        debug_assert_eq!(ret.signed(), -1);
         Err(from_errno())
     }
 }
@@ -261,14 +306,21 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
 pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&[u8]> {
     let len = buf.len();
     let mut block = [ParamRegW::buf(buf), ParamRegW::unsigned(len)];
-    let res = unsafe { syscall(OperationNumber::SYS_GET_CMDLINE, ParamRegW::block(&mut block)) };
-    if res.unsigned() == 0 {
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | -1              |                 |
+    // | PARAMETER REGISTER | - (unchanged)   | - (unmentioned) | param_unchanged |
+    // | block / buf        | updated         | - (unmentioned) |                 |
+    let ret = unsafe {
+        syscall_param_unchanged(OperationNumber::SYS_GET_CMDLINE, ParamRegW::block(&mut block))
+    };
+    if ret.unsigned() == 0 {
         debug_assert!(!block[0].to_ret().ptr().is_null());
         let size = block[1].to_ret().unsigned();
         debug_assert!(size < len); // len contains trailing nul
         Ok(unsafe { slice_assume_init_ref(&buf[..size]) })
     } else {
-        debug_assert_eq!(res.signed(), -1);
+        debug_assert_eq!(ret.signed(), -1);
         Err(from_errno())
     }
 }
@@ -276,8 +328,13 @@ pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&[u8]> 
 /// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-heapinfo-0x16)
 pub fn sys_heapinfo() -> HeapInfo {
     let mut buf: HeapInfo = unsafe { mem::zeroed() };
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | ? (unmentioned) | ? (unmentioned) |                 |
+    // | PARAMETER REGISTER | - (unchanged)   | - (unmentioned) | param_unchanged |
+    // | buf                | updated         | - (unmentioned) |                 |
     unsafe {
-        syscall(OperationNumber::SYS_HEAPINFO, ParamRegW::ref_(&mut buf));
+        syscall_param_unchanged(OperationNumber::SYS_HEAPINFO, ParamRegW::ref_(&mut buf));
     }
     buf
 }
@@ -285,15 +342,29 @@ pub fn sys_heapinfo() -> HeapInfo {
 /// [SYS_ISERROR (0x08)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-iserror-0x08)
 pub fn sys_iserror(res: isize) -> bool {
     let block = [ParamRegR::signed(res)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_ISERROR, ParamRegR::block(&block)) };
-    res.unsigned() != 0
+    // |                    | is not an error | is an error     |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | nonzero         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block              | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_ISERROR, ParamRegR::block(&block))
+    };
+    ret.unsigned() != 0
 }
 
 /// [SYS_ISTTY (0x09)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-istty-0x09)
 pub fn sys_istty(fd: BorrowedFd<'_>) -> io::Result<bool> {
     let block = [ParamRegR::fd(fd)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_ISTTY, ParamRegR::block(&block)) };
-    match res.unsigned() {
+    // |                    | is a tty        | is a file       | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 1               | 0               | other           |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block              | - (unmentioned) | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_ISTTY, ParamRegR::block(&block))
+    };
+    match ret.unsigned() {
         1 => Ok(true),
         0 => Ok(false),
         _ => Err(from_errno()), // TODO: some host system doesn't set errno
@@ -304,10 +375,17 @@ pub fn sys_istty(fd: BorrowedFd<'_>) -> io::Result<bool> {
 pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
     let block =
         [ParamRegR::c_str(path), ParamRegR::unsigned(mode as usize), ParamRegR::c_str_len(path)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_OPEN, ParamRegR::block(&block)) };
-    match res.raw_fd() {
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | nonzero         | -1              |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block / path       | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_OPEN, ParamRegR::block(&block))
+    };
+    match ret.raw_fd() {
         Some(fd) => {
-            debug_assert_ne!(res.unsigned(), 0);
+            debug_assert_ne!(ret.unsigned(), 0);
             Ok(unsafe { OwnedFd::from_raw_fd(fd) })
         }
         None => Err(from_errno()),
@@ -319,8 +397,14 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let len = buf.len();
     let mut block = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::unsigned(len)];
-    let res = unsafe { syscall(OperationNumber::SYS_READ, ParamRegW::block(&mut block)) };
-    if res.unsigned() <= len { Ok(len - res.unsigned()) } else { Err(from_errno()) }
+    // |                    | fully filled    | on EOF          | partly filled   | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | == len          | < len           | > len || < 0    |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block / buf        | updated         | - (unmentioned) | updated         | ? (unmentioned) |                 |
+    let ret =
+        unsafe { syscall_param_unchanged(OperationNumber::SYS_READ, ParamRegW::block(&mut block)) };
+    if ret.unsigned() <= len { Ok(len - ret.unsigned()) } else { Err(from_errno()) }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -333,15 +417,26 @@ pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 
 /// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-readc-0x07)
 pub fn sys_readc() -> u8 {
-    let res = unsafe { syscall0(OperationNumber::SYS_READC) };
-    res.u8()
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | updated         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | param_unchanged |
+    let ret = unsafe { syscall0_param_unchanged(OperationNumber::SYS_READC) };
+    ret.u8()
 }
 
 /// [SYS_REMOVE (0x0E)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-remove-0x0e)
 pub fn sys_remove(path: &CStr) -> io::Result<()> {
     let block = [ParamRegR::c_str(path), ParamRegR::c_str_len(path)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_REMOVE, ParamRegR::block(&block)) };
-    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | nonzero         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block / path       | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_REMOVE, ParamRegR::block(&block))
+    };
+    if ret.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
 }
 
 /// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f)
@@ -352,8 +447,15 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> io::Result<()> {
         ParamRegR::c_str(to),
         ParamRegR::c_str_len(to),
     ];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_RENAME, ParamRegR::block(&block)) };
-    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | nonzero         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block / from / to  | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_RENAME, ParamRegR::block(&block))
+    };
+    if ret.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
 }
 
 // TODO(arm_compat): resolve safety
@@ -361,43 +463,79 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> io::Result<()> {
 /// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-seek-0x0a)
 pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> io::Result<()> {
     let block = [ParamRegR::fd(fd), ParamRegR::unsigned(abs_pos)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_SEEK, ParamRegR::block(&block)) };
-    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | 0               | negative        |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    // | block              | - (unmentioned) | - (unmentioned) | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_SEEK, ParamRegR::block(&block))
+    };
+    if ret.unsigned() == 0 {
+        Ok(())
+    } else {
+        debug_assert!(ret.signed().is_negative());
+        Err(from_errno())
+    }
 }
 
 /// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-system-0x12)
 pub fn sys_system(cmd: &CStr) -> usize {
+    // On exit, the RETURN REGISTER contains the return status.
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | updated         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | param_unchanged |
+    // | block / cmd        | - (unmentioned) | readonly        |
     let block = [ParamRegR::c_str(cmd), ParamRegR::c_str_len(cmd)];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_SYSTEM, ParamRegR::block(&block)) };
-    res.unsigned()
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_SYSTEM, ParamRegR::block(&block))
+    };
+    ret.unsigned()
 }
 
 /// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-tickfreq-0x31)
 pub fn sys_tickfreq() -> io::Result<usize> {
-    let res = unsafe { syscall0(OperationNumber::SYS_TICKFREQ) };
-    if res.signed() == -1 { Err(from_errno()) } else { Ok(res.unsigned()) }
+    // |                    | on success      | on failure      |                 |
+    // | ------------------ | --------------- | --------------- | --------------- |
+    // | RETURN REGISTER    | other           | -1              |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned) | param_unchanged |
+    let ret = unsafe { syscall0_param_unchanged(OperationNumber::SYS_TICKFREQ) };
+    if ret.signed() == -1 { Err(from_errno()) } else { Ok(ret.unsigned()) }
 }
 
 /// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-time-0x11)
-#[allow(clippy::unnecessary_wraps)] // TODO: change in next breaking release?
+#[allow(clippy::unnecessary_wraps)] // TODO(semver): change in next breaking release
 pub fn sys_time() -> io::Result<usize> {
-    let res = unsafe { syscall0(OperationNumber::SYS_TIME) };
-    Ok(res.unsigned())
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | updated         |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | param_unchanged |
+    let ret = unsafe { syscall0_param_unchanged(OperationNumber::SYS_TIME) };
+    Ok(ret.unsigned())
 }
 
 /// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05)
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
-    let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::unsigned(buf.len())];
-    let res = unsafe { syscall_readonly(OperationNumber::SYS_WRITE, ParamRegR::block(&block)) };
-    match res.unsigned() {
-        0 => Ok(buf.len()),
-        not_written if not_written <= buf.len() => {
-            if not_written == buf.len() && !buf.is_empty() {
+    let len = buf.len();
+    let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::unsigned(len)];
+    // |                    | fully filled    | partly filled / on failure |                 |
+    // | ------------------ | --------------- | -------------------------- | --------------- |
+    // | RETURN REGISTER    | 0               | nonzero                    |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | - (unmentioned)            | param_unchanged |
+    // | block / buf        | - (unmentioned) | - (unmentioned)            | readonly        |
+    let ret = unsafe {
+        syscall_param_unchanged_readonly(OperationNumber::SYS_WRITE, ParamRegR::block(&block))
+    };
+    match ret.unsigned() {
+        0 => Ok(len),
+        not_written if not_written <= len => {
+            if not_written == len && !buf.is_empty() {
                 // At least on qemu-system-arm 7.2, if fd is a read-only file,
                 // this is returned instead of an error.
                 return Err(from_errno());
             }
-            Ok(buf.len() - not_written)
+            Ok(len - not_written)
         }
         _ => Err(from_errno()),
     }
@@ -406,15 +544,25 @@ pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 pub(crate) use self::sys_write as write;
 
 /// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-writec-0x03)
-pub fn sys_writec(b: u8) {
+pub fn sys_writec(character: u8) {
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | corrupted       |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | param_unchanged |
+    // | character          | - (unmentioned) | readonly        |
     unsafe {
-        syscall_readonly(OperationNumber::SYS_WRITEC, ParamRegR::ref_(&b));
+        syscall_param_unchanged_readonly(OperationNumber::SYS_WRITEC, ParamRegR::ref_(&character));
     }
 }
 
 /// [SYS_WRITE0 (0x04)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write0-0x04)
-pub fn sys_write0(s: &CStr) {
+pub fn sys_write0(string: &CStr) {
+    // |                    | always          |                 |
+    // | ------------------ | --------------- | --------------- |
+    // | RETURN REGISTER    | corrupted       |                 |
+    // | PARAMETER REGISTER | - (unmentioned) | param_unchanged |
+    // | string             | - (unmentioned) | readonly        |
     unsafe {
-        syscall_readonly(OperationNumber::SYS_WRITE0, ParamRegR::c_str(s));
+        syscall_param_unchanged_readonly(OperationNumber::SYS_WRITE0, ParamRegR::c_str(string));
     }
 }
