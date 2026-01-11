@@ -102,7 +102,7 @@ fn from_errno(res: RetReg) -> io::Error {
 pub fn mips_exit(code: i32) {
     #[allow(clippy::cast_sign_loss)]
     unsafe {
-        syscall1_readonly(OperationCode::UHI_EXIT, ParamRegR::usize(code as isize as usize));
+        syscall1_readonly(OperationCode::UHI_EXIT, ParamRegR::unsigned(code as isize as usize));
     }
 }
 pub(crate) fn exit(code: i32) -> ! {
@@ -110,7 +110,7 @@ pub(crate) fn exit(code: i32) -> ! {
     unsafe {
         syscall1_noreturn_readonly(
             OperationCode::UHI_EXIT,
-            ParamRegR::usize(code as isize as usize),
+            ParamRegR::unsigned(code as isize as usize),
         )
     }
 }
@@ -122,8 +122,8 @@ pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> io::Result<OwnedFd> {
         syscall3_readonly(
             OperationCode::UHI_OPEN,
             ParamRegR::c_str(path),
-            ParamRegR::usize(flags as usize),
-            ParamRegR::usize(mode as usize),
+            ParamRegR::unsigned(flags as usize),
+            ParamRegR::unsigned(mode as usize),
         )
     };
     match res.raw_fd() {
@@ -136,10 +136,10 @@ pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> io::Result<OwnedFd> {
 pub unsafe fn mips_close(fd: RawFd) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_CLOSE, ParamRegR::raw_fd(fd)) };
-    if res.usize() == 0 {
+    if res.unsigned() == 0 {
         Ok(())
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno(errno))
     }
 }
@@ -154,14 +154,14 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
             OperationCode::UHI_READ,
             ParamRegW::fd(fd),
             ParamRegW::buf(buf),
-            ParamRegW::usize(len),
+            ParamRegW::unsigned(len),
         )
     };
-    if res.int() == -1 {
+    if res.signed() == -1 {
         Err(from_errno(errno))
     } else {
-        debug_assert!(res.usize() <= buf.len());
-        Ok(res.usize())
+        debug_assert!(res.unsigned() <= buf.len());
+        Ok(res.unsigned())
     }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
@@ -174,14 +174,14 @@ pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
             OperationCode::UHI_WRITE,
             ParamRegR::fd(fd),
             ParamRegR::buf(buf),
-            ParamRegR::usize(buf.len()),
+            ParamRegR::unsigned(buf.len()),
         )
     };
-    if res.int() == -1 {
+    if res.signed() == -1 {
         Err(from_errno(errno))
     } else {
-        debug_assert!(res.usize() <= buf.len());
-        Ok(res.usize())
+        debug_assert!(res.unsigned() <= buf.len());
+        Ok(res.unsigned())
     }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
@@ -197,18 +197,18 @@ pub unsafe fn mips_lseek(
         syscall3_readonly(
             OperationCode::UHI_LSEEK,
             ParamRegR::fd(fd),
-            ParamRegR::isize(offset),
-            ParamRegR::usize(whence as usize),
+            ParamRegR::signed(offset),
+            ParamRegR::unsigned(whence as usize),
         )
     };
-    if res.int() == -1 { Err(from_errno(errno)) } else { Ok(res.usize()) }
+    if res.signed() == -1 { Err(from_errno(errno)) } else { Ok(res.unsigned()) }
 }
 
 /// UHI_UNLINK
 pub fn mips_unlink(path: &CStr) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_UNLINK, ParamRegR::c_str(path)) };
-    if res.usize() == 0 { Ok(()) } else { Err(from_errno(errno)) }
+    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno(errno)) }
 }
 
 /// UHI_FSTAT
@@ -216,31 +216,31 @@ pub fn mips_fstat(fd: BorrowedFd<'_>) -> io::Result<uhi_stat> {
     let mut buf: uhi_stat = unsafe { mem::zeroed() };
     let (res, errno) =
         unsafe { syscall2(OperationCode::UHI_FSTAT, ParamRegW::fd(fd), ParamRegW::ref_(&mut buf)) };
-    if res.usize() == 0 { Ok(buf) } else { Err(from_errno(errno)) }
+    if res.unsigned() == 0 { Ok(buf) } else { Err(from_errno(errno)) }
 }
 
 /// UHI_ARGC
 pub fn mips_argc() -> usize {
     let (res, _errno) = unsafe { syscall0(OperationCode::UHI_ARGC) };
-    debug_assert!(!res.int().is_negative(), "{}", res.int());
-    res.usize()
+    debug_assert!(!res.signed().is_negative(), "{}", res.signed());
+    res.unsigned()
 }
 
 /// UHI_ARGNLEN
 pub fn mips_argnlen(n: usize) -> io::Result<usize> {
     let (res, errno) =
-        unsafe { syscall1_readonly(OperationCode::UHI_ARGNLEN, ParamRegR::usize(n)) };
-    if res.int() == -1 { Err(from_errno(errno)) } else { Ok(res.usize()) }
+        unsafe { syscall1_readonly(OperationCode::UHI_ARGNLEN, ParamRegR::unsigned(n)) };
+    if res.signed() == -1 { Err(from_errno(errno)) } else { Ok(res.unsigned()) }
 }
 
 /// UHI_ARGN
 pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> io::Result<()> {
     let (res, errno) =
-        unsafe { syscall2(OperationCode::UHI_ARGN, ParamRegW::usize(n), ParamRegW::ptr(buf)) };
-    if res.usize() == 0 {
+        unsafe { syscall2(OperationCode::UHI_ARGN, ParamRegW::unsigned(n), ParamRegW::ptr(buf)) };
+    if res.unsigned() == 0 {
         Ok(())
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno(errno))
     }
 }
@@ -248,11 +248,11 @@ pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> io::Result<()> {
 /// UHI_PLOG
 pub fn mips_plog(msg: &CStr) -> io::Result<usize> {
     let (res, errno) = unsafe { syscall1_readonly(OperationCode::UHI_PLOG, ParamRegR::c_str(msg)) };
-    if res.int() == -1 {
+    if res.signed() == -1 {
         Err(from_errno(errno))
     } else {
-        debug_assert_eq!(res.usize(), msg.to_bytes().len());
-        Ok(res.usize())
+        debug_assert_eq!(res.unsigned(), msg.to_bytes().len());
+        Ok(res.unsigned())
     }
 }
 
@@ -267,15 +267,15 @@ pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> io::Resu
             OperationCode::UHI_PREAD,
             ParamRegW::fd(fd),
             ParamRegW::buf(buf),
-            ParamRegW::usize(len),
-            ParamRegW::usize(offset),
+            ParamRegW::unsigned(len),
+            ParamRegW::unsigned(offset),
         )
     };
-    if res.int() == -1 {
+    if res.signed() == -1 {
         Err(from_errno(errno))
     } else {
-        debug_assert!(res.usize() <= buf.len());
-        Ok(res.usize())
+        debug_assert!(res.unsigned() <= buf.len());
+        Ok(res.unsigned())
     }
 }
 
@@ -286,15 +286,15 @@ pub fn mips_pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: usize) -> io::Result<
             OperationCode::UHI_PWRITE,
             ParamRegR::fd(fd),
             ParamRegR::buf(buf),
-            ParamRegR::usize(buf.len()),
-            ParamRegR::usize(offset),
+            ParamRegR::unsigned(buf.len()),
+            ParamRegR::unsigned(offset),
         )
     };
-    if res.int() == -1 {
+    if res.signed() == -1 {
         Err(from_errno(errno))
     } else {
-        debug_assert!(res.usize() <= buf.len());
-        Ok(res.usize())
+        debug_assert!(res.unsigned() <= buf.len());
+        Ok(res.unsigned())
     }
 }
 
@@ -303,10 +303,10 @@ pub fn mips_link(old: &CStr, new: &CStr) -> io::Result<()> {
     let (res, errno) = unsafe {
         syscall2_readonly(OperationCode::UHI_LINK, ParamRegR::c_str(old), ParamRegR::c_str(new))
     };
-    if res.usize() == 0 {
+    if res.unsigned() == 0 {
         Ok(())
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno(errno))
     }
 }

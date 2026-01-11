@@ -90,5 +90,5 @@ impl OperationNumber {
 pub unsafe fn syscall0(number: OperationNumber) -> RetReg {
     // In most operations that don't have parameters, such as SYS_ERRNO, and
     // SYS_CLOCK, the PARAMETER REGISTER must be zero.
-    unsafe { syscall_readonly(number, ParamRegR::usize(0)) }
+    unsafe { syscall_readonly(number, ParamRegR::unsigned(0)) }
 }

@@ -134,17 +134,17 @@ fn from_errno() -> io::Error {
 /// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10)
 pub fn sys_clock() -> io::Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_CLOCK) };
-    if res.int() == -1 { Err(from_errno()) } else { Ok(res.usize()) }
+    if res.signed() == -1 { Err(from_errno()) } else { Ok(res.unsigned()) }
 }
 
 /// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-close-0x02)
 pub unsafe fn sys_close(fd: RawFd) -> io::Result<()> {
     let block = [ParamRegR::raw_fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_CLOSE, ParamRegR::block(&block)) };
-    if res.usize() == 0 {
+    if res.unsigned() == 0 {
         Ok(())
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno())
     }
 }
@@ -156,10 +156,10 @@ pub fn sys_elapsed() -> io::Result<u64> {
     // On 64-bit, the parameter is a pointer to one 64-bit field data block
     let mut block = [0_u64];
     let res = unsafe { syscall(OperationNumber::SYS_ELAPSED, ParamRegW::ref_(&mut block)) };
-    if res.usize() == 0 {
+    if res.unsigned() == 0 {
         Ok(block[0])
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno())
     }
 }
@@ -174,9 +174,9 @@ pub fn sys_errno() -> io::RawOsError {
 // TODO(semver): change return type to !?
 pub fn sys_exit(reason: ExitReason) {
     #[cfg(target_pointer_width = "32")]
-    let arg = ParamRegR::usize(reason as usize);
+    let arg = ParamRegR::unsigned(reason as usize);
     #[cfg(target_pointer_width = "64")]
-    let block = [ParamRegR::usize(reason as usize), ParamRegR::usize(0)];
+    let block = [ParamRegR::unsigned(reason as usize), ParamRegR::unsigned(0)];
     #[cfg(target_pointer_width = "64")]
     let arg = ParamRegR::block(&block);
     // > No return is expected from these calls. However, it is possible for the
@@ -195,7 +195,7 @@ pub(crate) fn exit(code: i32) -> ! {
     // On 64-bit system, SYS_EXIT_EXTENDED call is identical to the behavior of the mandatory SYS_EXIT.
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        let block = [ParamRegR::usize(reason as usize), ParamRegR::usize(subcode)];
+        let block = [ParamRegR::unsigned(reason as usize), ParamRegR::unsigned(subcode)];
         syscall_noreturn_readonly(OperationNumber::SYS_EXIT, ParamRegR::block(&block))
     }
     #[cfg(target_pointer_width = "32")]
@@ -209,14 +209,17 @@ pub(crate) fn exit(code: i32) -> ! {
             _ => ExitReason::ADP_Stopped_RunTimeErrorUnknown,
         };
         unsafe {
-            syscall_noreturn_readonly(OperationNumber::SYS_EXIT, ParamRegR::usize(reason as usize))
+            syscall_noreturn_readonly(
+                OperationNumber::SYS_EXIT,
+                ParamRegR::unsigned(reason as usize),
+            )
         }
     }
 }
 
 /// [SYS_EXIT_EXTENDED (0x20)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-extended-0x20)
 pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
-    let block = [ParamRegR::usize(reason as usize), ParamRegR::usize(subcode)];
+    let block = [ParamRegR::unsigned(reason as usize), ParamRegR::unsigned(subcode)];
     #[cfg(target_pointer_width = "32")]
     let number = OperationNumber::SYS_EXIT_EXTENDED;
     // On 64-bit system, SYS_EXIT_EXTENDED call is identical to the behavior of the mandatory SYS_EXIT.
@@ -231,7 +234,7 @@ pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
 pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
     let block = [ParamRegR::fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_FLEN, ParamRegR::block(&block)) };
-    if res.int() == -1 { Err(from_errno()) } else { Ok(res.usize()) }
+    if res.signed() == -1 { Err(from_errno()) } else { Ok(res.unsigned()) }
 }
 
 /// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
@@ -243,13 +246,13 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
 pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
     let len = cmdline.size;
     let res = unsafe { syscall(OperationNumber::SYS_GET_CMDLINE, ParamRegW::ref_(cmdline)) };
-    if res.usize() == 0 {
+    if res.unsigned() == 0 {
         debug_assert!(!cmdline.ptr.is_null());
         let size = cmdline.size;
         debug_assert!(size < len); // len contains trailing nul
         Ok(())
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno())
     }
 }
@@ -257,15 +260,15 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
 /// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
 pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&[u8]> {
     let len = buf.len();
-    let mut block = [ParamRegW::buf(buf), ParamRegW::usize(len)];
+    let mut block = [ParamRegW::buf(buf), ParamRegW::unsigned(len)];
     let res = unsafe { syscall(OperationNumber::SYS_GET_CMDLINE, ParamRegW::block(&mut block)) };
-    if res.usize() == 0 {
+    if res.unsigned() == 0 {
         debug_assert!(!block[0].to_ret().ptr().is_null());
-        let size = block[1].to_ret().usize();
+        let size = block[1].to_ret().unsigned();
         debug_assert!(size < len); // len contains trailing nul
         Ok(unsafe { slice_assume_init_ref(&buf[..size]) })
     } else {
-        debug_assert_eq!(res.int(), -1);
+        debug_assert_eq!(res.signed(), -1);
         Err(from_errno())
     }
 }
@@ -281,16 +284,16 @@ pub fn sys_heapinfo() -> HeapInfo {
 
 /// [SYS_ISERROR (0x08)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-iserror-0x08)
 pub fn sys_iserror(res: isize) -> bool {
-    let block = [ParamRegR::isize(res)];
+    let block = [ParamRegR::signed(res)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_ISERROR, ParamRegR::block(&block)) };
-    res.usize() != 0
+    res.unsigned() != 0
 }
 
 /// [SYS_ISTTY (0x09)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-istty-0x09)
 pub fn sys_istty(fd: BorrowedFd<'_>) -> io::Result<bool> {
     let block = [ParamRegR::fd(fd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_ISTTY, ParamRegR::block(&block)) };
-    match res.usize() {
+    match res.unsigned() {
         1 => Ok(true),
         0 => Ok(false),
         _ => Err(from_errno()), // TODO: some host system doesn't set errno
@@ -300,11 +303,11 @@ pub fn sys_istty(fd: BorrowedFd<'_>) -> io::Result<bool> {
 /// [SYS_OPEN (0x01)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-open-0x01)
 pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
     let block =
-        [ParamRegR::c_str(path), ParamRegR::usize(mode as usize), ParamRegR::c_str_len(path)];
+        [ParamRegR::c_str(path), ParamRegR::unsigned(mode as usize), ParamRegR::c_str_len(path)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_OPEN, ParamRegR::block(&block)) };
     match res.raw_fd() {
         Some(fd) => {
-            debug_assert_ne!(res.usize(), 0);
+            debug_assert_ne!(res.unsigned(), 0);
             Ok(unsafe { OwnedFd::from_raw_fd(fd) })
         }
         None => Err(from_errno()),
@@ -315,9 +318,9 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
 /// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let len = buf.len();
-    let mut block = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::usize(len)];
+    let mut block = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::unsigned(len)];
     let res = unsafe { syscall(OperationNumber::SYS_READ, ParamRegW::block(&mut block)) };
-    if res.usize() <= len { Ok(len - res.usize()) } else { Err(from_errno()) }
+    if res.unsigned() <= len { Ok(len - res.unsigned()) } else { Err(from_errno()) }
 }
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
@@ -338,7 +341,7 @@ pub fn sys_readc() -> u8 {
 pub fn sys_remove(path: &CStr) -> io::Result<()> {
     let block = [ParamRegR::c_str(path), ParamRegR::c_str_len(path)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_REMOVE, ParamRegR::block(&block)) };
-    if res.usize() == 0 { Ok(()) } else { Err(from_errno()) }
+    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
 }
 
 /// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f)
@@ -350,43 +353,43 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> io::Result<()> {
         ParamRegR::c_str_len(to),
     ];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_RENAME, ParamRegR::block(&block)) };
-    if res.usize() == 0 { Ok(()) } else { Err(from_errno()) }
+    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
 }
 
 // TODO(arm_compat): resolve safety
 // > The effect of seeking outside the current extent of the file object is undefined.
 /// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-seek-0x0a)
 pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> io::Result<()> {
-    let block = [ParamRegR::fd(fd), ParamRegR::usize(abs_pos)];
+    let block = [ParamRegR::fd(fd), ParamRegR::unsigned(abs_pos)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_SEEK, ParamRegR::block(&block)) };
-    if res.usize() == 0 { Ok(()) } else { Err(from_errno()) }
+    if res.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
 }
 
 /// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-system-0x12)
 pub fn sys_system(cmd: &CStr) -> usize {
     let block = [ParamRegR::c_str(cmd), ParamRegR::c_str_len(cmd)];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_SYSTEM, ParamRegR::block(&block)) };
-    res.usize()
+    res.unsigned()
 }
 
 /// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-tickfreq-0x31)
 pub fn sys_tickfreq() -> io::Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TICKFREQ) };
-    if res.int() == -1 { Err(from_errno()) } else { Ok(res.usize()) }
+    if res.signed() == -1 { Err(from_errno()) } else { Ok(res.unsigned()) }
 }
 
 /// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-time-0x11)
 #[allow(clippy::unnecessary_wraps)] // TODO: change in next breaking release?
 pub fn sys_time() -> io::Result<usize> {
     let res = unsafe { syscall0(OperationNumber::SYS_TIME) };
-    Ok(res.usize())
+    Ok(res.unsigned())
 }
 
 /// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05)
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
-    let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::usize(buf.len())];
+    let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::unsigned(buf.len())];
     let res = unsafe { syscall_readonly(OperationNumber::SYS_WRITE, ParamRegR::block(&block)) };
-    match res.usize() {
+    match res.unsigned() {
         0 => Ok(buf.len()),
         not_written if not_written <= buf.len() => {
             if not_written == buf.len() && !buf.is_empty() {

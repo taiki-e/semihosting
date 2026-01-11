@@ -269,6 +269,7 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
     docsrs,
     doc(auto_cfg(hide(semihosting_no_duration_checked_float, semihosting_no_error_in_core)))
 )]
+#![cfg_attr(semihosting_no_strict_provenance, allow(unstable_name_collisions))]
 
 // 64-bit architecture's 32-bit ABI (e.g., AArch64 ILP32 ABI) are also
 // unsupported yet (is there a semihosting interface defined for those ABIs?).

@@ -44,10 +44,24 @@ pub(crate) mod ptr {
     cfg_sel!({
         #[cfg(not(semihosting_no_strict_provenance))]
         {
-            pub(crate) use core::ptr::{with_exposed_provenance, with_exposed_provenance_mut};
+            pub(crate) use core::ptr::{
+                with_exposed_provenance, with_exposed_provenance_mut, without_provenance_mut,
+            };
         }
         #[cfg(else)]
         {
+            use core::mem;
+
+            #[inline(always)]
+            #[must_use]
+            pub(crate) const fn without_provenance_mut<T>(addr: usize) -> *mut T {
+                // An int-to-pointer transmute currently has exactly the intended semantics: it creates a
+                // pointer without provenance. Note that this is *not* a stable guarantee about transmute
+                // semantics, it relies on sysroot crates having special status.
+                // SAFETY: every valid integer is also a valid pointer (as long as you don't dereference that
+                // pointer).
+                unsafe { mem::transmute(addr) }
+            }
             #[inline(always)]
             #[must_use]
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
@@ -59,6 +73,35 @@ pub(crate) mod ptr {
             #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
             pub(crate) fn with_exposed_provenance_mut<T>(addr: usize) -> *mut T {
                 addr as *mut T
+            }
+
+            pub(crate) trait PtrExt<T: ?Sized>: Copy {
+                #[must_use]
+                fn addr(self) -> usize;
+            }
+            impl<T: ?Sized> PtrExt<T> for *const T {
+                #[inline(always)]
+                #[must_use]
+                fn addr(self) -> usize {
+                    // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
+                    // address without exposing the provenance. Note that this is *not* a stable guarantee about
+                    // transmute semantics, it relies on sysroot crates having special status.
+                    // SAFETY: Pointer-to-integer transmutes are valid (if you are okay with losing the
+                    // provenance).
+                    unsafe { mem::transmute(self.cast::<()>()) }
+                }
+            }
+            impl<T: ?Sized> PtrExt<T> for *mut T {
+                #[inline(always)]
+                #[must_use]
+                fn addr(self) -> usize {
+                    // A pointer-to-integer transmute currently has exactly the right semantics: it returns the
+                    // address without exposing the provenance. Note that this is *not* a stable guarantee about
+                    // transmute semantics, it relies on sysroot crates having special status.
+                    // SAFETY: Pointer-to-integer transmutes are valid (if you are okay with losing the
+                    // provenance).
+                    unsafe { mem::transmute(self.cast::<()>()) }
+                }
             }
         }
     });

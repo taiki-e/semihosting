@@ -7,6 +7,8 @@ use core::{
     marker::PhantomData,
 };
 
+#[cfg(semihosting_no_strict_provenance)]
+use crate::utils::ptr::PtrExt as _;
 use crate::{
     fd::{BorrowedFd, RawFd},
     io::RawOsError,
@@ -23,10 +25,20 @@ impl<'a> ParamRegW<'a> {
     }
     #[inline]
     pub fn raw_fd(fd: RawFd) -> Self {
-        Self::isize(fd as isize)
+        Self::signed(fd as isize)
+    }
+    #[inline]
+    pub(crate) fn unsigned(n: usize) -> Self {
+        Self(crate::utils::ptr::without_provenance_mut(n), PhantomData)
+    }
+    #[allow(clippy::cast_sign_loss)]
+    #[inline]
+    pub(crate) fn signed(n: isize) -> Self {
+        Self::unsigned(n as usize)
     }
     #[inline]
     pub fn usize(n: usize) -> Self {
+        // TODO(semver): use without_provenance_mut
         Self(crate::utils::ptr::with_exposed_provenance_mut(n), PhantomData)
     }
     #[allow(clippy::cast_sign_loss)]
@@ -76,10 +88,20 @@ impl<'a> ParamRegR<'a> {
     }
     #[inline]
     pub fn raw_fd(fd: RawFd) -> Self {
-        Self::isize(fd as isize)
+        Self::signed(fd as isize)
+    }
+    #[inline]
+    pub(crate) fn unsigned(n: usize) -> Self {
+        Self(crate::utils::ptr::without_provenance_mut(n), PhantomData)
+    }
+    #[allow(clippy::cast_sign_loss)]
+    #[inline]
+    pub(crate) fn signed(n: isize) -> Self {
+        Self::unsigned(n as usize)
     }
     #[inline]
     pub fn usize(n: usize) -> Self {
+        // TODO(semver): without_provenance_mut
         Self(crate::utils::ptr::with_exposed_provenance(n), PhantomData)
     }
     #[allow(clippy::cast_sign_loss)]
@@ -114,7 +136,7 @@ impl<'a> ParamRegR<'a> {
 impl<'a> ParamRegR<'a> {
     #[inline]
     pub fn c_str_len(s: &CStr) -> Self {
-        Self::usize(s.to_bytes().len())
+        Self::unsigned(s.to_bytes().len())
     }
     #[inline]
     pub fn block(b: &'a [ParamRegR<'_>]) -> Self {
@@ -128,6 +150,15 @@ impl<'a> ParamRegR<'a> {
 #[repr(transparent)]
 pub struct RetReg(pub(crate) *mut c_void);
 impl RetReg {
+    #[inline(always)]
+    pub(crate) fn unsigned(self) -> usize {
+        self.0.addr()
+    }
+    #[allow(clippy::cast_possible_wrap, clippy::cast_sign_loss)]
+    #[inline(always)]
+    pub(crate) fn signed(self) -> isize {
+        self.unsigned() as isize
+    }
     #[inline]
     pub fn usize(self) -> usize {
         self.0 as usize
@@ -144,20 +175,22 @@ impl RetReg {
     }
     #[inline]
     pub fn raw_fd(self) -> Option<RawFd> {
-        let fd = self.int();
+        #[allow(clippy::cast_possible_truncation)]
+        let fd = self.signed() as RawFd;
         if fd == -1 {
             None
         } else {
             debug_assert!(!fd.is_negative(), "{}", fd);
-            debug_assert_eq!(fd as isize, self.isize());
+            debug_assert_eq!(fd as isize, self.signed());
             Some(fd)
         }
     }
     #[inline]
     pub fn errno(self) -> RawOsError {
-        let err = self.int();
+        #[allow(clippy::cast_possible_truncation)]
+        let err = self.signed() as RawOsError;
         debug_assert!(!err.is_negative(), "{}", err);
-        debug_assert_eq!(err as isize, self.isize());
+        debug_assert_eq!(err as isize, self.signed());
         err
     }
 }
@@ -169,14 +202,14 @@ impl RetReg {
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 impl RetReg {
-    #[allow(clippy::cast_possible_truncation)]
     #[inline]
     pub fn u8(self) -> u8 {
-        let b = self.usize() as u8;
-        debug_assert_eq!(b as usize, self.usize());
+        #[allow(clippy::cast_possible_truncation)]
+        let b = self.unsigned() as u8;
+        debug_assert_eq!(b as usize, self.unsigned());
         b
     }
-    #[inline]
+    #[inline(always)]
     pub(crate) fn ptr(self) -> *mut c_void {
         self.0
     }
