@@ -27,6 +27,7 @@ use self::syscall::{OperationNumber, ParamRegR, ParamRegW, syscall, syscall_read
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io,
+    utils::slice_assume_init_ref,
 };
 
 #[allow(missing_docs)]
@@ -112,8 +113,9 @@ pub struct HeapInfo {
     pub stack_limit: *mut c_void,
 }
 
+// TODO(semver): Remove
 #[allow(missing_docs)]
-#[allow(clippy::exhaustive_structs)] // TODO(semver)
+#[allow(clippy::exhaustive_structs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct CommandLine {
@@ -215,10 +217,31 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
 /// # Safety
 ///
 /// CommandLine::ptr must be valid for at least the size specified in CommandLine::size.
+#[deprecated(note = "use safe sys_get_cmdline_uninit instead")] // TODO(semver): Remove
 pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
+    let len = cmdline.size;
     let res = unsafe { syscall(OperationNumber::SYS_GET_CMDLINE, ParamRegW::ref_(cmdline)) };
     if res.usize() == 0 {
+        debug_assert!(!cmdline.ptr.is_null());
+        let size = cmdline.size;
+        debug_assert!(size < len); // len contains trailing nul
         Ok(())
+    } else {
+        debug_assert_eq!(res.int(), -1);
+        Err(from_errno())
+    }
+}
+
+/// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
+pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&[u8]> {
+    let len = buf.len();
+    let mut block = [ParamRegW::buf(buf), ParamRegW::usize(len)];
+    let res = unsafe { syscall(OperationNumber::SYS_GET_CMDLINE, ParamRegW::block(&mut block)) };
+    if res.usize() == 0 {
+        debug_assert!(!block[0].to_ret().ptr().is_null());
+        let size = block[1].to_ret().usize();
+        debug_assert!(size < len); // len contains trailing nul
+        Ok(unsafe { slice_assume_init_ref(&buf[..size]) })
     } else {
         debug_assert_eq!(res.int(), -1);
         Err(from_errno())

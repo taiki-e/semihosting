@@ -20,7 +20,13 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 - Add `sys::arm_compat::syscall::ParamRegR::c_str_len`.
 
+- Add `sys::arm_compat::sys_get_cmdline_uninit`.
+
 - Add `sys::mips::syscall::ParamRegR::ref_`.
+
+- Deprecate `sys::arm_compat::sys_get_cmdline` in favor of safe `sys_get_cmdline_uninit`.
+
+- Optimize `experimental::env::args`.
 
 - Documentation improvements.
 

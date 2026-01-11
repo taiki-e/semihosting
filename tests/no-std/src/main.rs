@@ -259,10 +259,35 @@ fn run() {
         const BUF_SIZE: usize = 256;
         #[cfg(arm_compat)]
         {
-            let mut buf = [0; BUF_SIZE];
-            let mut cmdline_block = CommandLine { ptr: buf.as_mut_ptr(), size: BUF_SIZE - 1 };
-            unsafe { sys_get_cmdline(&mut cmdline_block).unwrap() }
-            println!("sys_get_cmdline: '{}'", str::from_utf8(&buf[..cmdline_block.size]).unwrap());
+            use core::mem::MaybeUninit;
+
+            let mut buf = [MaybeUninit::uninit(); BUF_SIZE];
+            let cmd = sys_get_cmdline_uninit(&mut buf).unwrap();
+            println!("sys_get_cmdline_uninit.size: '{}'", cmd.len());
+            assert!(cmd.len() < BUF_SIZE);
+            println!("sys_get_cmdline_uninit: '{}'", str::from_utf8(cmd).unwrap());
+            assert_eq!(unsafe { buf[cmd.len()].assume_init() }, 0);
+
+            // let now = Instant::now();
+            // for _ in 0..100000 {
+            //     let mut buf = [0; BUF_SIZE];
+            //     let mut cmdline_block = CommandLine { ptr: buf.as_mut_ptr(), size: BUF_SIZE };
+            //     unsafe { sys_get_cmdline(&mut cmdline_block).unwrap() }
+            //     assert!(cmdline_block.size < BUF_SIZE);
+            //     assert_eq!(buf[cmdline_block.size], 0);
+            //     core::hint::black_box(&mut buf);
+            // }
+            // println!("sys_get_cmdline time: {:?}", now.elapsed());
+            //
+            // let now = Instant::now();
+            // for _ in 0..100000 {
+            //     let mut buf = [MaybeUninit::uninit(); BUF_SIZE];
+            //     let size = sys_get_cmdline_uninit(&mut buf).unwrap();
+            //     assert!(size < BUF_SIZE);
+            //     assert_eq!(unsafe { buf[size].assume_init() }, 0);
+            //     core::hint::black_box(&mut buf);
+            // }
+            // println!("sys_get_cmdline_uninit time: {:?}", now.elapsed());
         }
         let args = env::args::<BUF_SIZE>().unwrap();
         let program = (&args).next().unwrap().unwrap();

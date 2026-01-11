@@ -59,6 +59,10 @@ impl<'a> ParamRegW<'a> {
     pub fn block(b: &'a mut [ParamRegW<'_>]) -> Self {
         Self::ptr(b.as_mut_ptr())
     }
+    #[inline]
+    pub(crate) fn to_ret(&self) -> RetReg {
+        RetReg(self.0)
+    }
 }
 
 /// PARAMETER REGISTER (read-only)
@@ -171,5 +175,9 @@ impl RetReg {
         let b = self.usize() as u8;
         debug_assert_eq!(b as usize, self.usize());
         b
+    }
+    #[inline]
+    pub(crate) fn ptr(self) -> *mut c_void {
+        self.0
     }
 }
