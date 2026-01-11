@@ -26,6 +26,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 - Deprecate `sys::arm_compat::sys_get_cmdline` in favor of safe `sys_get_cmdline_uninit`.
 
+- Optimize `process::{exit,abort}`.
+
 - Optimize `experimental::env::args`.
 
 - Documentation improvements.

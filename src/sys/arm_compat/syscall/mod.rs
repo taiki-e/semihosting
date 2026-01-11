@@ -2,7 +2,6 @@
 
 //! Raw semihosting call.
 
-pub use self::arch::{syscall, syscall_readonly};
 #[allow(clippy::needless_pass_by_value)]
 #[cfg_attr(target_arch = "aarch64", path = "aarch64.rs")]
 #[cfg_attr(target_arch = "arm", path = "arm.rs")]
@@ -10,6 +9,8 @@ pub use self::arch::{syscall, syscall_readonly};
 #[cfg_attr(target_arch = "xtensa", path = "xtensa.rs")]
 mod arch;
 
+pub(crate) use self::arch::syscall_noreturn_readonly;
+pub use self::arch::{syscall, syscall_readonly};
 pub use crate::sys::reg::{ParamRegR, ParamRegW, RetReg};
 
 /// Semihosting operation number.

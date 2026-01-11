@@ -23,7 +23,10 @@ use core::{
     mem::{self, MaybeUninit},
 };
 
-use self::syscall::{OperationNumber, ParamRegR, ParamRegW, syscall, syscall_readonly, syscall0};
+use self::syscall::{
+    OperationNumber, ParamRegR, ParamRegW, syscall, syscall_noreturn_readonly, syscall_readonly,
+    syscall0,
+};
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io,
@@ -167,19 +170,8 @@ pub fn sys_errno() -> io::RawOsError {
     res.errno()
 }
 
-#[allow(clippy::cast_sign_loss)]
-pub(crate) fn exit(code: i32) {
-    // TODO: check sh_ext_exit_extended first
-    sys_exit_extended(ExitReason::ADP_Stopped_ApplicationExit, code as isize as usize);
-    // If SYS_EXIT_EXTENDED is not supported, above call doesn't exit program,
-    // so try again with SYS_EXIT.
-    let reason = match code {
-        0 => ExitReason::ADP_Stopped_ApplicationExit,
-        _ => ExitReason::ADP_Stopped_RunTimeErrorUnknown,
-    };
-    sys_exit(reason);
-}
 /// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-0x18)
+// TODO(semver): change return type to !?
 pub fn sys_exit(reason: ExitReason) {
     #[cfg(target_pointer_width = "32")]
     let arg = ParamRegR::usize(reason as usize);
@@ -187,8 +179,38 @@ pub fn sys_exit(reason: ExitReason) {
     let block = [ParamRegR::usize(reason as usize), ParamRegR::usize(0)];
     #[cfg(target_pointer_width = "64")]
     let arg = ParamRegR::block(&block);
+    // > No return is expected from these calls. However, it is possible for the
+    // > debugger to request that the application continues by performing an
+    // > RDI_Execute request or equivalent. In this case, execution continues
+    // > with the registers as they were on entry to the operation, or as
+    // > subsequently modified by the debugger.
     unsafe {
         syscall_readonly(OperationNumber::SYS_EXIT, arg);
+    }
+}
+pub(crate) fn exit(code: i32) -> ! {
+    let reason = ExitReason::ADP_Stopped_ApplicationExit;
+    #[allow(clippy::cast_sign_loss)]
+    let subcode = code as isize as usize;
+    // On 64-bit system, SYS_EXIT_EXTENDED call is identical to the behavior of the mandatory SYS_EXIT.
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        let block = [ParamRegR::usize(reason as usize), ParamRegR::usize(subcode)];
+        syscall_noreturn_readonly(OperationNumber::SYS_EXIT, ParamRegR::block(&block))
+    }
+    #[cfg(target_pointer_width = "32")]
+    {
+        // TODO: check sh_ext_exit_extended first
+        sys_exit_extended(reason, subcode);
+
+        // If SYS_EXIT_EXTENDED is not supported, above call doesn't exit program, so call SYS_EXIT.
+        let reason = match code {
+            0 => ExitReason::ADP_Stopped_ApplicationExit,
+            _ => ExitReason::ADP_Stopped_RunTimeErrorUnknown,
+        };
+        unsafe {
+            syscall_noreturn_readonly(OperationNumber::SYS_EXIT, ParamRegR::usize(reason as usize))
+        }
     }
 }
 

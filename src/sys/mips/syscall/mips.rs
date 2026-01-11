@@ -4,14 +4,20 @@ use core::arch::asm;
 
 use super::{OperationCode, ParamRegR, ParamRegW, RetReg};
 
-/// syscall with 0 arguments
+macro_rules! trap {
+    () => {
+        "sdbbp 1"
+    };
+}
+
+/// Raw semihosting call without parameters.
 #[inline]
 pub unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
     let r1;
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             out("$4") _,
@@ -23,14 +29,14 @@ pub unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 1 parameter that will be read + modified by the host
+/// Raw semihosting call with 1 parameter that will be read + modified by the host.
 #[inline]
 pub unsafe fn syscall1(op: OperationCode, arg1: ParamRegW<'_>) -> (RetReg, RetReg) {
     let r1;
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -42,14 +48,14 @@ pub unsafe fn syscall1(op: OperationCode, arg1: ParamRegW<'_>) -> (RetReg, RetRe
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 1 parameter that will be read (but not modified) by the host
+/// Raw semihosting call with 1 parameter that will be read (but not modified) by the host.
 #[inline]
 pub unsafe fn syscall1_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> (RetReg, RetReg) {
     let r1;
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -61,7 +67,25 @@ pub unsafe fn syscall1_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> (RetR
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 2 parameters that will be read + modified by the host
+#[inline]
+pub(crate) unsafe fn syscall1_noreturn_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> ! {
+    unsafe {
+        asm!(
+            trap!(),
+            // An infinite loop to prevent the noreturn contract from being violated when a
+            // semihosting call doesn't work for some reason.
+            "2:",
+                "b 2b",
+                "nop",
+            in("$2") 1_usize,
+            in("$4") arg1.0,
+            in("$25") op.0,
+            options(nostack, noreturn, preserves_flags, readonly),
+        )
+    }
+}
+
+/// Raw semihosting call with 2 parameters that will be read + modified by the host.
 #[inline]
 pub unsafe fn syscall2(
     op: OperationCode,
@@ -72,7 +96,7 @@ pub unsafe fn syscall2(
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -84,7 +108,7 @@ pub unsafe fn syscall2(
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 2 parameters that will be read (but not modified) by the host
+/// Raw semihosting call with 2 parameters that will be read (but not modified) by the host.
 #[inline]
 pub unsafe fn syscall2_readonly(
     op: OperationCode,
@@ -95,7 +119,7 @@ pub unsafe fn syscall2_readonly(
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -107,7 +131,7 @@ pub unsafe fn syscall2_readonly(
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 3 parameters that will be read + modified by the host
+/// Raw semihosting call with 3 parameters that will be read + modified by the host.
 #[inline]
 pub unsafe fn syscall3(
     op: OperationCode,
@@ -119,7 +143,7 @@ pub unsafe fn syscall3(
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -132,7 +156,7 @@ pub unsafe fn syscall3(
     }
 }
 
-/// Raw semihosting call with 3 parameters that will be read (but not modified) by the host
+/// Raw semihosting call with 3 parameters that will be read (but not modified) by the host.
 #[inline]
 pub unsafe fn syscall3_readonly(
     op: OperationCode,
@@ -144,7 +168,7 @@ pub unsafe fn syscall3_readonly(
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -157,7 +181,7 @@ pub unsafe fn syscall3_readonly(
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 4 parameters that will be read + modified by the host
+/// Raw semihosting call with 4 parameters that will be read + modified by the host.
 #[inline]
 pub unsafe fn syscall4(
     op: OperationCode,
@@ -170,7 +194,7 @@ pub unsafe fn syscall4(
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -184,7 +208,7 @@ pub unsafe fn syscall4(
     (RetReg(r1), RetReg(r2))
 }
 
-/// Raw semihosting call with 4 parameters that will be read (but not modified) by the host
+/// Raw semihosting call with 4 parameters that will be read (but not modified) by the host.
 #[inline]
 pub unsafe fn syscall4_readonly(
     op: OperationCode,
@@ -197,7 +221,7 @@ pub unsafe fn syscall4_readonly(
     let r2;
     unsafe {
         asm!(
-            "sdbbp 1",
+            trap!(),
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,

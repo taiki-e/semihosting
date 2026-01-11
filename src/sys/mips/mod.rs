@@ -19,8 +19,9 @@ pub mod syscall;
 use core::{ffi::CStr, mem};
 
 use self::syscall::{
-    OperationCode, ParamRegR, ParamRegW, RetReg, syscall0, syscall1_readonly, syscall2,
-    syscall2_readonly, syscall3, syscall3_readonly, syscall4, syscall4_readonly,
+    OperationCode, ParamRegR, ParamRegW, RetReg, syscall0, syscall1_noreturn_readonly,
+    syscall1_readonly, syscall2, syscall2_readonly, syscall3, syscall3_readonly, syscall4,
+    syscall4_readonly,
 };
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
@@ -97,17 +98,26 @@ fn from_errno(res: RetReg) -> io::Error {
 }
 
 /// UHI_EXIT
-#[allow(clippy::cast_sign_loss)]
+// TODO(semver): change return type to !?
 pub fn mips_exit(code: i32) {
+    #[allow(clippy::cast_sign_loss)]
     unsafe {
         syscall1_readonly(OperationCode::UHI_EXIT, ParamRegR::usize(code as isize as usize));
     }
 }
-pub(crate) use self::mips_exit as exit;
+pub(crate) fn exit(code: i32) -> ! {
+    #[allow(clippy::cast_sign_loss)]
+    unsafe {
+        syscall1_noreturn_readonly(
+            OperationCode::UHI_EXIT,
+            ParamRegR::usize(code as isize as usize),
+        )
+    }
+}
 
 /// UHI_OPEN
-#[allow(clippy::cast_sign_loss)]
 pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> io::Result<OwnedFd> {
+    #[allow(clippy::cast_sign_loss)]
     let (res, errno) = unsafe {
         syscall3_readonly(
             OperationCode::UHI_OPEN,

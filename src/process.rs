@@ -54,9 +54,7 @@ impl From<u8> for ExitCode {
 /// process, no destructors on the current stack or any other thread's stack
 /// will be run.
 pub fn exit(code: i32) -> ! {
-    sys::exit(code);
-    #[allow(clippy::empty_loop)] // this crate is #![no_std]
-    loop {}
+    sys::exit(code)
 }
 
 /// Terminates the process in an abnormal fashion.
