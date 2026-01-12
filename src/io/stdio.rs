@@ -110,10 +110,10 @@ pub trait IsTerminal: crate::sealed::Sealed {
     ///
     /// The following semihosting calls are currently being used:
     ///
-    /// | Platform                                           | Semihosting call |
-    /// | -------------------------------------------------- | ---------------- |
-    /// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_ISTTY]      |
-    /// | MIPS32, MIPS64                                     | UHI_fstat        |
+    /// | Platform                                                      | Semihosting call |
+    /// | ------------------------------------------------------------- | ---------------- |
+    /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_ISTTY]      |
+    /// | MIPS32, MIPS64                                                | UHI_fstat        |
     ///
     /// [SYS_ISTTY]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-istty-0x09
     ///

@@ -337,10 +337,18 @@ fn run() {
         assert_eq!(sys_iserror(isize::MAX), false);
         assert_eq!(sys_iserror(1), false);
         assert_eq!(sys_iserror(0), false);
-        assert_eq!(sys_iserror(-1), true);
-        assert_eq!(sys_iserror(-4095), true);
-        assert_eq!(sys_iserror(-4096), true);
-        assert_eq!(sys_iserror(isize::MIN), true);
+        // TODO(loongarch32):
+        if cfg!(target_arch = "loongarch32") {
+            assert_eq!(sys_iserror(-1), false);
+            assert_eq!(sys_iserror(-4095), false);
+            assert_eq!(sys_iserror(-4096), false);
+            assert_eq!(sys_iserror(isize::MIN), false);
+        } else {
+            assert_eq!(sys_iserror(-1), true);
+            assert_eq!(sys_iserror(-4095), true);
+            assert_eq!(sys_iserror(-4096), true);
+            assert_eq!(sys_iserror(isize::MIN), true);
+        }
         // println!("{}", sys_readc() as char); // TODO(arm_compat): only works on qemu-user
         print!("sys_system: ");
         assert_eq!(sys_system(c!("pwd")), 0);

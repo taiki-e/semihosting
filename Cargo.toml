@@ -9,7 +9,7 @@ keywords = ["qemu"]
 categories = ["embedded", "hardware-support", "no-std", "no-std::no-alloc"]
 exclude = ["/.*", "/tools", "/target-specs"]
 description = """
-Semihosting for AArch64, Arm, RISC-V, MIPS32, MIPS64, and Xtensa.
+Semihosting for AArch64, Arm, RISC-V, LoongArch, MIPS32, MIPS64, and Xtensa.
 """
 
 [package.metadata.docs.rs]
@@ -66,6 +66,7 @@ rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 unexpected_cfgs = { level = "warn", check-cfg = [
     'cfg(target_arch,values("xtensa"))', # 1.81+ https://github.com/rust-lang/rust/pull/125141
+    'cfg(target_arch,values("loongarch32"))', # 1.89+ https://github.com/rust-lang/rust/pull/142053
 ] }
 unnameable_types = "warn"
 unreachable_pub = "warn"

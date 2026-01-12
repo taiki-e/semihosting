@@ -69,7 +69,7 @@ jobs:
     secrets: inherit
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
+      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64,loongarch64-unknown-linux-gnu
       # NB: sync with env.TEST_FEATURES
       clippy-args: --features alloc,stdio,fs,args,time,random
 
@@ -89,9 +89,6 @@ jobs:
           - rust: stable
           - rust: beta
           - rust: nightly
-          # Test pre-8.0 QEMU for MIPS.
-          - rust: nightly
-            qemu-system: '7.2'
           # The behavior of semihosting somewhat depends on the behavior of the host system.
           - rust: nightly
             os: ubuntu-24.04-arm
@@ -103,6 +100,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@v1
+      - uses: taiki-e/github-actions/free-device-space@main
+        if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
@@ -119,18 +118,41 @@ jobs:
             done
             "$@"
           }
-          if [[ "${{ matrix.rust }}" == "1.64" ]]; then
+          llvm_version=$(rustc -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
+          llvm_version="${llvm_version%%.*}"
+          if [[ "${llvm_version}" -lt 17 ]]; then
             # pre-17 LLD doesn't support big-endian arm
             retry sudo apt-get -o Acquire::Retries=10 -qq update
             retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends binutils-arm-none-eabi
           fi
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-system
-          retry docker create --name qemu-system ghcr.io/taiki-e/qemu-system:"${QEMU_SYSTEM_VERSION}"
+          retry docker create --name qemu-system ghcr.io/taiki-e/qemu-system
           mkdir -p -- qemu-system
           docker cp -- qemu-system:/qemu qemu-system/qemu
           docker rm -f -- qemu-system >/dev/null
           sudo cp -r -- qemu-system/qemu/. /usr/local/
           rm -rf -- ./qemu-system
+          qemu-system-arm --version
+          # Pre-8.0 QEMU 7.2 for MIPS
+          retry docker create --name qemu-system ghcr.io/taiki-e/qemu-system:7.2
+          mkdir -p -- qemu-system
+          docker cp -- qemu-system:/qemu qemu-system/qemu
+          docker rm -f -- qemu-system >/dev/null
+          sudo mv -- qemu-system/qemu /usr/local/qemu-7.2
+          rm -rf -- ./qemu-system
+          /usr/local/qemu-7.2/bin/qemu-system-mips --version
+          printf '%s\n' "MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/qemu-7.2/bin" >>"${GITHUB_ENV}"
+          # Patched QEMU 9.2 for LoongArch from https://github.com/picolibc/picolibc-ci-tools/releases
+          case "$(uname -m)" in
+            aarch64 | arm64) ;;
+            *)
+              retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused https://github.com/picolibc/picolibc-ci-tools/releases/download/v11/qemu-stable.linux-amd64.tar.xz \
+                | tar xf -
+              sudo mv -- qemu-stable /usr/local/qemu-stable
+              /usr/local/qemu-stable/bin/qemu-system-loongarch64 --version
+              printf '%s\n' "LOONGARCH_QEMU_SYSTEM_BIN_DIR=/usr/local/qemu-stable/bin" >>"${GITHUB_ENV}"
+            ;;
+          esac
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
           retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user
           mkdir -p -- qemu-user
@@ -138,14 +160,12 @@ jobs:
           docker rm -f -- qemu-user >/dev/null
           sudo mv -- qemu-user/bin/qemu-* /usr/local/bin/
           rm -rf -- ./qemu-user
+          qemu-arm --version
           if [[ "${{ matrix.rust }}" == "stable" ]]; then
             retry espup install --targets esp32
           fi
-          qemu-system-arm --version
-          qemu-arm --version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          QEMU_SYSTEM_VERSION: ${{ matrix.qemu-system || 'latest' }}
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
           brew install qemu

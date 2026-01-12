@@ -101,6 +101,13 @@ case "${target}" in
   riscv64*)
     qemu_user riscv64
     ;;
+  # LoongArch
+  loongarch32*)
+    qemu_user loongarch32
+    ;;
+  loongarch64*)
+    qemu_user loongarch64
+    ;;
   # MIPS
   mips*) bail "QEMU doesn't support semihosting for MIPS (${target}) with user-mode" ;;
   *) bail "unrecognized target ${target}" ;;

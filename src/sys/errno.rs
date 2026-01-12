@@ -40,6 +40,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ECONNRESET => ConnectionReset,
@@ -56,6 +58,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ELOOP => __FilesystemLoop,
@@ -69,6 +73,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ENAMETOOLONG => InvalidFilename,
@@ -77,6 +83,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ENETDOWN => NetworkDown,
@@ -85,6 +93,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ENETUNREACH => NetworkUnreachable,
@@ -93,6 +103,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ENOTCONN => NotConnected,
@@ -107,6 +119,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ETIMEDOUT => TimedOut,
@@ -115,6 +129,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         errno::ETXTBSY => ExecutableFileBusy,
@@ -131,6 +147,8 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "arm",
             target_arch = "riscv32",
             target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
         )))]
         x if x == errno::EAGAIN || x == errno::EWOULDBLOCK => WouldBlock,

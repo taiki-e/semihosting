@@ -19,7 +19,7 @@ args=(
 )
 semihosting_args=("$@")
 
-semi_config=''
+semi_config='enable=on'
 if [[ -n "${QEMU_SYSTEM_RUNNER_ARG_SPACES_SEPARATED:-}" ]]; then
   for arg in "${semihosting_args[@]}"; do
     if [[ "${arg}" == *' '* ]] || [[ "${arg}" == *$'\t'* ]]; then
@@ -44,20 +44,21 @@ else
     semi_config+=",arg=${arg_string}"
   fi
 fi
-semi_config="${semi_config#,}"
-if [[ -n "${semi_config}" ]]; then
-  args+=(-semihosting-config "${semi_config}")
-else
-  args+=(-semihosting)
-fi
+args+=(-semihosting-config "${semi_config}")
+
+case "${target}" in
+  mips*) bin_dir="${MIPS_QEMU_SYSTEM_BIN_DIR:+"${MIPS_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
+  loongarch*) bin_dir="${LOONGARCH_QEMU_SYSTEM_BIN_DIR:+"${LOONGARCH_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
+esac
+[[ -n "${bin_dir:-}" ]] || bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 
 qemu_system() {
   qemu_arch="$1"
   shift
   (
     set -x
-    "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" --version
-    "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-${qemu_arch}" "$@" "${args[@]}"
+    "${bin_dir}qemu-system-${qemu_arch}" --version
+    "${bin_dir}qemu-system-${qemu_arch}" "$@" "${args[@]}"
   )
 }
 
@@ -117,6 +118,13 @@ case "${target}" in
     ;;
   riscv64*)
     qemu_system riscv64 -M virt
+    ;;
+  # LoongArch
+  loongarch32*)
+    qemu_system loongarch64 -M virt -cpu la132
+    ;;
+  loongarch64*)
+    qemu_system loongarch64 -M virt
     ;;
   # MIPS
   mips-*)

@@ -59,10 +59,10 @@ pub fn write<P: AsRef<CStr>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result
 ///
 /// The following semihosting calls are currently being used:
 ///
-/// | Platform                                           | Semihosting call |
-/// | -------------------------------------------------- | ---------------- |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_REMOVE]     |
-/// | MIPS32, MIPS64                                     | UHI_unlink       |
+/// | Platform                                                      | Semihosting call |
+/// | ------------------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_REMOVE]     |
+/// | MIPS32, MIPS64                                                | UHI_unlink       |
 ///
 /// [SYS_REMOVE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-remove-0x0e
 ///
@@ -85,10 +85,10 @@ pub fn remove_file<P: AsRef<CStr>>(path: P) -> io::Result<()> {
 ///
 /// The following semihosting calls are currently being used:
 ///
-/// | Platform                                           | Semihosting call |
-/// | -------------------------------------------------- | ---------------- |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_RENAME]     |
-/// | MIPS32, MIPS64                                     | (Unsupported)    |
+/// | Platform                                                      | Semihosting call |
+/// | ------------------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_RENAME]     |
+/// | MIPS32, MIPS64                                                | (Unsupported)    |
 ///
 /// [SYS_RENAME]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f
 ///
@@ -126,10 +126,10 @@ impl File {
     ///
     /// The following semihosting calls are currently being used:
     ///
-    /// | Platform                                           | Semihosting call |
-    /// | -------------------------------------------------- | ---------------- |
-    /// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_FLEN]       |
-    /// | MIPS32, MIPS64                                     | UHI_fstat        |
+    /// | Platform                                                      | Semihosting call |
+    /// | ------------------------------------------------------------- | ---------------- |
+    /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_FLEN]       |
+    /// | MIPS32, MIPS64                                                | UHI_fstat        |
     ///
     /// [SYS_FLEN]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-flen-0x0c
     ///

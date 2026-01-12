@@ -10,6 +10,8 @@ cd -- "$(dirname -- "$0")"/..
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
 #    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir [+toolchain] [target]...
+#    MIPS_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir [+toolchain] [target]...
+#    LOONGARCH_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir [+toolchain] [target]...
 
 # rustc -Z unstable-options --print all-target-specs-json | jq -r '. | to_entries[] | if .value.os then empty else .key end'
 default_targets=(
@@ -72,6 +74,13 @@ default_targets=(
   riscv64im-unknown-none-elf
   riscv64imac-unknown-none-elf
   riscv64gc-unknown-none-elf
+
+  # loongarch32
+  loongarch32-unknown-none
+  loongarch32-unknown-none-softfloat
+  # loongarch64
+  loongarch64-unknown-none
+  loongarch64-unknown-none-softfloat
 
   # mips32r2
   mips-unknown-none # custom target
@@ -157,6 +166,7 @@ if [[ "${rustc_version}" =~ nightly|dev ]]; then
   fi
 fi
 workspace_root=$(pwd)
+qemu_system_bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 export SEMIHOSTING_DENY_WARNINGS=1
 
 run() {
@@ -213,7 +223,7 @@ run() {
       esac
       ;;
     armv7a* | thumbv7a*) ;;
-    aarch64* | arm* | thumb* | riscv*)
+    aarch64* | arm* | thumb* | riscv* | loongarch*)
       case "${runner}" in
         qemu-system)
           case "${target}" in
@@ -226,10 +236,25 @@ run() {
               ;;
             armv8r* | armebv8r* | thumbv8r*)
               # -machine mps3-an536 requires QEMU 9.0.
-              if "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-arm" --version | grep -Eq "QEMU emulator version [0-8]\."; then
+              if "${qemu_system_bin_dir}qemu-system-arm" --version | grep -Eq "QEMU emulator version [0-8]\."; then
                 info "QEMU doesn't support machine for Armv8-R (${target}) on QEMU pre-9.0 (skipped)"
                 return 0
               fi
+              ;;
+            loongarch*)
+              case "$(uname -m)" in
+                aarch64 | arm64)
+                  info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+                  return 0
+                  ;;
+              esac
+              case "$(uname -s)" in
+                Linux) ;;
+                *)
+                  info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+                  return 0
+                  ;;
+              esac
               ;;
           esac
           linker=link.x
@@ -243,6 +268,10 @@ run() {
                 target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
               fi
               ;;
+            loongarch*)
+              info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+              return 0
+              ;;
           esac
           ;;
       esac
@@ -250,8 +279,10 @@ run() {
     mips*)
       case "${runner}" in
         qemu-system)
+          local bin_dir="${MIPS_QEMU_SYSTEM_BIN_DIR:+"${MIPS_QEMU_SYSTEM_BIN_DIR%/}/"}"
+          [[ -n "${bin_dir}" ]] || bin_dir="${qemu_system_bin_dir}"
           # On QEMU 8.0+, QEMU doesn't seem to support semihosting for MIPS. https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0
-          if "${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
+          if "${bin_dir}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
             info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
             return 0
           fi
