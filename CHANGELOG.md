@@ -12,25 +12,21 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
-- Add `experimental::time::Instant`.
+- `experimental::time` improvements:
+  - Add `Instant`. ([c412f9f](https://github.com/taiki-e/semihosting/commit/c412f9f48b0c9b08c8c88dade0b46c416ed838b6))
+  - Re-export `Duration` `TryFromFloatSecsError` from `core::time`. ([c412f9f](https://github.com/taiki-e/semihosting/commit/c412f9f48b0c9b08c8c88dade0b46c416ed838b6))
+  - Implement `core::error::Error` for `SystemTimeError`. ([c412f9f](https://github.com/taiki-e/semihosting/commit/c412f9f48b0c9b08c8c88dade0b46c416ed838b6))
 
-- Re-export `core::time::{Duration,TryFromFloatSecsError}` in `experimental::time`.
+- `sys` improvements:
+  - Add `read`, `read_uninit`, `write`, `close`, `arm_compat::sys_read_orig`, and `arm_compat::sys_write_orig`, and deprecate `arm_compat::sys_read` and `arm_compat::sys_write`. See deprecation notes of [`arm_compat::sys_read`](https://docs.rs/semihosting/0.1/semihosting/sys/arm_compat/fn.sys_read.html) and [`arm_compat::sys_write`](https://docs.rs/semihosting/0.1/semihosting/sys/arm_compat/fn.sys_write.html) for details. ([741b9bd](https://github.com/taiki-e/semihosting/commit/741b9bdec178f4a27e1e76e0582a011697625293))
+  - Add `arm_compat::sys_get_cmdline_uninit`, and deprecate `arm_compat::sys_get_cmdline` in favor of `sys_get_cmdline_uninit`. ([9f46540](https://github.com/taiki-e/semihosting/commit/9f4654092c498805c9ae238b541ceb92b870d57e), [af23159](https://github.com/taiki-e/semihosting/commit/af231592f4cf86b60fee151dc1cf52617a961015))
+  - Add `arm_compat::syscall::ParamRegR::c_str_len`. ([a30da16](https://github.com/taiki-e/semihosting/commit/a30da167c61593bef8f765dec8b3628eb376782c))
+  - Add `mips::syscall::ParamRegR::ref_`. ([1a3f6a9](https://github.com/taiki-e/semihosting/commit/1a3f6a9b7a4160c8e3ad5594ebde34a81406ba6f))
 
-- Implement `core::error::Error` for `experimental::time::SystemTimeError`.
-
-- Add `sys::arm_compat::syscall::ParamRegR::c_str_len`.
-
-- Add `sys::arm_compat::sys_get_cmdline_uninit`.
-
-- Add `sys::mips::syscall::ParamRegR::ref_`.
-
-- Deprecate `sys::arm_compat::sys_get_cmdline` in favor of safe `sys_get_cmdline_uninit`.
-
-- Optimize `process::{exit,abort}`.
-
-- Optimize `experimental::env::args`.
-
-- Optimize various semihosting calls on AArch64, Arm, RISC-V, Xtensa.
+- Various optimizations:
+  - Optimize `process::{exit,abort}`. ([7d32f79](https://github.com/taiki-e/semihosting/commit/7d32f7940f2a18532c30f890198099a4f466981b))
+  - Optimize `experimental::env::args`. ([9f46540](https://github.com/taiki-e/semihosting/commit/9f4654092c498805c9ae238b541ceb92b870d57e))
+  - Optimize various semihosting calls on AArch64, Arm, RISC-V, Xtensa. ([f65bb43](https://github.com/taiki-e/semihosting/commit/f65bb435c028d036d4c2e1914eed485205a6aecc))
 
 - Documentation improvements.
 
