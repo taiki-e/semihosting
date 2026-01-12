@@ -280,7 +280,7 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
 /// # Safety
 ///
 /// CommandLine::ptr must be valid for at least the size specified in CommandLine::size.
-#[deprecated(note = "use safe sys_get_cmdline_uninit instead")] // TODO(semver): Remove
+#[deprecated(note = "use safer [`sys_get_cmdline_uninit`] instead")] // TODO(semver): Remove
 pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
     let len = cmdline.size;
     // |                    | on success      | on failure      |                 |
@@ -394,6 +394,8 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
 
 // TODO(sys,semver): Add init variant?
 /// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06)
+///
+/// **Note:** Unlike SYS_READ's original behavior, this returns the number of bytes read.
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let len = buf.len();
     let mut block = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::unsigned(len)];
@@ -516,6 +518,8 @@ pub fn sys_time() -> io::Result<usize> {
 }
 
 /// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05)
+///
+/// **Note:** Unlike SYS_WRITE's original behavior, this returns the number of bytes written.
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let len = buf.len();
     let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::unsigned(len)];
