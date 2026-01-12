@@ -38,6 +38,20 @@ pub(crate) const unsafe fn slice_assume_init_ref<T>(s: &[MaybeUninit<T>]) -> &[T
     // reference and thus guaranteed to be valid for reads.
     unsafe { &*(s as *const [MaybeUninit<T>] as *const [T]) }
 }
+// <[_]>::assume_init_mut requires Rust 1.93.
+/// # Safety
+///
+/// Calling this when the content is not yet fully initialized causes undefined
+/// behavior: it is up to the caller to guarantee that every `MaybeUninit<T>` in the
+/// slice really is in an initialized state. For instance, `.assume_init_mut()` cannot
+/// be used to initialize a `MaybeUninit` slice.
+#[allow(dead_code)]
+#[inline(always)]
+pub(crate) const unsafe fn slice_assume_init_mut<T>(s: &mut [MaybeUninit<T>]) -> &mut [T] {
+    // SAFETY: similar to safety notes for `slice_get_ref`, but we have a
+    // mutable reference which is also guaranteed to be valid for writes.
+    unsafe { &mut *(s as *mut [MaybeUninit<T>] as *mut [T]) }
+}
 
 // This module provides core::ptr strict_provenance/exposed_provenance polyfill for pre-1.84 rustc.
 pub(crate) mod ptr {

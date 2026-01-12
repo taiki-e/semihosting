@@ -16,7 +16,7 @@ pub(crate) mod fs;
 pub(crate) mod stdio;
 pub mod syscall;
 
-use core::{ffi::CStr, mem};
+use core::{ffi::CStr, mem, mem::MaybeUninit};
 
 use self::syscall::{
     OperationCode, ParamRegR, ParamRegW, RetReg, syscall0, syscall1_noreturn_readonly,
@@ -26,6 +26,7 @@ use self::syscall::{
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io,
+    utils::slice_assume_init_mut,
 };
 
 #[allow(missing_docs)]
@@ -145,9 +146,20 @@ pub unsafe fn mips_close(fd: RawFd) -> io::Result<()> {
 }
 pub(crate) use self::mips_close as close;
 
-// TODO(sys): Add uninit variant?
 /// UHI_read
 pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+    let len = buf.len();
+    // SAFETY: transmuting initialized `&mut [u8]` to `&mut [MaybeUninit<u8>]` is safe unless uninitialized byte will be written to resulting slice.
+    let buf =
+        unsafe { core::slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
+    Ok(read_uninit(fd, buf)?.0.len())
+}
+#[cfg(any(feature = "stdio", feature = "fs"))]
+pub(crate) use self::mips_read as read;
+fn read_uninit<'a>(
+    fd: BorrowedFd<'_>,
+    buf: &'a mut [MaybeUninit<u8>],
+) -> io::Result<(&'a mut [u8], &'a mut [MaybeUninit<u8>])> {
     let len = buf.len();
     let (res, errno) = unsafe {
         syscall3(
@@ -161,11 +173,10 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
         Err(from_errno(errno))
     } else {
         debug_assert!(res.unsigned() <= buf.len());
-        Ok(res.unsigned())
+        let (filled, rest) = buf.split_at_mut(res.unsigned());
+        Ok((unsafe { slice_assume_init_mut(filled) }, rest))
     }
 }
-#[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) use self::mips_read as read;
 
 /// UHI_write
 pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
@@ -258,9 +269,19 @@ pub fn mips_plog(msg: &CStr) -> io::Result<usize> {
 
 // TODO(mips): UHI_ASSERT
 
-// TODO(sys): Add uninit variant?
 /// UHI_pread
 pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> io::Result<usize> {
+    let len = buf.len();
+    // SAFETY: transmuting initialized `&mut [u8]` to `&mut [MaybeUninit<u8>]` is safe unless uninitialized byte will be written to resulting slice.
+    let buf =
+        unsafe { core::slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
+    Ok(mips_pread_uninit(fd, buf, offset)?.0.len())
+}
+fn mips_pread_uninit<'a>(
+    fd: BorrowedFd<'_>,
+    buf: &'a mut [MaybeUninit<u8>],
+    offset: usize,
+) -> io::Result<(&'a mut [u8], &'a mut [MaybeUninit<u8>])> {
     let len = buf.len();
     let (res, errno) = unsafe {
         syscall4(
@@ -275,7 +296,8 @@ pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> io::Resu
         Err(from_errno(errno))
     } else {
         debug_assert!(res.unsigned() <= buf.len());
-        Ok(res.unsigned())
+        let (filled, rest) = buf.split_at_mut(res.unsigned());
+        Ok((unsafe { slice_assume_init_mut(filled) }, rest))
     }
 }
 
