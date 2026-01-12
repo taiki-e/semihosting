@@ -9,7 +9,7 @@
 //! - At the following platform-specific module level, thin wrappers around more platform-specific operations,
 //!   including raw semihosting calls are provided. These usually just call the corresponding
 //!   semihosting calls, but is memory-safe and I/O-safe.
-//!   - `arm_compat`: AArch64, Arm, RISC-V, Xtensa (openocd-semihosting)
+//!   - `arm_compat`: AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting)
 //!   - `mips`: MIPS32, MIPS64
 
 #![allow(
@@ -24,6 +24,8 @@
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    target_arch = "loongarch32",
+    target_arch = "loongarch64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 use self::arm_compat as arch;
@@ -32,6 +34,8 @@ use self::arm_compat as arch;
     target_arch = "arm",
     target_arch = "riscv32",
     target_arch = "riscv64",
+    target_arch = "loongarch32",
+    target_arch = "loongarch64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
 ))]
 #[cfg_attr(
@@ -41,6 +45,8 @@ use self::arm_compat as arch;
         target_arch = "arm",
         target_arch = "riscv32",
         target_arch = "riscv64",
+        target_arch = "loongarch32",
+        target_arch = "loongarch64",
         all(target_arch = "xtensa", feature = "openocd-semihosting"),
     )))
 )]
@@ -108,10 +114,10 @@ use crate::{
 ///
 /// The following semihosting calls are currently being used:
 ///
-/// | Platform                                           | Semihosting call |
-/// | -------------------------------------------------- | ---------------- |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_CLOSE]      |
-/// | MIPS32, MIPS64                                     | UHI_close        |
+/// | Platform                                                      | Semihosting call |
+/// | ------------------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_CLOSE]      |
+/// | MIPS32, MIPS64                                                | UHI_close        |
 ///
 /// [SYS_CLOSE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-close-0x02
 ///
@@ -131,10 +137,10 @@ pub unsafe fn close(fd: RawFd) -> io::Result<()> {
 ///
 /// The following semihosting calls are currently being used:
 ///
-/// | Platform                                           | Semihosting call |
-/// | -------------------------------------------------- | ---------------- |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_READ]       |
-/// | MIPS32, MIPS64                                     | UHI_read         |
+/// | Platform                                                      | Semihosting call |
+/// | ------------------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_READ]       |
+/// | MIPS32, MIPS64                                                | UHI_read         |
 ///
 /// [SYS_READ]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06
 ///
@@ -168,10 +174,10 @@ pub fn read_uninit<'a>(
 ///
 /// The following semihosting calls are currently being used:
 ///
-/// | Platform                                           | Semihosting call |
-/// | -------------------------------------------------- | ---------------- |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_WRITE]       |
-/// | MIPS32, MIPS64                                     | UHI_write         |
+/// | Platform                                                      | Semihosting call |
+/// | ------------------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_WRITE]       |
+/// | MIPS32, MIPS64                                                | UHI_write         |
 ///
 /// [SYS_WRITE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05
 ///

@@ -8,7 +8,7 @@
 
 <!-- tidy:sync-markdown-to-rustdoc:start:src/lib.rs -->
 
-Semihosting for AArch64, Arm, RISC-V, MIPS32, MIPS64, and Xtensa.
+Semihosting for AArch64, Arm, RISC-V, LoongArch, MIPS32, MIPS64, and Xtensa.
 
 This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) for more information on semihosting.
 
@@ -46,6 +46,7 @@ The following target architectures are supported:
 | aarch64 | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) | `sys::arm_compat` | |
 | arm | [Semihosting for AArch32 and AArch64](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) | `sys::arm_compat` | use `SVC` on A+R profile by default based on Arm's recommendation but it can be changed by [`trap-hlt` feature](#optional-features-trap-hlt). |
 | riscv32/riscv64 | [RISC-V Semihosting](https://github.com/riscv-non-isa/riscv-semihosting/blob/1.0/riscv-semihosting.adoc) | `sys::arm_compat` | |
+| loongarch32/loongarch64 | | `sys::arm_compat` | |
 | xtensa | [OpenOCD Semihosting](https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c) | `sys::arm_compat` | requires [`openocd-semihosting` feature](#optional-features-openocd-semihosting) |
 | mips/mips32r6/mips64/mips64r6 | Unified Hosting Interface (MD01069) | `sys::mips` | |
 
@@ -72,13 +73,15 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `thumbv8m.main-none-eabi{,hf}`            | ✓    | ✓                      | ✓                         |                            |           |
 | `riscv32*-unknown-none-elf`               | ✓    | ✓                      | ✓                         | ✓                          |           |
 | `riscv64*-unknown-none-elf`               | ✓    | ✓                      | ✓                         | ✓                          |           |
+| `loongarch32-unknown-none{,-softfloat}`   | ✓    | ✓                      | N/A                       |                            |           |
+| `loongarch64-unknown-none{,-softfloat}`   | ✓    | ✓                      | N/A                       |                            |           |
 | `mips{,el}-unknown-none`                  | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mips{,el}-mti-none-elf`                  | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mips64{,el}-unknown-none`                | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mipsisa32r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 | `mipsisa64r6{,el}-unknown-none`           | ✓    | ✓                      | N/A                       |                            | \[4] \[5] |
 
-\[1] `stdio`, `fs`, `time`, and `args`.<br>
+\[1] `stdio`, `fs`, `time`, `args`, and `random`.<br>
 \[2] I'm not sure how to test panic-unwind on qemu-user.<br>
 \[3] QEMU's big-endian Arm/AArch64 support in [broken on system mode](https://github.com/taiki-e/semihosting/issues/18).<br>
 \[4] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>

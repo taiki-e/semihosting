@@ -59,10 +59,30 @@ fn setup_for_qemu_system(manifest_dir: &Path) {
                 _ => {}
             }
         }
-        "riscv32" | "riscv64" => {
-            fs::write(out_dir.join("riscv-common.ld"), include_bytes!("riscv-common.ld")).unwrap();
-            fs::copy(manifest_dir.join(format!("{target_arch}.ld")), out_dir.join("link.x"))
-                .unwrap();
+        "riscv32" | "riscv64" | "loongarch32" | "loongarch64" => {
+            let fw_jump_addr = match target_arch {
+                // https://github.com/riscv-software-src/opensbi/blob/v1.8/platform/template/objects.mk#L72
+                "riscv32" => "0x80400000",
+                "riscv64" => "0x80200000",
+                // https://github.com/qemu/qemu/blob/v10.2.0/tests/tcg/loongarch64/system/kernel.ld#L5
+                "loongarch32" | "loongarch64" => "0x200000",
+                _ => unreachable!(),
+            };
+            fs::copy(
+                manifest_dir.join("riscv-loongarch-common.ld"),
+                out_dir.join("riscv-loongarch-common.ld"),
+            )
+            .unwrap();
+            fs::write(
+                out_dir.join("link.x"),
+                format!(
+                    "\
+                    FW_JUMP_ADDR = {fw_jump_addr};\n\
+                    INCLUDE riscv-loongarch-common.ld\n\
+                    "
+                ),
+            )
+            .unwrap();
             check_link("link.x");
         }
         "mips" | "mips32r6" | "mips64" | "mips64r6" => {

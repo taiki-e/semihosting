@@ -58,10 +58,10 @@ impl From<u8> for ExitCode {
 ///
 /// The following semihosting calls are currently being used:
 ///
-/// | Platform                                           | Semihosting call                 |
-/// | -------------------------------------------------- | -------------------------------- |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_EXIT] / [SYS_EXIT_EXTENDED] |
-/// | MIPS32, MIPS64                                     | UHI_exit                         |
+/// | Platform                                                      | Semihosting call                 |
+/// | ------------------------------------------------------------- | -------------------------------- |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_EXIT] / [SYS_EXIT_EXTENDED] |
+/// | MIPS32, MIPS64                                                | UHI_exit                         |
 ///
 /// [SYS_EXIT]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-0x18
 /// [SYS_EXIT_EXTENDED]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-extended-0x20

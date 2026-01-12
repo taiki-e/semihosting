@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Low-level access to semihosting interfaces for Arm (AArch32 and AArch64) and
-//! RISC-V (which supports Arm-compatible semihosting interfaces).
+//! other architectures which support Arm-compatible semihosting interfaces
+//! (RISC-V, LoongArch, Xtensa).
 //!
 //! Refs:
 //! - Semihosting for AArch32 and AArch64 <https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst>
 //! - RISC-V Semihosting <https://github.com/riscv-non-isa/riscv-semihosting/blob/1.0/riscv-semihosting.adoc>
 //! - <https://github.com/qemu/qemu/blob/v10.2.0/semihosting/arm-compat-semi.c>
+//! - <https://lore.kernel.org/qemu-devel/20241222-semihosting-v1-1-8a770df60e9c@flygoat.com/>
 //! - <https://github.com/espressif/openocd-esp32/blob/HEAD/src/target/espressif/esp_xtensa_semihosting.c>
 
 #![allow(clippy::missing_safety_doc, clippy::undocumented_unsafe_blocks)] // TODO

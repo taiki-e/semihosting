@@ -7,6 +7,7 @@ CENTI
 CENTISECONDS
 CMDLINE
 CREAT
+dbcl
 demangle
 discontiguous
 ebreak

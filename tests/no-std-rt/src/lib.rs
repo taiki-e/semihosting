@@ -9,13 +9,19 @@
 ))]
 compile_error!("no-std-rt: exactly one of 'qemu-user' or 'qemu-system' feature must be enabled");
 
-#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
-#[no_mangle]
-#[link_section = ".text._start_arguments"]
-pub static BOOT_CORE_ID: u64 = 0;
-#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
-core::arch::global_asm!(include_str!("../raspi/boot.s"));
-
+#[cfg(feature = "qemu-user")]
+#[macro_export]
+macro_rules! entry {
+    ($entry_fn:ident) => {
+        #[no_mangle]
+        unsafe extern "C" fn _start() -> ! {
+            main()
+        }
+        fn main() -> ! {
+            ::semihosting::process::Termination::report($entry_fn()).exit_process()
+        }
+    };
+}
 #[cfg(cortex_m_rt)]
 #[doc(hidden)]
 pub use cortex_m_rt::{entry as cortex_m_rt_entry, *};
@@ -45,6 +51,12 @@ macro_rules! entry {
     };
 }
 #[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
+#[no_mangle]
+#[link_section = ".text._start_arguments"]
+pub static BOOT_CORE_ID: u64 = 0;
+#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
+core::arch::global_asm!(include_str!("../raspi/boot.s"));
+#[cfg(all(target_arch = "aarch64", feature = "qemu-system"))]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
@@ -57,9 +69,10 @@ macro_rules! entry {
         }
     };
 }
+#[cfg(feature = "qemu-system")]
 #[cfg(not(cortex_m_rt))]
 #[cfg(not(aarch32_rt))]
-#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
+#[cfg(not(target_arch = "aarch64"))]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
@@ -73,14 +86,19 @@ macro_rules! entry {
         }
     };
 }
+#[cfg(feature = "qemu-system")]
 #[cfg(not(cortex_m_rt))]
 #[cfg(not(aarch32_rt))]
-#[cfg(not(all(target_arch = "aarch64", feature = "qemu-system")))]
+#[cfg(not(target_arch = "aarch64"))]
 #[doc(hidden)]
 #[inline(always)]
 pub unsafe fn init_start() {
-    #[cfg(all(any(target_arch = "riscv32", target_arch = "riscv64"), feature = "qemu-system"))]
+    #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
         core::arch::asm!("la sp, _stack");
+    }
+    #[cfg(any(target_arch = "loongarch32", target_arch = "loongarch64"))]
+    unsafe {
+        core::arch::asm!("la.abs $sp, _stack");
     }
 }

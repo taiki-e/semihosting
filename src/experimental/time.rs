@@ -35,10 +35,10 @@ use crate::sys::time;
 /// The following semihosting calls are currently being used by `now()` to find out
 /// the current time:
 ///
-/// | Platform                                           | Semihosting call | Representable precision  |
-/// | -------------------------------------------------- | ---------------- | ------------------------ |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_CLOCK]      | 10 millisecond intervals |
-/// | MIPS32, MIPS64                                     | (Unsupported)    | -                        |
+/// | Platform                                                      | Semihosting call | Representable precision  |
+/// | ------------------------------------------------------------- | ---------------- | ------------------------ |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_CLOCK]      | 10 millisecond intervals |
+/// | MIPS32, MIPS64                                                | (Unsupported)    | -                        |
 ///
 /// [SYS_CLOCK]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10
 ///
@@ -65,10 +65,10 @@ pub struct Instant(time::Instant);
 /// The following semihosting calls are currently being used by `now()` to find out
 /// the current time:
 ///
-/// | Platform                                           | Semihosting call | Representable precision  |
-/// | -------------------------------------------------- | ---------------- | ------------------------ |
-/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_TIME]       | second intervals         |
-/// | MIPS32, MIPS64                                     | (Unsupported)    | -                        |
+/// | Platform                                                      | Semihosting call | Representable precision  |
+/// | ------------------------------------------------------------- | ---------------- | ------------------------ |
+/// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_TIME]       | second intervals         |
+/// | MIPS32, MIPS64                                                | (Unsupported)    | -                        |
 ///
 /// [SYS_TIME]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-time-0x11
 ///
