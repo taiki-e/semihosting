@@ -105,7 +105,19 @@ pub trait IsTerminal: crate::sealed::Sealed {
     /// On platforms where Rust does not know how to detect a terminal yet, this will return
     /// `false`. This will also return `false` if an unexpected error occurred, such as from
     /// passing an invalid file descriptor.
+    ///
+    /// The following semihosting calls are currently being used:
+    ///
+    /// | Platform                                           | Semihosting call |
+    /// | -------------------------------------------------- | ---------------- |
+    /// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_ISTTY]      |
+    /// | MIPS32, MIPS64                                     | UHI_fstat        |
+    ///
+    /// [SYS_ISTTY]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-istty-0x09
+    ///
+    /// **Disclaimer:** These semihosting calls might change over time.
     #[doc(alias = "isatty")]
+    #[doc(alias = "SYS_ISTTY")] // arm_compat
     fn is_terminal(&self) -> bool;
 }
 macro_rules! impl_is_terminal {

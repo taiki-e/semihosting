@@ -54,6 +54,22 @@ pub fn write<P: AsRef<CStr>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result
 /// See [`std::fs::remove_file` documentation][std] for details.
 ///
 /// [std]: https://doc.rust-lang.org/std/fs/fn.remove_file.html
+///
+/// # Platform-specific behavior
+///
+/// The following semihosting calls are currently being used:
+///
+/// | Platform                                           | Semihosting call |
+/// | -------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_REMOVE]     |
+/// | MIPS32, MIPS64                                     | UHI_unlink       |
+///
+/// [SYS_REMOVE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-remove-0x0e
+///
+/// **Disclaimer:** These semihosting calls might change over time.
+#[doc(alias = "rm", alias = "unlink", alias = "DeleteFile")]
+#[doc(alias = "SYS_REMOVE")] // arm_compat
+#[doc(alias = "UHI_unlink")] // mips
 pub fn remove_file<P: AsRef<CStr>>(path: P) -> io::Result<()> {
     sys::fs::unlink(path.as_ref())
 }
@@ -67,7 +83,18 @@ pub fn remove_file<P: AsRef<CStr>>(path: P) -> io::Result<()> {
 ///
 /// # Platform-specific behavior
 ///
-/// Currently, this function is not supported on MIPS32/MIPS64.
+/// The following semihosting calls are currently being used:
+///
+/// | Platform                                           | Semihosting call |
+/// | -------------------------------------------------- | ---------------- |
+/// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_RENAME]     |
+/// | MIPS32, MIPS64                                     | (Unsupported)    |
+///
+/// [SYS_RENAME]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f
+///
+/// **Disclaimer:** These semihosting calls might change over time.
+#[doc(alias = "mv", alias = "MoveFile", alias = "MoveFileEx")]
+#[doc(alias = "SYS_RENAME")] // arm_compat
 pub fn rename<P: AsRef<CStr>, Q: AsRef<CStr>>(from: P, to: Q) -> io::Result<()> {
     sys::fs::rename(from.as_ref(), to.as_ref())
 }
@@ -94,6 +121,19 @@ impl File {
         OpenOptions::new()
     }
     /// Queries metadata about the underlying file.
+    ///
+    /// # Platform-specific behavior
+    ///
+    /// The following semihosting calls are currently being used:
+    ///
+    /// | Platform                                           | Semihosting call |
+    /// | -------------------------------------------------- | ---------------- |
+    /// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_FLEN]       |
+    /// | MIPS32, MIPS64                                     | UHI_fstat        |
+    ///
+    /// [SYS_FLEN]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-flen-0x0c
+    ///
+    /// **Disclaimer:** These semihosting calls might change over time.
     pub fn metadata(&self) -> io::Result<Metadata> {
         sys::fs::metadata(self.as_fd()).map(Metadata)
     }

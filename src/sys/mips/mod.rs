@@ -97,7 +97,7 @@ fn from_errno(res: RetReg) -> io::Error {
     io::Error::from_raw_os_error(res.errno())
 }
 
-/// UHI_EXIT
+/// UHI_exit
 // TODO(semver): change return type to !?
 pub fn mips_exit(code: i32) {
     #[allow(clippy::cast_sign_loss)]
@@ -115,7 +115,7 @@ pub(crate) fn exit(code: i32) -> ! {
     }
 }
 
-/// UHI_OPEN
+/// UHI_open
 pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> io::Result<OwnedFd> {
     #[allow(clippy::cast_sign_loss)]
     let (res, errno) = unsafe {
@@ -132,7 +132,7 @@ pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> io::Result<OwnedFd> {
     }
 }
 
-/// UHI_CLOSE
+/// UHI_close
 pub unsafe fn mips_close(fd: RawFd) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_CLOSE, ParamRegR::raw_fd(fd)) };
@@ -146,7 +146,7 @@ pub unsafe fn mips_close(fd: RawFd) -> io::Result<()> {
 pub(crate) use self::mips_close as close;
 
 // TODO(sys): Add uninit variant?
-/// UHI_READ
+/// UHI_read
 pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let len = buf.len();
     let (res, errno) = unsafe {
@@ -167,7 +167,7 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_read as read;
 
-/// UHI_WRITE
+/// UHI_write
 pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let (res, errno) = unsafe {
         syscall3_readonly(
@@ -187,7 +187,7 @@ pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 #[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_write as write;
 
-/// UHI_LSEEK
+/// UHI_lseek
 pub unsafe fn mips_lseek(
     fd: BorrowedFd<'_>,
     offset: isize,
@@ -204,14 +204,14 @@ pub unsafe fn mips_lseek(
     if res.signed() == -1 { Err(from_errno(errno)) } else { Ok(res.unsigned()) }
 }
 
-/// UHI_UNLINK
+/// UHI_unlink
 pub fn mips_unlink(path: &CStr) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_UNLINK, ParamRegR::c_str(path)) };
     if res.unsigned() == 0 { Ok(()) } else { Err(from_errno(errno)) }
 }
 
-/// UHI_FSTAT
+/// UHI_fstat
 pub fn mips_fstat(fd: BorrowedFd<'_>) -> io::Result<uhi_stat> {
     let mut buf: uhi_stat = unsafe { mem::zeroed() };
     let (res, errno) =
@@ -219,21 +219,21 @@ pub fn mips_fstat(fd: BorrowedFd<'_>) -> io::Result<uhi_stat> {
     if res.unsigned() == 0 { Ok(buf) } else { Err(from_errno(errno)) }
 }
 
-/// UHI_ARGC
+/// UHI_argc
 pub fn mips_argc() -> usize {
     let (res, _errno) = unsafe { syscall0(OperationCode::UHI_ARGC) };
     debug_assert!(!res.signed().is_negative(), "{}", res.signed());
     res.unsigned()
 }
 
-/// UHI_ARGNLEN
+/// UHI_argnlen
 pub fn mips_argnlen(n: usize) -> io::Result<usize> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_ARGNLEN, ParamRegR::unsigned(n)) };
     if res.signed() == -1 { Err(from_errno(errno)) } else { Ok(res.unsigned()) }
 }
 
-/// UHI_ARGN
+/// UHI_argn
 pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall2(OperationCode::UHI_ARGN, ParamRegW::unsigned(n), ParamRegW::ptr(buf)) };
@@ -245,7 +245,7 @@ pub unsafe fn mips_argn(n: usize, buf: *mut u8) -> io::Result<()> {
     }
 }
 
-/// UHI_PLOG
+/// UHI_plog
 pub fn mips_plog(msg: &CStr) -> io::Result<usize> {
     let (res, errno) = unsafe { syscall1_readonly(OperationCode::UHI_PLOG, ParamRegR::c_str(msg)) };
     if res.signed() == -1 {
@@ -259,7 +259,7 @@ pub fn mips_plog(msg: &CStr) -> io::Result<usize> {
 // TODO(mips): UHI_ASSERT
 
 // TODO(sys): Add uninit variant?
-/// UHI_PREAD
+/// UHI_pread
 pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> io::Result<usize> {
     let len = buf.len();
     let (res, errno) = unsafe {
@@ -279,7 +279,7 @@ pub fn mips_pread(fd: BorrowedFd<'_>, buf: &mut [u8], offset: usize) -> io::Resu
     }
 }
 
-/// UHI_PWRITE
+/// UHI_pwrite
 pub fn mips_pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: usize) -> io::Result<usize> {
     let (res, errno) = unsafe {
         syscall4_readonly(
@@ -298,7 +298,7 @@ pub fn mips_pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: usize) -> io::Result<
     }
 }
 
-/// UHI_LINK
+/// UHI_link
 pub fn mips_link(old: &CStr, new: &CStr) -> io::Result<()> {
     let (res, errno) = unsafe {
         syscall2_readonly(OperationCode::UHI_LINK, ParamRegR::c_str(old), ParamRegR::c_str(new))
