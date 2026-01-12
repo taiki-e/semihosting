@@ -134,6 +134,7 @@ pub fn mips_open(path: &CStr, flags: i32, mode: i32) -> io::Result<OwnedFd> {
 }
 
 /// UHI_close
+/// (Equivalent to [`sys::close`](crate::sys::close))
 pub unsafe fn mips_close(fd: RawFd) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_CLOSE, ParamRegR::raw_fd(fd)) };
@@ -147,6 +148,7 @@ pub unsafe fn mips_close(fd: RawFd) -> io::Result<()> {
 pub(crate) use self::mips_close as close;
 
 /// UHI_read
+/// (Equivalent to [`sys::read`](crate::sys::read))
 pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let len = buf.len();
     // SAFETY: transmuting initialized `&mut [u8]` to `&mut [MaybeUninit<u8>]` is safe unless uninitialized byte will be written to resulting slice.
@@ -154,9 +156,8 @@ pub fn mips_read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
         unsafe { core::slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
     Ok(read_uninit(fd, buf)?.0.len())
 }
-#[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_read as read;
-fn read_uninit<'a>(
+pub(crate) fn read_uninit<'a>(
     fd: BorrowedFd<'_>,
     buf: &'a mut [MaybeUninit<u8>],
 ) -> io::Result<(&'a mut [u8], &'a mut [MaybeUninit<u8>])> {
@@ -179,6 +180,7 @@ fn read_uninit<'a>(
 }
 
 /// UHI_write
+/// (Equivalent to [`sys::write`](crate::sys::write))
 pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let (res, errno) = unsafe {
         syscall3_readonly(
@@ -195,7 +197,6 @@ pub fn mips_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
         Ok(res.unsigned())
     }
 }
-#[cfg(any(feature = "stdio", feature = "fs"))]
 pub(crate) use self::mips_write as write;
 
 /// UHI_lseek
@@ -216,6 +217,7 @@ pub unsafe fn mips_lseek(
 }
 
 /// UHI_unlink
+/// (Equivalent to [`fs::remove_file`](crate::fs::remove_file))
 pub fn mips_unlink(path: &CStr) -> io::Result<()> {
     let (res, errno) =
         unsafe { syscall1_readonly(OperationCode::UHI_UNLINK, ParamRegR::c_str(path)) };

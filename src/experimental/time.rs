@@ -40,7 +40,7 @@ use crate::sys::time;
 /// | AArch64, Arm, RISC-V, Xtensa (openocd-semihosting) | [SYS_CLOCK]      | 10 millisecond intervals |
 /// | MIPS32, MIPS64                                     | (Unsupported)    | -                        |
 ///
-/// [SYS_CLOCK](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10)
+/// [SYS_CLOCK]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 ///

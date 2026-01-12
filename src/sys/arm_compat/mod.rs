@@ -143,6 +143,7 @@ pub fn sys_clock() -> io::Result<usize> {
 }
 
 /// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-close-0x02)
+/// (Equivalent to [`sys::close`](crate::sys::close))
 pub unsafe fn sys_close(fd: RawFd) -> io::Result<()> {
     let block = [ParamRegR::raw_fd(fd)];
     // |                    | on success      | on failure      |                 |
@@ -275,7 +276,7 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
     if ret.signed() == -1 { Err(from_errno()) } else { Ok(ret.unsigned()) }
 }
 
-/// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
+/// Deprecated: use [`sys_get_cmdline_uninit`] instead
 ///
 /// # Safety
 ///
@@ -392,11 +393,37 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
     }
 }
 
-// TODO(sys,semver): Add init variant?
-/// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06)
+/// Deprecated: use [`sys::read`](crate::sys::read), [`sys::read_uninit`](crate::sys::read_uninit), or [`sys_read_orig`] instead
+///
 ///
 /// **Note:** Unlike SYS_READ's original behavior, this returns the number of bytes read.
+/// - If you want to continue to use uninitialized buffer, use [`sys::read_uninit`](crate::sys::read_uninit) instead.
+/// - If you want the current behavior, use [`sys::read`](crate::sys::read) instead.
+/// - If you want the SYS_READ's original behavior, use [`sys_read_orig`] instead.
+///
+/// This function may be changed to behave as [`sys_read_orig`] in a future breaking release.
+#[deprecated(
+    note = "use [`sys::read`](crate::sys::read), [`sys::read_uninit`](crate::sys::read_uninit), or [`sys_read_orig`] instead"
+)] // TODO(semver)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
+    Ok(read_uninit(fd, buf)?.0.len())
+}
+/// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06)
+pub fn sys_read_orig(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+    let num_read = read(fd, buf)?;
+    Ok(buf.len() - num_read)
+}
+pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
+    let len = buf.len();
+    // SAFETY: transmuting initialized `&mut [u8]` to `&mut [MaybeUninit<u8>]` is safe unless uninitialized byte will be written to resulting slice.
+    let buf =
+        unsafe { core::slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
+    Ok(read_uninit(fd, buf)?.0.len())
+}
+pub(crate) fn read_uninit<'a>(
+    fd: BorrowedFd<'_>,
+    buf: &'a mut [MaybeUninit<u8>],
+) -> io::Result<(&'a mut [u8], &'a mut [MaybeUninit<u8>])> {
     let len = buf.len();
     let mut block = [ParamRegW::fd(fd), ParamRegW::buf(buf), ParamRegW::unsigned(len)];
     // |                    | fully filled    | on EOF          | partly filled   | on failure      |                 |
@@ -406,15 +433,14 @@ pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<u
     // | block / buf        | updated         | - (unmentioned) | updated         | ? (unmentioned) |                 |
     let ret =
         unsafe { syscall_param_unchanged(OperationNumber::SYS_READ, ParamRegW::block(&mut block)) };
-    if ret.unsigned() <= len { Ok(len - ret.unsigned()) } else { Err(from_errno()) }
-}
-#[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
-    let len = buf.len();
-    // SAFETY: transmuting initialized `&mut [u8]` to `&mut [MaybeUninit<u8>]` is safe unless uninitialized byte will be written to resulting slice.
-    let buf =
-        unsafe { core::slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<MaybeUninit<u8>>(), len) };
-    sys_read(fd, buf)
+    let not_read = ret.unsigned();
+    if not_read <= len {
+        let (filled, rest) = buf.split_at_mut(buf.len() - not_read);
+        Ok((unsafe { slice_assume_init_mut(filled) }, rest))
+    } else {
+        debug_assert!(ret.signed().is_negative());
+        Err(from_errno())
+    }
 }
 
 /// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-readc-0x07)
@@ -428,6 +454,7 @@ pub fn sys_readc() -> u8 {
 }
 
 /// [SYS_REMOVE (0x0E)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-remove-0x0e)
+/// (Equivalent to [`fs::remove_file`](crate::fs::remove_file))
 pub fn sys_remove(path: &CStr) -> io::Result<()> {
     let block = [ParamRegR::c_str(path), ParamRegR::c_str_len(path)];
     // |                    | on success      | on failure      |                 |
@@ -442,6 +469,7 @@ pub fn sys_remove(path: &CStr) -> io::Result<()> {
 }
 
 /// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f)
+/// (Equivalent to [`fs::rename`](crate::fs::rename))
 pub fn sys_rename(from: &CStr, to: &CStr) -> io::Result<()> {
     let block = [
         ParamRegR::c_str(from),
@@ -517,10 +545,19 @@ pub fn sys_time() -> io::Result<usize> {
     Ok(ret.unsigned())
 }
 
-/// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05)
+/// Deprecated: use [`sys::write`](crate::sys::write) or [`sys_write_orig`] instead
 ///
 /// **Note:** Unlike SYS_WRITE's original behavior, this returns the number of bytes written.
+/// - If you want the current behavior, use [`sys::write`](crate::sys::write) instead.
+/// - If you want the SYS_WRITE's original behavior, use [`sys_write_orig`] instead.
+///
+/// This function may be changed to behave as [`sys_write_orig`] in a future breaking release.
+#[deprecated(note = "use [`sys::write`](crate::sys::write) or [`sys_write_orig`] instead")] // TODO(semver)
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
+    write(fd, buf)
+}
+/// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05)
+pub fn sys_write_orig(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let len = buf.len();
     let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::unsigned(len)];
     // |                    | fully filled    | partly filled / on failure |                 |
@@ -531,21 +568,27 @@ pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let ret = unsafe {
         syscall_param_unchanged_readonly(OperationNumber::SYS_WRITE, ParamRegR::block(&block))
     };
-    match ret.unsigned() {
-        0 => Ok(len),
-        not_written if not_written <= len => {
-            if not_written == len && !buf.is_empty() {
-                // At least on qemu-system-arm 7.2, if fd is a read-only file,
-                // this is returned instead of an error.
-                return Err(from_errno());
-            }
-            Ok(len - not_written)
+    let not_written = ret.unsigned();
+    #[allow(clippy::comparison_chain)]
+    if not_written < len {
+        Ok(not_written)
+    } else if not_written == len {
+        if len == 0 {
+            Ok(not_written)
+        } else {
+            // At least on qemu-system-arm 7.2, if fd is a read-only file,
+            // this is returned instead of an error.
+            Err(from_errno())
         }
-        _ => Err(from_errno()),
+    } else {
+        debug_assert!(ret.signed().is_negative());
+        Err(from_errno())
     }
 }
-#[cfg(any(feature = "stdio", feature = "fs"))]
-pub(crate) use self::sys_write as write;
+pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
+    let not_written = sys_write_orig(fd, buf)?;
+    Ok(buf.len() - not_written)
+}
 
 /// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-writec-0x03)
 pub fn sys_writec(character: u8) {

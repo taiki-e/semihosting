@@ -134,6 +134,8 @@ impl File {
     /// [SYS_FLEN]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-flen-0x0c
     ///
     /// **Disclaimer:** These semihosting calls might change over time.
+    #[doc(alias = "SYS_FLEN")] // arm_compat
+    #[doc(alias = "UHI_fstat")] // mips
     pub fn metadata(&self) -> io::Result<Metadata> {
         sys::fs::metadata(self.as_fd()).map(Metadata)
     }

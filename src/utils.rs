@@ -46,7 +46,7 @@ pub(crate) const unsafe fn slice_assume_init_ref<T>(s: &[MaybeUninit<T>]) -> &[T
 /// slice really is in an initialized state. For instance, `.assume_init_mut()` cannot
 /// be used to initialize a `MaybeUninit` slice.
 #[inline(always)]
-pub(crate) const unsafe fn slice_assume_init_mut<T>(s: &mut [MaybeUninit<T>]) -> &mut [T] {
+pub(crate) unsafe fn slice_assume_init_mut<T>(s: &mut [MaybeUninit<T>]) -> &mut [T] {
     // SAFETY: similar to safety notes for `slice_get_ref`, but we have a
     // mutable reference which is also guaranteed to be valid for writes.
     unsafe { &mut *(s as *mut [MaybeUninit<T>] as *mut [T]) }

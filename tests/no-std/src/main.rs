@@ -134,7 +134,7 @@ fn run() {
         let mut stdin = io::stdin().unwrap();
         if cfg!(mips) {
             assert_eq!(stdin.as_fd().as_raw_fd(), 0);
-            assert_eq!(stdin.is_terminal(), stdio_is_terminal);
+            assert_eq!(stdin.is_terminal(), true);
         } else {
             // in tests, we use <<< to input stdin, so stdin is not tty.
             // assert_eq!(stdin.is_terminal(), stdio_is_terminal);
