@@ -155,6 +155,7 @@ impl io::Write for File {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         sys::write(self.as_fd(), bytes)
     }
+    #[inline]
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
@@ -173,6 +174,7 @@ impl io::Write for &File {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         sys::write(self.as_fd(), bytes)
     }
+    #[inline]
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
