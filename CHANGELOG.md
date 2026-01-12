@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.23] - 2026-01-12
+
 - `experimental::time` improvements:
   - Add `Instant`. ([c412f9f](https://github.com/taiki-e/semihosting/commit/c412f9f48b0c9b08c8c88dade0b46c416ed838b6))
   - Re-export `Duration` `TryFromFloatSecsError` from `core::time`. ([c412f9f](https://github.com/taiki-e/semihosting/commit/c412f9f48b0c9b08c8c88dade0b46c416ed838b6))
@@ -148,7 +150,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.22...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.23...HEAD
+[0.1.23]: https://github.com/taiki-e/semihosting/compare/v0.1.22...v0.1.23
 [0.1.22]: https://github.com/taiki-e/semihosting/compare/v0.1.21...v0.1.22
 [0.1.21]: https://github.com/taiki-e/semihosting/compare/v0.1.20...v0.1.21
 [0.1.20]: https://github.com/taiki-e/semihosting/compare/v0.1.19...v0.1.20
