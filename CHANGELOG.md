@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `experimental::random::{fill_bytes, fill_uninit_bytes}` under experimental `random` feature.
+
 ## [0.1.23] - 2026-01-12
 
 - `experimental::time` improvements:

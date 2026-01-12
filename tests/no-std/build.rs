@@ -5,6 +5,7 @@ use std::{env, fs, path::PathBuf, time::SystemTime};
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rustc-check-cfg=cfg(mips,arm_compat)");
+    println!(r#"cargo:rustc-check-cfg=cfg(host_os,values("windows"))"#);
 
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
 
@@ -16,6 +17,9 @@ fn main() {
 
     let target = env::var("TARGET").expect("TARGET not set");
     let host = env::var("HOST").expect("HOST not set");
+    if host.contains("-windows") {
+        println!(r#"cargo:rustc-cfg=host_os="windows""#);
+    }
     let profile = env::var("PROFILE").expect("PROFILE not set");
     let out_dir: PathBuf = env::var_os("OUT_DIR").expect("OUT_DIR not set").into();
     let sep = if host.contains("-windows") { '\\' } else { '/' };
