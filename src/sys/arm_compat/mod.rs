@@ -31,7 +31,7 @@ use self::syscall::{
 use crate::{
     fd::{BorrowedFd, OwnedFd, RawFd},
     io,
-    utils::slice_assume_init_ref,
+    utils::slice_assume_init_mut,
 };
 
 #[allow(missing_docs)]
@@ -303,7 +303,7 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
 }
 
 /// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
-pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&[u8]> {
+pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&mut [u8]> {
     let len = buf.len();
     let mut block = [ParamRegW::buf(buf), ParamRegW::unsigned(len)];
     // |                    | on success      | on failure      |                 |
@@ -318,7 +318,7 @@ pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&[u8]> 
         debug_assert!(!block[0].to_ret().ptr().is_null());
         let size = block[1].to_ret().unsigned();
         debug_assert!(size < len); // len contains trailing nul
-        Ok(unsafe { slice_assume_init_ref(&buf[..size]) })
+        Ok(unsafe { slice_assume_init_mut(&mut buf[..size]) })
     } else {
         debug_assert_eq!(ret.signed(), -1);
         Err(from_errno())
