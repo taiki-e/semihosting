@@ -32,6 +32,7 @@ APIs are categorized into the following four types:
 - `semihosting::experimental` module provides experimental APIs. See [optional features](#optional-features) for more.
   - `env`: Provide `args`.
   - `time`: Provide `Instant` and `SystemTime`.
+  - `random`: Provide `fill_bytes` and `fill_uninit_bytes`.
   - `panic`: Provide `catch_unwind`.
 
 Additionally, this library provides a panic handler for semihosting, `-C panic=unwind` support, backtrace support, via [optional features](#optional-features).
@@ -168,6 +169,16 @@ semihosting = { version = "0.1", features = ["stdio", "panic-handler"] }
   - This feature is experimental (tracking issue: [#2](https://github.com/taiki-e/semihosting/issues/2))
     and outside of the normal semver guarantees and minor or patch versions of semihosting may make
     breaking changes to them at any time.
+
+- **`random`**<br>
+  Enable `semihosting::experimental::random`.
+
+  Note:
+  - This feature is experimental (tracking issue: [#22](https://github.com/taiki-e/semihosting/issues/22))
+    and outside of the normal semver guarantees and minor or patch versions of semihosting may make
+    breaking changes to them at any time.
+  - This implicitly enables the `fs` features.
+  - This is optimized on targets atomic CAS. You may want to use `portable-atomic` feature together if your target doesn't support atomic CAS (e.g., RISC-V without A-extension).
 
 - **`panic-unwind`**<br>
   Provide `-C panic=unwind` support for panic handler and enable

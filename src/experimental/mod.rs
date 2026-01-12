@@ -11,6 +11,9 @@ pub mod env;
 #[cfg(feature = "panic-unwind")]
 #[cfg_attr(docsrs, doc(cfg(feature = "panic-unwind")))]
 pub mod panic;
+#[cfg(feature = "random")]
+#[cfg_attr(docsrs, doc(cfg(feature = "random")))]
+pub mod random;
 #[cfg(feature = "time")]
 #[cfg_attr(docsrs, doc(cfg(feature = "time")))]
 pub mod time;

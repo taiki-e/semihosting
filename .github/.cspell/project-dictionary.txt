@@ -59,6 +59,7 @@ Tensilica
 tickfreq
 ucrt
 unseekable
+urandom
 versatileab
 versatilepb
 virt

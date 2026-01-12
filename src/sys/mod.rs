@@ -74,6 +74,8 @@ pub mod mips;
 #[cfg(feature = "args")]
 pub(crate) mod env;
 mod errno;
+#[cfg(feature = "random")]
+pub(crate) mod random;
 mod reg;
 #[cfg(feature = "time")]
 pub(crate) mod time;

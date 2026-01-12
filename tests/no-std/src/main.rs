@@ -16,7 +16,7 @@ use semihosting::sys::arm_compat::*;
 use semihosting::sys::mips::*;
 use semihosting::{
     c, dbg,
-    experimental::env,
+    experimental::{env, random},
     fd::AsFd as _,
     fs,
     io::{self, IsTerminal as _, Read as _, Seek as _, Write as _},
@@ -252,6 +252,31 @@ fn run() {
 
         fs::remove_file(path_a).unwrap();
         assert_eq!(fs::File::open(path_a).unwrap_err().kind(), io::ErrorKind::NotFound);
+        println!("ok");
+    }
+    {
+        println!("test random ... ");
+        let mut buf = [0; 64];
+        if random::fill_bytes(&mut buf).is_err() {
+            // Windows has no /dev/urandom
+            assert!(cfg!(host_os = "windows"));
+        } else {
+            assert!(cfg!(not(host_os = "windows")));
+            print!("\nrandom: ");
+            for b in buf {
+                print!("{b:x}");
+            }
+            println!();
+            let mut buf = [0];
+            for x in 0..=u8::MAX {
+                loop {
+                    random::fill_bytes(&mut buf).unwrap();
+                    if buf[0] == x {
+                        break;
+                    }
+                }
+            }
+        }
         println!("ok");
     }
     {
