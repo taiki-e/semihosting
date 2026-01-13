@@ -1,5 +1,6 @@
 argn
 argnlen
+ASXE
 balign
 bkpt
 blksize
@@ -7,6 +8,7 @@ CENTI
 CENTISECONDS
 CMDLINE
 CREAT
+csrwr
 dbcl
 demangle
 discontiguous
@@ -35,6 +37,7 @@ IXOTH
 IXUSR
 lseek
 nlink
+noat
 nondecreasing
 norvc
 nsec

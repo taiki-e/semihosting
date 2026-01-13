@@ -17,7 +17,10 @@ pub unsafe fn syscall0(op: OperationCode) -> (RetReg, RetReg) {
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             out("$4") _,
@@ -36,7 +39,10 @@ pub unsafe fn syscall1(op: OperationCode, arg1: ParamRegW<'_>) -> (RetReg, RetRe
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -55,7 +61,10 @@ pub unsafe fn syscall1_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> (RetR
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -71,12 +80,14 @@ pub unsafe fn syscall1_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> (RetR
 pub(crate) unsafe fn syscall1_noreturn_readonly(op: OperationCode, arg1: ParamRegR<'_>) -> ! {
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
             // An infinite loop to prevent the noreturn contract from being violated when a
             // semihosting call doesn't work for some reason.
             "2:",
                 "b 2b",
-                "nop",
+            ".set pop",
             in("$2") 1_usize,
             in("$4") arg1.0,
             in("$25") op.0,
@@ -96,7 +107,10 @@ pub unsafe fn syscall2(
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -119,7 +133,10 @@ pub unsafe fn syscall2_readonly(
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -143,7 +160,10 @@ pub unsafe fn syscall3(
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -168,7 +188,10 @@ pub unsafe fn syscall3_readonly(
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -194,7 +217,10 @@ pub unsafe fn syscall4(
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,
@@ -221,7 +247,10 @@ pub unsafe fn syscall4_readonly(
     let r2;
     unsafe {
         asm!(
+            ".set push",
+            ".set noat",
             trap!(),
+            ".set pop",
             inout("$2") 1_usize => r1,
             out("$3") r2,
             inout("$4") arg1.0 => _,

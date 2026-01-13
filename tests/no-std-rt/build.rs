@@ -59,37 +59,38 @@ fn setup_for_qemu_system(manifest_dir: &Path) {
                 _ => {}
             }
         }
-        "riscv32" | "riscv64" | "loongarch32" | "loongarch64" => {
-            let fw_jump_addr = match target_arch {
-                // https://github.com/riscv-software-src/opensbi/blob/v1.8/platform/template/objects.mk#L72
-                "riscv32" => "0x80400000",
-                "riscv64" => "0x80200000",
-                // https://github.com/qemu/qemu/blob/v10.2.0/tests/tcg/loongarch64/system/kernel.ld#L5
-                "loongarch32" | "loongarch64" => "0x200000",
-                _ => unreachable!(),
-            };
-            fs::copy(
-                manifest_dir.join("riscv-loongarch-common.ld"),
-                out_dir.join("riscv-loongarch-common.ld"),
-            )
-            .unwrap();
-            fs::write(
-                out_dir.join("link.x"),
-                format!(
-                    "\
+        _ => {
+            let is_riscv = target_arch.starts_with("riscv");
+            let is_loongarch = target_arch.starts_with("loongarch");
+            let is_mips = target_arch.starts_with("mips");
+            if is_riscv || is_loongarch || is_mips {
+                let fw_jump_addr = match target_arch {
+                    // https://github.com/riscv-software-src/opensbi/blob/v1.8/platform/template/objects.mk#L72
+                    "riscv32" => "0x80400000",
+                    "riscv64" => "0x80200000",
+                    // https://github.com/qemu/qemu/blob/v10.2.0/tests/tcg/loongarch64/system/kernel.ld#L5
+                    _ if is_loongarch => "0x200000",
+                    _ if is_mips => "0x80000",
+                    _ => unreachable!(),
+                };
+                fs::copy(
+                    manifest_dir.join("riscv-loongarch-mips-common.ld"),
+                    out_dir.join("common.ld"),
+                )
+                .unwrap();
+                fs::write(
+                    out_dir.join("link.x"),
+                    format!(
+                        "\
                     FW_JUMP_ADDR = {fw_jump_addr};\n\
-                    INCLUDE riscv-loongarch-common.ld\n\
+                    INCLUDE common.ld\n\
                     "
-                ),
-            )
-            .unwrap();
-            check_link("link.x");
+                    ),
+                )
+                .unwrap();
+                check_link("link.x");
+            }
         }
-        "mips" | "mips32r6" | "mips64" | "mips64r6" => {
-            fs::copy(manifest_dir.join("mips.ld"), out_dir.join("link.x")).unwrap();
-            check_link("link.x");
-        }
-        _ => {}
     }
 
     println!("cargo:rustc-link-search={}", out_dir.display());
