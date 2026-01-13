@@ -12,12 +12,6 @@ pub(crate) fn is_interrupted(errno: RawOsError) -> bool {
     errno as c_int == errno::EINTR
 }
 
-#[cfg(feature = "fs")]
-#[cold]
-pub(crate) fn einval() -> io::Error {
-    io::Error::from_raw_os_error(errno::EINVAL)
-}
-
 // Adapted from https://github.com/rust-lang/rust/blob/1.92.0/library/std/src/sys/pal/unix/mod.rs#L235.
 pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
     #[allow(clippy::enum_glob_use)]

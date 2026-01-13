@@ -7,7 +7,6 @@ pub(crate) use super::{sys_remove as unlink, sys_rename as rename};
 use crate::{
     fd::{BorrowedFd, OwnedFd},
     fs, io,
-    sys::errno::einval,
 };
 
 pub(crate) struct Metadata {
@@ -30,12 +29,12 @@ pub(crate) fn open(path: &CStr, options: &fs::OpenOptions) -> io::Result<OwnedFd
         (true, false) => {}
         (false, false) => {
             if options.truncate || options.create {
-                return Err(einval());
+                return Err(io::Error::EINVAL);
             }
         }
         (_, true) => {
             if options.truncate {
-                return Err(einval());
+                return Err(io::Error::EINVAL);
             }
         }
     }
@@ -48,7 +47,7 @@ pub(crate) fn open(path: &CStr, options: &fs::OpenOptions) -> io::Result<OwnedFd
         (true, true, false, true, true) => OpenMode::RDWR_TRUNC_BINARY,
         (false, true, true, true, false) => OpenMode::WRONLY_APPEND_BINARY,
         (true, true, true, true, false) => OpenMode::RDWR_APPEND_BINARY,
-        _ => return Err(einval()),
+        _ => return Err(io::Error::EINVAL),
     };
     sys_open(path, mode)
 }
@@ -62,13 +61,13 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: io::SeekFrom) -> io::Result<u64> {
             let len = sys_flen(fd)? as u64;
             let pos = (len as i64).saturating_add(offset);
             if pos.is_negative() {
-                return Err(einval());
+                return Err(io::Error::EINVAL);
             }
             pos as u64
         } // io::SeekFrom::Current(_offset) => todo!(),
     };
     // sys_seek may succeed without this guard, but make the behavior consistent with other platforms.
-    let abs_pos = isize::try_from(abs_pos).map_err(|_| einval())?;
+    let abs_pos = isize::try_from(abs_pos).map_err(|_| io::Error::EINVAL)?;
     unsafe { sys_seek(fd, abs_pos as usize)? }
     Ok(abs_pos as u64)
 }

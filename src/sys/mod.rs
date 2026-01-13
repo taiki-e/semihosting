@@ -88,10 +88,10 @@ pub(crate) mod time;
 
 use core::mem::MaybeUninit;
 
-#[cfg(feature = "fs")]
-pub(crate) use self::arch::fs;
 #[cfg(feature = "stdio")]
 pub(crate) use self::arch::stdio;
+#[cfg(feature = "fs")]
+pub(crate) use self::arch::{errno::EINVAL, fs};
 pub(crate) use self::{
     arch::exit,
     errno::{decode_error_kind, is_interrupted},

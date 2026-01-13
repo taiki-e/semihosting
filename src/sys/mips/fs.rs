@@ -10,7 +10,6 @@ pub(crate) use super::{mips_fstat as metadata, mips_unlink as unlink, uhi_stat a
 use crate::{
     fd::{BorrowedFd, OwnedFd},
     fs, io,
-    sys::errno::einval,
 };
 
 impl Metadata {
@@ -26,12 +25,12 @@ pub(crate) fn open(path: &CStr, options: &fs::OpenOptions) -> io::Result<OwnedFd
         (true, false) => {}
         (false, false) => {
             if options.truncate || options.create {
-                return Err(einval());
+                return Err(io::Error::EINVAL);
             }
         }
         (_, true) => {
             if options.truncate {
-                return Err(einval());
+                return Err(io::Error::EINVAL);
             }
         }
     }
@@ -41,7 +40,7 @@ pub(crate) fn open(path: &CStr, options: &fs::OpenOptions) -> io::Result<OwnedFd
         (true, true, false) => O_RDWR,
         (false, _, true) => O_WRONLY | O_APPEND,
         (true, _, true) => O_RDWR | O_APPEND,
-        (false, false, false) => return Err(einval()),
+        (false, false, false) => return Err(io::Error::EINVAL),
     };
     let creation_mode = match (options.create, options.truncate, options.create_new) {
         (false, false, false) => 0,
@@ -63,13 +62,13 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: io::SeekFrom) -> io::Result<u64> {
             let len = mips_fstat(fd)?.size();
             let pos = (len as i64).saturating_add(offset);
             if pos.is_negative() {
-                return Err(einval());
+                return Err(io::Error::EINVAL);
             }
             (SEEK_SET, pos)
         } // io::SeekFrom::Current(offset) => (SEEK_CUR, offset),
     };
     // mips_lseek will fail even without this guard, but errno will not be set.
-    let offset = isize::try_from(offset).map_err(|_| einval())?;
+    let offset = isize::try_from(offset).map_err(|_| io::Error::EINVAL)?;
     Ok(unsafe { mips_lseek(fd, offset, whence)? as u64 })
 }
 

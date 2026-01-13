@@ -57,6 +57,9 @@ impl Error {
 
     pub(crate) const ZERO_TIMEOUT: Self =
         const_error!(ErrorKind::InvalidInput, "cannot set a 0 duration timeout");
+
+    #[cfg(feature = "fs")]
+    pub(crate) const EINVAL: Self = Self { repr: Repr::Os(sys::EINVAL) };
 }
 
 #[cfg(feature = "alloc")]
