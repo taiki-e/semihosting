@@ -176,6 +176,10 @@ jobs:
           printf '%s\n' 'C:\msys64\ucrt64\bin' >>"${GITHUB_PATH}"
           C:/msys64/ucrt64/bin/qemu-system-arm --version
         if: startsWith(matrix.os, 'windows')
+      # Avoid needless git fetch
+      - run: sed -Ei '/^unwinding = .*/d' Cargo.toml
+        working-directory: tests/no-std
+        if: matrix.rust != 'nightly'
       # syn 2.0.107 & quote 1.0.42 & proc-macro2 1.0.104 requires Rust 1.68.
       - run: |
           cargo generate-lockfile

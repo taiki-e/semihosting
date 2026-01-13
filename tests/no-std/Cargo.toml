@@ -43,3 +43,6 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 opt-level = "s"
 
 [profile.release]
+
+[patch.crates-io]
+unwinding = { git = "https://github.com/taiki-e/unwinding.git", rev = "26a5101" }
