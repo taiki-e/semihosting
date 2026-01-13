@@ -337,7 +337,7 @@ run() {
         # TODO: Skip user mode due to "rust-lld: error: undefined symbol: __eh_frame".
         qemu-system)
           case "${target}" in
-            aarch64* | arm64* | riscv*)
+            aarch64* | arm64* | riscv* | loongarch64* | mips-* | mipsel-*)
               # Handle targets without atomic CAS
               case "${target}" in
                 thumbv[4-5]t* | armv[4-5]t* | thumbv6m*)
