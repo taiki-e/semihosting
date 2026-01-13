@@ -64,7 +64,7 @@ pub enum ExitReason {
     ADP_Stopped_OSSpecific = 0x20029,
 }
 
-// Refs: https://github.com/openocd-org/openocd/blob/HEAD/src/target/semihosting_common.c
+// For `O_*` flags mapping, see https://github.com/openocd-org/openocd/blob/HEAD/src/target/semihosting_common.c
 #[allow(missing_docs)]
 #[derive(Debug, Clone, Copy)]
 #[repr(usize)]
@@ -72,39 +72,63 @@ pub enum ExitReason {
 pub enum OpenMode {
     /// `fopen` mode: `r`<br>
     /// `O_*` flags: `O_RDONLY`
+    #[doc(alias = "r")]
+    #[doc(alias = "O_RDONLY")]
     RDONLY = 0,
     /// `fopen` mode: `rb`<br>
     /// `O_*` flags: `O_RDONLY | O_BINARY`
+    #[doc(alias = "rb")]
+    #[doc(alias = "O_RDONLY", alias = "O_BINARY")]
     RDONLY_BINARY = 1,
     /// `fopen` mode: `r+`<br>
     /// `O_*` flags: `O_RDWR`
+    #[doc(alias = "r+")]
+    #[doc(alias = "O_RDWR")]
     RDWR = 2,
     /// `fopen` mode: `r+b`<br>
     /// `O_*` flags: `O_RDWR | O_BINARY`
+    #[doc(alias = "r+b")]
+    #[doc(alias = "O_RDWR", alias = "O_BINARY")]
     RDWR_BINARY = 3,
     /// `fopen` mode: `w`<br>
     /// `O_*` flags: `O_WRONLY | O_CREAT | O_TRUNC`
+    #[doc(alias = "w")]
+    #[doc(alias = "O_WRONLY", alias = "O_CREAT", alias = "O_TRUNC")]
     WRONLY_TRUNC = 4,
     /// `fopen` mode: `wb`<br>
     /// `O_*` flags: `O_WRONLY | O_CREAT | O_TRUNC | O_BINARY`
+    #[doc(alias = "wb")]
+    #[doc(alias = "O_WRONLY", alias = "O_CREAT", alias = "O_TRUNC", alias = "O_BINARY")]
     WRONLY_TRUNC_BINARY = 5,
     /// `fopen` mode: `w+`<br>
     /// `O_*` flags: `O_RDWR | O_CREAT | O_TRUNC`
+    #[doc(alias = "w+")]
+    #[doc(alias = "O_RDWR", alias = "O_CREAT", alias = "O_TRUNC")]
     RDWR_TRUNC = 6,
     /// `fopen` mode: `w+b`<br>
     /// `O_*` flags: `O_RDWR | O_CREAT | O_TRUNC | O_BINARY`
+    #[doc(alias = "w+b")]
+    #[doc(alias = "O_RDWR", alias = "O_CREAT", alias = "O_TRUNC", alias = "O_BINARY")]
     RDWR_TRUNC_BINARY = 7,
     /// `fopen` mode: `a`<br>
     /// `O_*` flags: `O_WRONLY | O_CREAT | O_APPEND`
+    #[doc(alias = "a")]
+    #[doc(alias = "O_WRONLY", alias = "O_CREAT", alias = "O_APPEND")]
     WRONLY_APPEND = 8,
     /// `fopen` mode: `ab`<br>
     /// `O_*` flags: `O_WRONLY | O_CREAT | O_APPEND | O_BINARY`
+    #[doc(alias = "ab")]
+    #[doc(alias = "O_WRONLY", alias = "O_CREAT", alias = "O_APPEND", alias = "O_BINARY")]
     WRONLY_APPEND_BINARY = 9,
     /// `fopen` mode: `a+`<br>
     /// `O_*` flags: `O_RDWR | O_CREAT | O_APPEND`
+    #[doc(alias = "a+")]
+    #[doc(alias = "O_RDWR", alias = "O_CREAT", alias = "O_APPEND")]
     RDWR_APPEND = 10,
     /// `fopen` mode: `a+b`<br>
     /// `O_*` flags: `O_RDWR | O_CREAT | O_APPEND | O_BINARY`
+    #[doc(alias = "a+b`")]
+    #[doc(alias = "O_RDWR", alias = "O_CREAT", alias = "O_APPEND", alias = "O_BINARY")]
     RDWR_APPEND_BINARY = 11,
 }
 
