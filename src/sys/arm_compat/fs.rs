@@ -47,7 +47,7 @@ pub(crate) fn open(path: &CStr, options: &fs::OpenOptions) -> io::Result<OwnedFd
         (true, true, false, true, true) => OpenMode::RDWR_TRUNC_BINARY,
         (false, true, true, true, false) => OpenMode::WRONLY_APPEND_BINARY,
         (true, true, true, true, false) => OpenMode::RDWR_APPEND_BINARY,
-        _ => return Err(io::Error::EINVAL),
+        _ => return Err(io::Error::UNSUPPORTED_PLATFORM),
     };
     sys_open(path, mode)
 }
