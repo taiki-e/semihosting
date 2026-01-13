@@ -21,13 +21,15 @@ for arg in "$@"; do
   fi
 done
 
+bin_dir="${QEMU_USER_BIN_DIR:+"${QEMU_USER_BIN_DIR%/}/"}"
+
 qemu_user() {
   qemu_arch="$1"
   shift
   (
     set -x
-    "qemu-${qemu_arch}" --version
-    "qemu-${qemu_arch}" "$@" "${args[@]}"
+    "${bin_dir}qemu-${qemu_arch}" --version
+    "${bin_dir}qemu-${qemu_arch}" "$@" "${args[@]}"
   )
 }
 
