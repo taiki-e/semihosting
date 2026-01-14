@@ -10,17 +10,17 @@ use crate::{
     utils::slice_assume_init_mut,
 };
 
+#[cfg_attr(any(target_has_atomic = "32", feature = "portable-atomic"), cold)]
+fn init() -> io::Result<OwnedFd> {
+    Ok(fs::File::open(c!("/dev/urandom"))?.into())
+}
+
 cfg_sel!({
     #[cfg(any(target_has_atomic = "32", feature = "portable-atomic"))]
     {
         use self::once::OnceOwnedFd;
         static DEVICE: OnceOwnedFd = OnceOwnedFd::none();
-
         pub(crate) fn fill_bytes(bytes: &mut [MaybeUninit<u8>]) -> io::Result<&mut [u8]> {
-            #[cold]
-            fn init() -> io::Result<OwnedFd> {
-                Ok(fs::File::open(c!("/dev/urandom"))?.into())
-            }
             let fd = DEVICE.get_or_try_init(init)?;
             read_exact_uninit(fd, bytes)
         }
@@ -28,9 +28,8 @@ cfg_sel!({
     #[cfg(else)]
     {
         use crate::fd::AsFd as _;
-
         pub(crate) fn fill_bytes(bytes: &mut [MaybeUninit<u8>]) -> io::Result<&mut [u8]> {
-            let fd: OwnedFd = fs::File::open(c!("/dev/urandom"))?.into();
+            let fd: OwnedFd = init()?;
             read_exact_uninit(fd.as_fd(), bytes)
         }
     }
@@ -41,12 +40,12 @@ fn read_exact_uninit<'a>(
     buf: &'a mut [MaybeUninit<u8>],
 ) -> io::Result<&'a mut [u8]> {
     fn inner(fd: BorrowedFd<'_>, mut buf: &mut [MaybeUninit<u8>]) -> io::Result<()> {
-        if buf.is_empty() {
-            return Ok(());
-        }
-        loop {
+        while !buf.is_empty() {
             match sys::read_uninit(fd, mem::take(&mut buf)) {
-                Ok((&mut [], _) | (_, &mut [])) => break,
+                Ok((&mut [], rest)) => {
+                    buf = rest;
+                    break;
+                }
                 Ok((_, rest)) => {
                     buf = rest;
                 }
