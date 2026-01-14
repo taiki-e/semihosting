@@ -68,17 +68,18 @@ mod once {
         fd::{BorrowedFd, OwnedFd},
         io,
     };
+    const INIT: i32 = -1;
     #[repr(transparent)]
     pub(super) struct OnceOwnedFd(AtomicI32);
     impl OnceOwnedFd {
         pub(super) const fn none() -> Self {
-            Self(AtomicI32::new(-1))
+            Self(AtomicI32::new(INIT))
         }
         #[inline]
         fn get(&self) -> Option<BorrowedFd<'_>> {
             let fd = self.0.load(Ordering::Acquire);
             // SAFETY: we set non -1 value only from OwnedFd and close it only from Drop.
-            if fd == -1 { None } else { Some(unsafe { BorrowedFd::borrow_raw(fd) }) }
+            if fd == INIT { None } else { Some(unsafe { BorrowedFd::borrow_raw(fd) }) }
         }
         #[inline]
         pub(super) fn get_or_try_init(
@@ -97,7 +98,7 @@ mod once {
                 return Ok(fd);
             }
             let fd = fd.into_raw_fd();
-            match self.0.compare_exchange(-1, fd, Ordering::Release, Ordering::Acquire) {
+            match self.0.compare_exchange(INIT, fd, Ordering::Release, Ordering::Acquire) {
                 // SAFETY: we set non -1 value only from OwnedFd and close it only from Drop.
                 Ok(_) => Ok(unsafe { BorrowedFd::borrow_raw(fd) }),
                 Err(new_fd) => {
@@ -112,7 +113,7 @@ mod once {
     impl Drop for OnceOwnedFd {
         fn drop(&mut self) {
             let fd = *self.0.get_mut();
-            if fd != 1 {
+            if fd != INIT {
                 // SAFETY: we set non -1 value only from OwnedFd and close it only from Drop.
                 drop(unsafe { OwnedFd::from_raw_fd(fd) });
             }
