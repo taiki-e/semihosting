@@ -45,4 +45,4 @@ opt-level = "s"
 [profile.release]
 
 [patch.crates-io]
-unwinding = { git = "https://github.com/taiki-e/unwinding.git", rev = "7a53ccc" } # https://github.com/nbdd0121/unwinding/pull/53 + https://github.com/nbdd0121/unwinding/pull/24 + https://github.com/nbdd0121/unwinding/pull/50
+unwinding = { git = "https://github.com/taiki-e/unwinding.git", rev = "5e98c2d" } # https://github.com/nbdd0121/unwinding/pull/53 + https://github.com/nbdd0121/unwinding/pull/24 + https://github.com/nbdd0121/unwinding/pull/50

@@ -53,12 +53,15 @@ esac
 [[ -n "${bin_dir:-}" ]] || bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 
 qemu_system() {
-  qemu_arch="$1"
+  local qemu="${bin_dir}qemu-system-$1"
   shift
+  if "${qemu}" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
+    args+=(-audio none)
+  fi
   (
     set -x
-    "${bin_dir}qemu-system-${qemu_arch}" --version
-    "${bin_dir}qemu-system-${qemu_arch}" "$@" "${args[@]}"
+    "${qemu}" --version
+    "${qemu}" "$@" "${args[@]}"
   )
 }
 

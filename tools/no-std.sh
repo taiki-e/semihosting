@@ -214,20 +214,16 @@ run() {
 
   local test_dir=tests/no-std
   case "${target}" in
-    aarch64_be*)
-      case "${runner}" in
-        qemu-system)
-          # TODO: QEMU exit with 1: https://github.com/taiki-e/semihosting/issues/18#issuecomment-3707232586
-          info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
-          return 0
-          ;;
-      esac
-      ;;
     armv7a* | thumbv7a*) ;;
     aarch64* | arm* | thumb* | riscv* | loongarch*)
       case "${runner}" in
         qemu-system)
           case "${target}" in
+            aarch64_be*)
+              # TODO: QEMU exit with 1: https://github.com/taiki-e/semihosting/issues/18#issuecomment-3707232586
+              info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
+              return 0
+              ;;
             armv7r* | armebv7r*)
               # aarch32-rt requires Rust 1.83.
               if [[ "${rustc_minor_version}" -lt 83 ]]; then
