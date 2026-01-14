@@ -12,9 +12,11 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
-- Support LoongArch32 and LoongArch64.
+- Support LoongArch32 and LoongArch64. ([#24](https://github.com/taiki-e/semihosting/pull/24))
 
-- Add `experimental::random::{fill_bytes, fill_uninit_bytes}` under experimental `random` feature.
+- Add `experimental::random::{fill_bytes, fill_uninit_bytes}` under experimental `random` feature. ([#23](https://github.com/taiki-e/semihosting/pull/23), [a5031c3](https://github.com/taiki-e/semihosting/commit/a5031c312e26e50c37858cdc60d4e5ae368e0158))
+
+- Documentation improvements.
 
 ## [0.1.23] - 2026-01-12
 
