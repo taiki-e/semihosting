@@ -6,7 +6,7 @@
 //
 // For now, this only includes values matched in all host platforms officially
 // supported by QEMU (i.e, Linux, macOS, FreeBSD, NetBSD, OpenBSD, Windows).
-// https://www.qemu.org/docs/master/about/build-platforms.html
+// https://github.com/qemu/qemu/blob/v10.2.0/docs/about/build-platforms.rst
 
 // TODO(sys): should we expose this as public API of `sys` module?
 

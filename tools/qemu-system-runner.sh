@@ -48,6 +48,7 @@ args+=(-semihosting-config "${semi_config}")
 
 bin_dir=''
 case "${target}" in
+  aarch64_be*) bin_dir="${AARCH64_BE_QEMU_SYSTEM_BIN_DIR:+"${AARCH64_BE_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
   mips*) bin_dir="${MIPS_QEMU_SYSTEM_BIN_DIR:+"${MIPS_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
   loongarch*) bin_dir="${LOONGARCH_QEMU_BIN_DIR:+"${LOONGARCH_QEMU_BIN_DIR%/}/"}" ;;
 esac

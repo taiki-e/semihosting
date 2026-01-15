@@ -9,6 +9,7 @@ cd -- "$(dirname -- "$0")"/..
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
+#    AARCH64_BE_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    MIPS_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    LOONGARCH_QEMU_BIN_DIR=/path/to/qemu-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
@@ -221,9 +222,11 @@ run() {
         qemu-system)
           case "${target}" in
             aarch64_be*)
-              # TODO: QEMU exit with 1: https://github.com/taiki-e/semihosting/issues/18#issuecomment-3707232586
-              info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
-              return 0
+              # TODO: The patched QEMU needed (see README.md for details).
+              if [[ -z "${AARCH64_BE_QEMU_SYSTEM_BIN_DIR:-}" ]]; then
+                info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
+                return 0
+              fi
               ;;
             armv7r* | armebv7r*)
               # aarch32-rt requires Rust 1.83.
@@ -276,19 +279,19 @@ run() {
     mips*)
       case "${runner}" in
         qemu-system)
-          local bin_dir="${MIPS_QEMU_SYSTEM_BIN_DIR:+"${MIPS_QEMU_SYSTEM_BIN_DIR%/}/"}"
-          [[ -n "${bin_dir}" ]] || bin_dir="${qemu_system_bin_dir}"
-          # On QEMU 8.0+, QEMU doesn't seem to support semihosting for MIPS. https://qemu-project.gitlab.io/qemu/about/removed-features.html#mips-trap-and-emulate-kvm-support-removed-in-8-0
-          if "${bin_dir}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
-            info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
-            return 0
+          # TODO: The patched QEMU needed on QEMU 8.0+ (see README.md for details).
+          if [[ -z "${MIPS_QEMU_SYSTEM_BIN_DIR:-}" ]]; then
+            if "${qemu_system_bin_dir}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
+              info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
+              return 0
+            fi
           fi
           linker=link.x
           # Allow linker_messages to work around https://github.com/llvm/llvm-project/issues/56192.
           target_rustflags+=" -C link-arg=-T${linker} -A linker_messages"
           ;;
-        # As of QEMU 7.2, QEMU doesn't support semihosting for MIPS with user-mode.
-        # https://www.qemu.org/docs/master/about/emulation.html#supported-targets
+        # As of QEMU 10.2, QEMU doesn't support semihosting for MIPS with user-mode.
+        # https://github.com/qemu/qemu/blob/v10.2.0/docs/about/emulation.rst#supported-targets
         qemu-user)
           info "QEMU doesn't support semihosting for MIPS (${target}) with user-mode (skipped)"
           return 0
