@@ -20,7 +20,7 @@ mod impls;
 #[cfg(feature = "stdio")]
 pub use self::stdio::{IsTerminal, Stderr, Stdin, Stdout, stderr, stdin, stdout};
 #[cfg(feature = "stdio")]
-mod stdio;
+pub(crate) mod stdio;
 
 use core::fmt;
 

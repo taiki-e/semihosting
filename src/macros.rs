@@ -6,7 +6,7 @@
 #[macro_export]
 macro_rules! print {
     ($($tt:tt)*) => {
-        if let $crate::__private::Ok(mut stdout) = $crate::io::stdout() {
+        if let $crate::__private::Ok(mut stdout) = $crate::__private::stdout_for_macro() {
             use $crate::io::Write as _;
             let _ = $crate::__private::write!(stdout, $($tt)*);
         }
@@ -16,7 +16,7 @@ macro_rules! print {
 #[macro_export]
 macro_rules! println {
     ($($tt:tt)*) => {
-        if let $crate::__private::Ok(mut stdout) = $crate::io::stdout() {
+        if let $crate::__private::Ok(mut stdout) = $crate::__private::stdout_for_macro() {
             use $crate::io::Write as _;
             let _ = $crate::__private::writeln!(stdout, $($tt)*);
         }
@@ -27,7 +27,7 @@ macro_rules! println {
 #[macro_export]
 macro_rules! eprint {
     ($($tt:tt)*) => {
-        if let $crate::__private::Ok(mut stderr) = $crate::io::stderr() {
+        if let $crate::__private::Ok(mut stderr) = $crate::__private::stderr_for_macro() {
             use $crate::io::Write as _;
             let _ = $crate::__private::write!(stderr, $($tt)*);
         }
@@ -37,7 +37,7 @@ macro_rules! eprint {
 #[macro_export]
 macro_rules! eprintln {
     ($($tt:tt)*) => {
-        if let $crate::__private::Ok(mut stderr) = $crate::io::stderr() {
+        if let $crate::__private::Ok(mut stderr) = $crate::__private::stderr_for_macro() {
             use $crate::io::Write as _;
             let _ = $crate::__private::writeln!(stderr, $($tt)*);
         }

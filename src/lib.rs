@@ -383,5 +383,8 @@ pub mod __private {
     };
 
     #[doc(hidden)]
-    pub use crate::c_str::const_c_str_check;
+    pub use crate::{
+        c_str::const_c_str_check,
+        io::stdio::{stderr_for_macro, stdout_for_macro},
+    };
 }

@@ -100,6 +100,35 @@ impl fmt::Debug for Stderr {
     }
 }
 
+cfg_sel!({
+    #[cfg(all(target_arch = "arm", target_endian = "big"))]
+    {
+        #[doc(hidden)]
+        pub struct StdoutForMacro(i32);
+        pub use self::stdout_for_macro as stderr_for_macro;
+        #[doc(hidden)]
+        pub fn stdout_for_macro() -> io::Result<StdoutForMacro> {
+            Ok(StdoutForMacro(-1))
+        }
+        impl io::Write for StdoutForMacro {
+            fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+                for &b in bytes {
+                    sys::arm_compat::sys_writec(b);
+                }
+                Ok(bytes.len())
+            }
+            #[inline]
+            fn flush(&mut self) -> io::Result<()> {
+                Ok(())
+            }
+        }
+    }
+    #[cfg(else)]
+    {
+        pub use self::{stderr as stderr_for_macro, stdout as stdout_for_macro};
+    }
+});
+
 /// Trait to determine if a descriptor/handle refers to a terminal/tty.
 pub trait IsTerminal: crate::sealed::Sealed {
     /// Returns `true` if the descriptor/handle refers to a terminal/tty.
