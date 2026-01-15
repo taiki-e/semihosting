@@ -97,6 +97,9 @@ fn setup_for_qemu_system(manifest_dir: &Path) {
 }
 
 fn check_link(expected_linker: &str) {
+    if cfg!(feature = "disable-link-check") {
+        return;
+    }
     if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
         for mut flag in rustflags.to_string_lossy().split('\x1f') {
             flag = flag.strip_prefix("-C").unwrap_or(flag);
