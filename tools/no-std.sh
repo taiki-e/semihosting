@@ -10,9 +10,10 @@ cd -- "$(dirname -- "$0")"/..
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    MIPS_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
-#    LOONGARCH_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
+#    LOONGARCH_QEMU_BIN_DIR=/path/to/qemu-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user QEMU_USER_BIN_DIR=/path/to/qemu-user-bin-dir ./tools/no-std.sh [+toolchain] [target]...
+#    TEST_RUNNER=qemu-user LOONGARCH_QEMU_BIN_DIR=/path/to/qemu-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 
 # rustc -Z unstable-options --print all-target-specs-json | jq -r '. | to_entries[] | if .value.os then empty else .key end'
 default_targets=(
@@ -239,19 +240,11 @@ run() {
               fi
               ;;
             loongarch*)
-              case "$(uname -m)" in
-                aarch64 | arm64)
-                  info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
-                  return 0
-                  ;;
-              esac
-              case "$(uname -s)" in
-                Linux) ;;
-                *)
-                  info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
-                  return 0
-                  ;;
-              esac
+              # TODO: The patched QEMU needed (see README.md for details).
+              if [[ -z "${LOONGARCH_QEMU_BIN_DIR:-}" ]]; then
+                info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+                return 0
+              fi
               ;;
           esac
           linker=link.x
@@ -265,9 +258,16 @@ run() {
                 target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
               fi
               ;;
-            loongarch*)
+            loongarch32*)
               info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
               return 0
+              ;;
+            loongarch*)
+              # TODO: The patched QEMU needed (see README.md for details).
+              if [[ -z "${LOONGARCH_QEMU_BIN_DIR:-}" ]]; then
+                info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+                return 0
+              fi
               ;;
           esac
           ;;

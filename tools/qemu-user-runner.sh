@@ -21,15 +21,19 @@ for arg in "$@"; do
   fi
 done
 
-bin_dir="${QEMU_USER_BIN_DIR:+"${QEMU_USER_BIN_DIR%/}/"}"
+bin_dir=''
+case "${target}" in
+  loongarch*) bin_dir="${LOONGARCH_QEMU_BIN_DIR:+"${LOONGARCH_QEMU_BIN_DIR%/}/"}" ;;
+esac
+[[ -n "${bin_dir:-}" ]] || bin_dir="${QEMU_USER_BIN_DIR:+"${QEMU_USER_BIN_DIR%/}/"}"
 
 qemu_user() {
-  qemu_arch="$1"
+  local qemu="${bin_dir}qemu-$1"
   shift
   (
     set -x
-    "${bin_dir}qemu-${qemu_arch}" --version
-    "${bin_dir}qemu-${qemu_arch}" "$@" "${args[@]}"
+    "${qemu}" --version
+    "${qemu}" "$@" "${args[@]}"
   )
 }
 

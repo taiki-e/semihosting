@@ -133,6 +133,14 @@ jobs:
           sudo cp -r -- qemu-system/qemu/. /usr/local/
           rm -rf -- ./qemu-system
           qemu-system-arm --version
+          # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
+          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user
+          mkdir -p -- qemu-user
+          docker cp -- qemu-user:/usr/bin qemu-user/bin
+          docker rm -f -- qemu-user >/dev/null
+          sudo mv -- qemu-user/bin/qemu-* /usr/local/bin/
+          rm -rf -- ./qemu-user
+          qemu-arm --version
           # Pre-8.0 QEMU 7.2 for MIPS
           retry docker create --name qemu-system ghcr.io/taiki-e/qemu-system:7.2
           mkdir -p -- qemu-system
@@ -142,25 +150,12 @@ jobs:
           rm -rf -- ./qemu-system
           /usr/local/qemu-7.2/bin/qemu-system-mips --version
           printf '%s\n' "MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/qemu-7.2/bin" >>"${GITHUB_ENV}"
-          # Patched QEMU 9.2 for LoongArch from https://github.com/picolibc/picolibc-ci-tools/releases
-          case "$(uname -m)" in
-            aarch64 | arm64) ;;
-            *)
-              retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused https://github.com/picolibc/picolibc-ci-tools/releases/download/v11/qemu-stable.linux-amd64.tar.xz \
-                | tar xf -
-              sudo mv -- qemu-stable /usr/local/qemu-stable
-              /usr/local/qemu-stable/bin/qemu-system-loongarch64 --version
-              printf '%s\n' "LOONGARCH_QEMU_SYSTEM_BIN_DIR=/usr/local/qemu-stable/bin" >>"${GITHUB_ENV}"
-            ;;
-          esac
-          # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
-          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user
-          mkdir -p -- qemu-user
-          docker cp -- qemu-user:/usr/bin qemu-user/bin
-          docker rm -f -- qemu-user >/dev/null
-          sudo mv -- qemu-user/bin/qemu-* /usr/local/bin/
-          rm -rf -- ./qemu-user
-          qemu-arm --version
+          # Patched QEMU 10.1.3 for LoongArch
+          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-connrefused https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.3/qemu-"${{ matrix.os || 'ubuntu-24.04' }}".tar.xz \
+            | tar xJf -
+          sudo mv -- qemu /usr/local/qemu-loongarch-semi
+          /usr/local/qemu-loongarch-semi/bin/qemu-system-loongarch64 --version
+          printf '%s\n' "LOONGARCH_QEMU_BIN_DIR=/usr/local/qemu-loongarch-semi/bin" >>"${GITHUB_ENV}"
           if [[ "${{ matrix.rust }}" == "stable" ]]; then
             retry espup install --targets esp32
           fi

@@ -46,9 +46,10 @@ else
 fi
 args+=(-semihosting-config "${semi_config}")
 
+bin_dir=''
 case "${target}" in
   mips*) bin_dir="${MIPS_QEMU_SYSTEM_BIN_DIR:+"${MIPS_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
-  loongarch*) bin_dir="${LOONGARCH_QEMU_SYSTEM_BIN_DIR:+"${LOONGARCH_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
+  loongarch*) bin_dir="${LOONGARCH_QEMU_BIN_DIR:+"${LOONGARCH_QEMU_BIN_DIR%/}/"}" ;;
 esac
 [[ -n "${bin_dir:-}" ]] || bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 

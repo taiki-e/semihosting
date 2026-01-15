@@ -366,18 +366,10 @@ fn run() {
             assert_eq!(sys_iserror(isize::MAX), false);
             assert_eq!(sys_iserror(1), false);
             assert_eq!(sys_iserror(0), false);
-            // TODO(loongarch32):
-            if cfg!(target_arch = "loongarch32") {
-                assert_eq!(sys_iserror(-1), false);
-                assert_eq!(sys_iserror(-4095), false);
-                assert_eq!(sys_iserror(-4096), false);
-                assert_eq!(sys_iserror(isize::MIN), false);
-            } else {
-                assert_eq!(sys_iserror(-1), true);
-                assert_eq!(sys_iserror(-4095), true);
-                assert_eq!(sys_iserror(-4096), true);
-                assert_eq!(sys_iserror(isize::MIN), true);
-            }
+            assert_eq!(sys_iserror(-1), true);
+            assert_eq!(sys_iserror(-4095), true);
+            assert_eq!(sys_iserror(-4096), true);
+            assert_eq!(sys_iserror(isize::MIN), true);
         }
         // println!("{}", sys_readc() as char); // TODO(arm_compat): only works on qemu-user https://gitlab.com/qemu-project/qemu/-/issues/1963
         if !qemu_has_read_order_bug {
