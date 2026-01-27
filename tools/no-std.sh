@@ -34,23 +34,23 @@ default_targets=(
   # v6
   armv6-none-eabi
   armv6-none-eabihf
-  # thumbv6-none-eabi # TODO: "rustc-LLVM ERROR: Cannot select: intrinsic %llvm.arm.hint" will be fixed in https://github.com/rust-lang/rust/pull/150138
+  thumbv6-none-eabi # custom target # TODO: use builtin target once https://github.com/rust-lang/compiler-builtins/pull/1050 released
   # v7-A
   armv7a-none-eabi
   armv7a-none-eabihf
-  thumbv7a-none-eabi   # custom target
-  thumbv7a-none-eabihf # custom target
+  thumbv7a-none-eabi
+  thumbv7a-none-eabihf
   # v7-R
   armv7r-none-eabi
   armv7r-none-eabihf
   armebv7r-none-eabi
   armebv7r-none-eabihf
-  thumbv7r-none-eabi   # custom target
-  thumbv7r-none-eabihf # custom target
+  thumbv7r-none-eabi
+  thumbv7r-none-eabihf
   # v8-R
   armv8r-none-eabihf
   armebv8r-none-eabihf # custom target
-  thumbv8r-none-eabihf # custom target
+  thumbv8r-none-eabihf
   # v6-M
   thumbv6m-none-eabi
   # v7-M
