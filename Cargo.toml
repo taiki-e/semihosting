@@ -2,6 +2,7 @@
 name = "semihosting"
 version = "0.1.24" #publish:version
 edition = "2021"
+# NB: Sync with msrv badge in README.md
 rust-version = "1.64" # For core::ffi::CStr
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/semihosting"
