@@ -66,6 +66,7 @@ jobs:
       contents: read
       pull-requests: write # for gh pr edit --add-assignee
       repository-projects: read # for gh pr edit --add-assignee
+      security-events: write # for github/codeql-action/*
     secrets: inherit
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
