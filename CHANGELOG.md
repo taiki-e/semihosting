@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.1.25] - 2026-03-08
+
 - Improve LoongArch32 support for old nightly. ([07f2579](https://github.com/taiki-e/semihosting/commit/07f2579f8a53f8b22b90491f44425b66025c963e))
 
 ## [0.1.24] - 2026-01-15
@@ -160,7 +162,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.24...HEAD
+[Unreleased]: https://github.com/taiki-e/semihosting/compare/v0.1.25...HEAD
+[0.1.25]: https://github.com/taiki-e/semihosting/compare/v0.1.24...v0.1.25
 [0.1.24]: https://github.com/taiki-e/semihosting/compare/v0.1.23...v0.1.24
 [0.1.23]: https://github.com/taiki-e/semihosting/compare/v0.1.22...v0.1.23
 [0.1.22]: https://github.com/taiki-e/semihosting/compare/v0.1.21...v0.1.22
