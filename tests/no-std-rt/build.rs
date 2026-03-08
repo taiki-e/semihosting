@@ -10,7 +10,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use self::version::{Version, rustc_version};
+use self::version::rustc_version;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");

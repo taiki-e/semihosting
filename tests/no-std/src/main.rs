@@ -278,8 +278,11 @@ fn run() {
         // Windows has no /dev/urandom
         let fail_expected = cfg!(host_os = "windows") || qemu_has_read_order_bug;
         let mut buf = [0; 64];
-        if random::fill_bytes(&mut buf).is_err() {
+        if let Err(e) = random::fill_bytes(&mut buf) {
             assert!(fail_expected);
+            if cfg!(host_os = "windows") && !qemu_has_read_order_bug {
+                assert_eq!(e.kind(), io::ErrorKind::NotFound);
+            }
         } else {
             assert!(!fail_expected);
             assert_ne!(buf, [0; 64]);
