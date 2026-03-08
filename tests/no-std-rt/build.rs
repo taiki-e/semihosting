@@ -1,14 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+// version.rs is shared with portable-atomic's build script, and portable-atomic-util only uses a part of it.
+#[allow(dead_code)]
+#[path = "version.rs"]
+mod version;
+
 use std::{
     env, fs,
     path::{Path, PathBuf},
 };
 
+use self::version::{Version, rustc_version};
+
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=raspi");
-    println!("cargo:rustc-check-cfg=cfg(cortex_m_rt,aarch32_rt)");
+    println!("cargo:rustc-check-cfg=cfg(cortex_m_rt,aarch32_rt,semihosting_no_asm)");
     let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     for e in fs::read_dir(manifest_dir).unwrap() {
         let path = e.unwrap().path();
@@ -89,6 +96,10 @@ fn setup_for_qemu_system(manifest_dir: &Path) {
                 )
                 .unwrap();
                 check_link("link.x");
+            }
+            // asm! on loongarch32 stabilized in Rust 1.91 (nightly-2025-08-11): https://github.com/rust-lang/rust/pull/144402
+            if target_arch == "loongarch32" && !rustc_version().unwrap().probe(91, 2025, 8, 10) {
+                println!("cargo:rustc-cfg=semihosting_no_asm");
             }
         }
     }

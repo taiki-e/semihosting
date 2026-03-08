@@ -4,6 +4,7 @@
 #![warn(unsafe_op_in_unsafe_fn)]
 #![cfg_attr(
     any(
+        all(target_arch = "loongarch32", semihosting_no_asm),
         target_arch = "mips",
         target_arch = "mips32r6",
         target_arch = "mips64",

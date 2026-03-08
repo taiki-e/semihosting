@@ -74,17 +74,18 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `thumbv8m.main-none-eabi{,hf}`            | ✓                | ✓              |           |
 | `riscv32*-unknown-none-elf`               | ✓                | ✓              |           |
 | `riscv64*-unknown-none-elf`               | ✓                | ✓              |           |
-| `loongarch32-unknown-none{,-softfloat}`   | ✓                | N/A            | \[2]      |
+| `loongarch32-unknown-none{,-softfloat}`   | ✓                | N/A            | \[2] \[3] |
 | `loongarch64-unknown-none{,-softfloat}`   | ✓                | ✓              | \[2]      |
-| `mips{,el}-unknown-none`                  | ✓                | N/A            | \[2] \[3] |
-| `mips{,el}-mti-none-elf`                  | ✓                | N/A            | \[2] \[3] |
-| `mips64{,el}-unknown-none`                | ✓                | N/A            | \[2] \[3] |
-| `mipsisa32r6{,el}-unknown-none`           | ✓                | N/A            | \[2] \[3] |
-| `mipsisa64r6{,el}-unknown-none`           | ✓                | N/A            | \[2] \[3] |
+| `mips{,el}-unknown-none`                  | ✓                | N/A            | \[2] \[4] |
+| `mips{,el}-mti-none-elf`                  | ✓                | N/A            | \[2] \[4] |
+| `mips64{,el}-unknown-none`                | ✓                | N/A            | \[2] \[4] |
+| `mipsisa32r6{,el}-unknown-none`           | ✓                | N/A            | \[2] \[4] |
+| `mipsisa64r6{,el}-unknown-none`           | ✓                | N/A            | \[2] \[4] |
 
 \[1] Due to [qemu-system bug about big-endian Arm](https://github.com/taiki-e/semihosting/issues/18), operations that contains reading/writing of strings such as file open (`stdio`, `fs`, `random`), `args`, and `SYS_SYSTEM` don't work.<br>
 \[2] Tested with patched QEMU ([aarch64_be](https://patchew.org/QEMU/20260106-semihosting-cpu-tswap-v1-0-646576c25f56@eonerc.rwth-aachen.de/), [loongarch](https://lore.kernel.org/qemu-devel/20241222-semihosting-v1-1-8a770df60e9c@flygoat.com/), [mips](https://github.com/taiki-e/qemu/commit/c2d1c8dbc5cb878fbcce824180aa812213785124)). QEMU binaries that we are using for test are available on our QEMU fork ([aarch64_be/mips](https://github.com/taiki-e/qemu/releases/tag/patched-10.2.0), [loongarch](https://github.com/taiki-e/qemu/releases/tag/loongarch-semi-10.1.3)).<br>
-\[3] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
+\[3] Requires Rust 1.91+.<br>
+\[4] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
 
 ## Optional features
 
