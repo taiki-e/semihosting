@@ -108,7 +108,10 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
-      - uses: taiki-e/install-action@espup
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: espup
+          fallback: none
         if: matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: |
           retry() {
