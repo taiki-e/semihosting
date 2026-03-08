@@ -377,6 +377,7 @@ mod sealed {
 pub mod __private {
     #[doc(hidden)]
     pub use core::{
+        concat,
         ffi::CStr,
         file, line,
         result::Result::{Err, Ok},

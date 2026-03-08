@@ -52,7 +52,7 @@
 #[macro_export]
 macro_rules! c {
     ($s:expr) => {{
-        const BYTES: &[u8] = concat!($s, "\0").as_bytes();
+        const BYTES: &[u8] = $crate::__private::concat!($s, "\0").as_bytes();
         const _: () = $crate::__private::const_c_str_check(BYTES);
         #[allow(unused_unsafe)]
         // SAFETY: we've checked `BYTES` is a valid C string
