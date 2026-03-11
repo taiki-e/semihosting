@@ -127,7 +127,7 @@ pub enum OpenMode {
     RDWR_APPEND = 10,
     /// `fopen` mode: `a+b`<br>
     /// `O_*` flags: `O_RDWR | O_CREAT | O_APPEND | O_BINARY`
-    #[doc(alias = "a+b`")]
+    #[doc(alias = "a+b")]
     #[doc(alias = "O_RDWR", alias = "O_CREAT", alias = "O_APPEND", alias = "O_BINARY")]
     RDWR_APPEND_BINARY = 11,
 }
