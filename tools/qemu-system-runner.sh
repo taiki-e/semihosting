@@ -51,6 +51,7 @@ case "${target}" in
   aarch64_be*) bin_dir="${AARCH64_BE_QEMU_SYSTEM_BIN_DIR:+"${AARCH64_BE_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
   mips*) bin_dir="${MIPS_QEMU_SYSTEM_BIN_DIR:+"${MIPS_QEMU_SYSTEM_BIN_DIR%/}/"}" ;;
   loongarch*) bin_dir="${LOONGARCH_QEMU_BIN_DIR:+"${LOONGARCH_QEMU_BIN_DIR%/}/"}" ;;
+  hexagon*) bin_dir="${HEXAGON_QEMU_BIN_DIR:+"${HEXAGON_QEMU_BIN_DIR%/}/"}" ;;
 esac
 [[ -n "${bin_dir:-}" ]] || bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 
@@ -130,6 +131,10 @@ case "${target}" in
     ;;
   loongarch64*)
     qemu_system loongarch64 -M virt
+    ;;
+  # Hexagon
+  hexagon*)
+    qemu_system hexagon -M sim -cpu v68
     ;;
   # MIPS
   mips-*)

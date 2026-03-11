@@ -196,3 +196,54 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: cargo +esp build --target xtensa-esp32-none-elf -Z build-std=core,alloc --features "${TEST_FEATURES},openocd-semihosting"
         if: matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
+
+  no-std-hexagon:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: taiki-e/checkout-action@v1
+      - uses: taiki-e/github-actions/install-rust@nightly
+      - run: |
+          retry() {
+            for i in {1..10}; do
+              if "$@"; then
+                return 0
+              else
+                sleep "${i}"
+              fi
+            done
+            "$@"
+          }
+          retry sudo apt-get -o Acquire::Retries=10 -qq update
+          retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends \
+            libc++1-14 \
+            libfdt1 \
+            libiscsi7 \
+            libjack0 \
+            libpulse0 \
+            libslirp0 \
+            libsndio7.0 \
+            liburing2
+          # https://github.com/quic/toolchain_for_hexagon/releases
+          llvm_version=22.1.0
+          mkdir -p -- clang-hexagon
+          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 --retry-all-errors "https://artifacts.codelinaro.org/artifactory/codelinaro-toolchain-for-hexagon/${llvm_version}_/clang+llvm-${llvm_version}-cross-hexagon-unknown-linux-musl.tar.zst" \
+            | tar xf - --zstd --strip-components 2 -C clang-hexagon
+          sudo mv -- clang-hexagon /usr/local/clang-hexagon
+          printf '%s\n' "CARGO_TARGET_HEXAGON_UNKNOWN_NONE_ELF_LINKER=/usr/local/clang-hexagon/bin/hexagon-unknown-none-elf-clang" >>"${GITHUB_ENV}"
+          printf '%s\n' "CARGO_TARGET_HEXAGON_UNKNOWN_LINUX_MUSL_LINKER=/usr/local/clang-hexagon/bin/hexagon-unknown-linux-musl-clang" >>"${GITHUB_ENV}"
+          printf '%s\n' "HEXAGON_QEMU_BIN_DIR=/usr/local/clang-hexagon/bin" >>"${GITHUB_ENV}"
+      # Avoid needless git fetch
+      - run: sed -Ei '/^unwinding = .*/d' Cargo.toml
+        working-directory: tests/no-std
+      - run: tools/no-std.sh hexagon-unknown-none-elf
+      # TODO(hexagon):
+      # With hexagon-unknown-none-elf, I got https://gitlab.com/qemu-project/qemu/-/work_items/805
+      # With hexagon-unknown-linux-musl, I got:
+      #   + /usr/local/clang-hexagon/bin/qemu-hexagon -cpu v68 -L /usr/local/clang-hexagon/target/hexagon-unknown-linux-musl ../../target/hexagon-unknown-linux-musl/debug/no-std-test a '' ''\''c d'\'''
+      #   22558 set_tid_address(0x4093e734) = 22558
+      #   22558 brk(NULL) = 0x08020000
+      #   22558 brk(0x08040000) = 0x08040000
+      #   22558 mmap2(0x08020000,65536,PROT_NONE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED,-1,0) = 0x08020000
+      #   --- SIGSEGV {si_signo=SIGSEGV, si_code=2, si_addr=0x08000000} ---
+      # - run: TEST_RUNNER=qemu-user tools/no-std.sh hexagon-unknown-linux-musl
