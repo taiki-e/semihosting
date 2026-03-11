@@ -248,8 +248,12 @@ run() {
             loongarch*)
               # TODO: The patched QEMU needed (see README.md for details).
               if [[ -z "${LOONGARCH_QEMU_BIN_DIR:-}" ]]; then
-                info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
-                return 0
+                if [[ -z "${CI:-}" ]]; then
+                  info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
+                  return 0
+                else
+                  bail "LoongArch semihosting support hasn't been merged upstream yet"
+                fi
               fi
               ;;
           esac
@@ -265,17 +269,28 @@ run() {
               fi
               ;;
             loongarch32*)
-              info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+              info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
               return 0
               ;;
             loongarch*)
               # TODO: The patched QEMU needed (see README.md for details).
               if [[ -z "${LOONGARCH_QEMU_BIN_DIR:-}" ]]; then
-                info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
-                return 0
+                if [[ -z "${CI:-}" ]]; then
+                  info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
+                  return 0
+                else
+                  bail "LoongArch semihosting support hasn't been merged upstream yet"
+                fi
               fi
               ;;
           esac
+          ;;
+      esac
+      ;;
+    hexagon-*-linux-musl)
+      case "${runner}" in
+        qemu-user)
+          target_rustflags+=" -C panic=abort -C link-arg=-nostartfiles"
           ;;
       esac
       ;;
