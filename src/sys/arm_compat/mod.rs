@@ -193,7 +193,8 @@ pub(crate) use self::sys_close as close;
 pub fn sys_elapsed() -> io::Result<u64> {
     // On 32-bit, the parameter is a pointer to two 32-bit field data block
     // On 64-bit, the parameter is a pointer to one 64-bit field data block
-    let mut block = [0_u64];
+    // Using one 64-bit field data block works as both cases well. // TODO: 32-bit big-endian
+    let mut block = 0_u64;
     // |                    | on success      | on failure      |                 |
     // | ------------------ | --------------- | --------------- | --------------- |
     // | RETURN REGISTER    | 0               | -1              |                 |
@@ -201,7 +202,7 @@ pub fn sys_elapsed() -> io::Result<u64> {
     // | block              | updated         | - (unmentioned) |                 |
     let ret = unsafe { syscall(OperationNumber::SYS_ELAPSED, ParamRegW::ref_(&mut block)) };
     if ret.unsigned() == 0 {
-        Ok(block[0])
+        Ok(block)
     } else {
         debug_assert_eq!(ret.signed(), -1);
         Err(from_errno())
