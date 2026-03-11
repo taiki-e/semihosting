@@ -5,7 +5,7 @@
      is synchronized from README.md. Any changes to that range are not preserved. -->
 <!-- tidy:sync-markdown-to-rustdoc:start -->
 
-Semihosting for AArch64, Arm, RISC-V, LoongArch, MIPS32, MIPS64, and Xtensa.
+Semihosting for AArch64, Arm, RISC-V, LoongArch, MIPS, and Xtensa.
 
 This library provides access to semihosting, a mechanism for programs running on the real or virtual (e.g., QEMU) target to communicate with I/O facilities on the host system. See the [Arm documentation](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst) for more information on semihosting.
 

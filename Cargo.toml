@@ -10,7 +10,7 @@ keywords = ["qemu"]
 categories = ["embedded", "hardware-support", "no-std", "no-std::no-alloc"]
 exclude = ["/.*", "/tools", "/target-specs"]
 description = """
-Semihosting for AArch64, Arm, RISC-V, LoongArch, MIPS32, MIPS64, and Xtensa.
+Semihosting for AArch64, Arm, RISC-V, LoongArch, MIPS, and Xtensa.
 """
 
 [package.metadata.docs.rs]
