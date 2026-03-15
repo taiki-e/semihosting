@@ -6,6 +6,7 @@
   "features": "+mips32r2,+soft-float,+noabicalls",
   "linker": "rust-lld",
   "linker-flavor": "ld.lld",
+  "llvm-abiname": "o32",
   "llvm-target": "mips-unknown-none",
   "max-atomic-width": 32,
   "panic-strategy": "abort",
