@@ -171,6 +171,10 @@ fi
 workspace_root=$(pwd)
 qemu_system_bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 export SEMIHOSTING_DENY_WARNINGS=1
+case "$(uname -s)" in
+  Linux) host_os=linux ;;
+  *) host_os=other ;;
+esac
 
 run() {
   local target="$1"
@@ -248,8 +252,12 @@ run() {
             loongarch*)
               # TODO: The patched QEMU needed (see README.md for details).
               if [[ -z "${LOONGARCH_QEMU_BIN_DIR:-}" ]]; then
-                info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
-                return 0
+                if [[ -z "${CI:-}" ]] || [[ "${host_os}" != 'linux' ]]; then
+                  info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
+                  return 0
+                else
+                  bail "LoongArch semihosting support hasn't been merged upstream yet"
+                fi
               fi
               ;;
           esac
@@ -265,14 +273,18 @@ run() {
               fi
               ;;
             loongarch32*)
-              info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
+              info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
               return 0
               ;;
             loongarch*)
               # TODO: The patched QEMU needed (see README.md for details).
               if [[ -z "${LOONGARCH_QEMU_BIN_DIR:-}" ]]; then
-                info "LoongArch semihosting support doesn't yet merged in upstream (skipped)"
-                return 0
+                if [[ -z "${CI:-}" ]] || [[ "${host_os}" != 'linux' ]]; then
+                  info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
+                  return 0
+                else
+                  bail "LoongArch semihosting support hasn't been merged upstream yet"
+                fi
               fi
               ;;
           esac
