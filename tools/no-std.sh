@@ -9,7 +9,6 @@ cd -- "$(dirname -- "$0")"/..
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
-#    AARCH64_BE_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    MIPS_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    LOONGARCH_QEMU_BIN_DIR=/path/to/qemu-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
@@ -229,9 +228,9 @@ run() {
         qemu-system)
           case "${target}" in
             aarch64_be*)
-              # TODO: The patched QEMU needed (see README.md for details).
-              if [[ -z "${AARCH64_BE_QEMU_SYSTEM_BIN_DIR:-}" ]]; then
-                info "QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
+              # broken on pre-11.0 QEMU.
+              if "${qemu_system_bin_dir}qemu-system-aarch64" --version | grep -Eq "QEMU emulator version ([0-9]\.|10\.([01]\.|2\.[^9]))"; then
+                info "pre-11.0 QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
                 return 0
               fi
               ;;
