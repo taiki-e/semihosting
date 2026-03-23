@@ -64,7 +64,7 @@ pub fn write<P: AsRef<CStr>, C: AsRef<[u8]>>(path: P, contents: C) -> io::Result
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_REMOVE]     |
 /// | MIPS32, MIPS64                                                | UHI_unlink       |
 ///
-/// [SYS_REMOVE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-remove-0x0e
+/// [SYS_REMOVE]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-remove-0x0e
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 #[doc(alias = "rm", alias = "unlink", alias = "DeleteFile")]
@@ -90,7 +90,7 @@ pub fn remove_file<P: AsRef<CStr>>(path: P) -> io::Result<()> {
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_RENAME]     |
 /// | MIPS32, MIPS64                                                | (Unsupported)    |
 ///
-/// [SYS_RENAME]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f
+/// [SYS_RENAME]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-rename-0x0f
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 #[doc(alias = "mv", alias = "MoveFile", alias = "MoveFileEx")]
@@ -131,7 +131,7 @@ impl File {
     /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_FLEN]       |
     /// | MIPS32, MIPS64                                                | UHI_fstat        |
     ///
-    /// [SYS_FLEN]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-flen-0x0c
+    /// [SYS_FLEN]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-flen-0x0c
     ///
     /// **Disclaimer:** These semihosting calls might change over time.
     #[doc(alias = "SYS_FLEN")] // arm_compat

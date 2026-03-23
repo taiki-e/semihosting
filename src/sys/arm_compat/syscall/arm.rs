@@ -17,7 +17,7 @@ cfg_sel!({
         }
     }
     // HLT
-    // https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#the-semihosting-interface
+    // https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#the-semihosting-interface
     // > This requirement includes supporting the HLT encodings on ARMv7 and earlier processors,
     // > even though HLT is only defined as an instruction in ARMv8. This may require the semihosting
     // > implementation to trap the UNDEF exception.

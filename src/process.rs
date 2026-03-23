@@ -63,8 +63,8 @@ impl From<u8> for ExitCode {
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_EXIT] / [SYS_EXIT_EXTENDED] |
 /// | MIPS32, MIPS64                                                | UHI_exit                         |
 ///
-/// [SYS_EXIT]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-0x18
-/// [SYS_EXIT_EXTENDED]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-extended-0x20
+/// [SYS_EXIT]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-exit-0x18
+/// [SYS_EXIT_EXTENDED]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-exit-extended-0x20
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 #[doc(alias = "SYS_EXIT")] // arm_compat

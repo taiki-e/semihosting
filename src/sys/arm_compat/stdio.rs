@@ -6,7 +6,7 @@ use crate::{
     io,
 };
 
-// From https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-open-0x01:
+// From https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-open-0x01:
 // > ARM targets interpret the special path name `:tt` as meaning the console
 // > input stream, for an open-read or the console output stream, for an open-write.
 // > Opening these streams is performed as part of the standard startup code for

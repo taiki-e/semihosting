@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-// https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-errno-0x13
+// https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-errno-0x13
 // > Whether `errno` is set or not, and to what value, is entirely host-specific,
 // > except where the ISO C standard defines the behavior.
 //

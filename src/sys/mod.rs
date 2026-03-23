@@ -119,7 +119,7 @@ use crate::{
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_CLOSE]      |
 /// | MIPS32, MIPS64                                                | UHI_close        |
 ///
-/// [SYS_CLOSE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-close-0x02
+/// [SYS_CLOSE]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-close-0x02
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 #[doc(alias = "SYS_CLOSE")] // arm_compat
@@ -142,7 +142,7 @@ pub unsafe fn close(fd: RawFd) -> io::Result<()> {
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_READ]       |
 /// | MIPS32, MIPS64                                                | UHI_read         |
 ///
-/// [SYS_READ]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06
+/// [SYS_READ]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-read-0x06
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 #[doc(alias = "SYS_READ")] // arm_compat
@@ -179,7 +179,7 @@ pub fn read_uninit<'a>(
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_WRITE]       |
 /// | MIPS32, MIPS64                                                | UHI_write         |
 ///
-/// [SYS_WRITE]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05
+/// [SYS_WRITE]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-write-0x05
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 #[doc(alias = "SYS_WRITE")] // arm_compat

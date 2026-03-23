@@ -40,7 +40,7 @@ use crate::sys::time;
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_CLOCK]      | 10 millisecond intervals |
 /// | MIPS32, MIPS64                                                | (Unsupported)    | -                        |
 ///
-/// [SYS_CLOCK]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10
+/// [SYS_CLOCK]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-clock-0x10
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 ///
@@ -70,7 +70,7 @@ pub struct Instant(time::Instant);
 /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_TIME]       | second intervals         |
 /// | MIPS32, MIPS64                                                | (Unsupported)    | -                        |
 ///
-/// [SYS_TIME]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-time-0x11
+/// [SYS_TIME]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-time-0x11
 ///
 /// **Disclaimer:** These semihosting calls might change over time.
 ///

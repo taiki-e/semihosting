@@ -115,7 +115,7 @@ pub trait IsTerminal: crate::sealed::Sealed {
     /// | AArch64, Arm, RISC-V, LoongArch, Xtensa (openocd-semihosting) | [SYS_ISTTY]      |
     /// | MIPS32, MIPS64                                                | UHI_fstat        |
     ///
-    /// [SYS_ISTTY]: https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-istty-0x09
+    /// [SYS_ISTTY]: https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-istty-0x09
     ///
     /// **Disclaimer:** These semihosting calls might change over time.
     #[doc(alias = "isatty")]

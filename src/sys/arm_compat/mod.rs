@@ -5,7 +5,7 @@
 //! (RISC-V, LoongArch, Xtensa).
 //!
 //! Refs:
-//! - Semihosting for AArch32 and AArch64 <https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst>
+//! - Semihosting for AArch32 and AArch64 <https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst>
 //! - RISC-V Semihosting <https://github.com/riscv-non-isa/riscv-semihosting/blob/1.0/riscv-semihosting.adoc>
 //! - <https://github.com/qemu/qemu/blob/v10.2.0/semihosting/arm-compat-semi.c>
 //! - <https://lore.kernel.org/qemu-devel/20241222-semihosting-v1-1-8a770df60e9c@flygoat.com/>
@@ -158,7 +158,7 @@ fn from_errno() -> io::Error {
     io::Error::from_raw_os_error(sys_errno())
 }
 
-/// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-clock-0x10)
+/// [SYS_CLOCK (0x10)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-clock-0x10)
 pub fn sys_clock() -> io::Result<usize> {
     // |                    | on success      | on failure      |                 |
     // | ------------------ | --------------- | --------------- | --------------- |
@@ -168,7 +168,7 @@ pub fn sys_clock() -> io::Result<usize> {
     if ret.signed() == -1 { Err(from_errno()) } else { Ok(ret.unsigned()) }
 }
 
-/// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-close-0x02)
+/// [SYS_CLOSE (0x02)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-close-0x02)
 /// (Equivalent to [`sys::close`](crate::sys::close))
 pub unsafe fn sys_close(fd: RawFd) -> io::Result<()> {
     let block = [ParamRegR::raw_fd(fd)];
@@ -189,7 +189,7 @@ pub unsafe fn sys_close(fd: RawFd) -> io::Result<()> {
 }
 pub(crate) use self::sys_close as close;
 
-/// [SYS_ELAPSED (0x30)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-elapsed-0x30)
+/// [SYS_ELAPSED (0x30)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-elapsed-0x30)
 pub fn sys_elapsed() -> io::Result<u64> {
     // On 32-bit, the parameter is a pointer to two 32-bit field data block
     // On 64-bit, the parameter is a pointer to one 64-bit field data block
@@ -209,7 +209,7 @@ pub fn sys_elapsed() -> io::Result<u64> {
     }
 }
 
-/// [SYS_ERRNO (0x13)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-errno-0x13)
+/// [SYS_ERRNO (0x13)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-errno-0x13)
 pub fn sys_errno() -> io::RawOsError {
     // |                    | always          |                 |
     // | ------------------ | --------------- | --------------- |
@@ -219,7 +219,7 @@ pub fn sys_errno() -> io::RawOsError {
     ret.errno()
 }
 
-/// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-0x18)
+/// [SYS_EXIT (0x18)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-exit-0x18)
 // TODO(semver): change return type to !?
 pub fn sys_exit(reason: ExitReason) {
     #[cfg(target_pointer_width = "32")]
@@ -271,7 +271,7 @@ pub(crate) fn exit(code: i32) -> ! {
     }
 }
 
-/// [SYS_EXIT_EXTENDED (0x20)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-exit-extended-0x20)
+/// [SYS_EXIT_EXTENDED (0x20)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-exit-extended-0x20)
 pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
     let block = [ParamRegR::unsigned(reason as usize), ParamRegR::unsigned(subcode)];
     #[cfg(target_pointer_width = "32")]
@@ -289,7 +289,7 @@ pub fn sys_exit_extended(reason: ExitReason, subcode: usize) {
     }
 }
 
-/// [SYS_FLEN (0x0C)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-flen-0x0c)
+/// [SYS_FLEN (0x0C)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-flen-0x0c)
 pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
     let block = [ParamRegR::fd(fd)];
     // |                    | on success      | on failure      |                 |
@@ -330,7 +330,7 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
     }
 }
 
-/// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-get-cmdline-0x15)
+/// [SYS_GET_CMDLINE (0x15)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-get-cmdline-0x15)
 pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&mut [u8]> {
     let len = buf.len();
     let mut block = [ParamRegW::buf(buf), ParamRegW::unsigned(len)];
@@ -353,7 +353,7 @@ pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&mut [u
     }
 }
 
-/// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-heapinfo-0x16)
+/// [SYS_HEAPINFO (0x16)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-heapinfo-0x16)
 pub fn sys_heapinfo() -> HeapInfo {
     let mut buf: HeapInfo = unsafe { mem::zeroed() };
     // |                    | on success      | on failure      |                 |
@@ -367,7 +367,7 @@ pub fn sys_heapinfo() -> HeapInfo {
     buf
 }
 
-/// [SYS_ISERROR (0x08)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-iserror-0x08)
+/// [SYS_ISERROR (0x08)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-iserror-0x08)
 pub fn sys_iserror(res: isize) -> bool {
     let block = [ParamRegR::signed(res)];
     // |                    | is not an error | is an error     |                 |
@@ -381,7 +381,7 @@ pub fn sys_iserror(res: isize) -> bool {
     ret.unsigned() != 0
 }
 
-/// [SYS_ISTTY (0x09)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-istty-0x09)
+/// [SYS_ISTTY (0x09)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-istty-0x09)
 pub fn sys_istty(fd: BorrowedFd<'_>) -> io::Result<bool> {
     let block = [ParamRegR::fd(fd)];
     // |                    | is a tty        | is a file       | on failure      |                 |
@@ -399,7 +399,7 @@ pub fn sys_istty(fd: BorrowedFd<'_>) -> io::Result<bool> {
     }
 }
 
-/// [SYS_OPEN (0x01)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-open-0x01)
+/// [SYS_OPEN (0x01)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-open-0x01)
 pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
     let block =
         [ParamRegR::c_str(path), ParamRegR::unsigned(mode as usize), ParamRegR::c_str_len(path)];
@@ -435,7 +435,7 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     Ok(read_uninit(fd, buf)?.0.len())
 }
-/// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-read-0x06)
+/// [SYS_READ (0x06)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-read-0x06)
 pub fn sys_read_orig(fd: BorrowedFd<'_>, buf: &mut [u8]) -> io::Result<usize> {
     let num_read = read(fd, buf)?;
     Ok(buf.len() - num_read)
@@ -470,7 +470,7 @@ pub(crate) fn read_uninit<'a>(
     }
 }
 
-/// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-readc-0x07)
+/// [SYS_READC (0x07)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-readc-0x07)
 pub fn sys_readc() -> u8 {
     // |                    | always          |                 |
     // | ------------------ | --------------- | --------------- |
@@ -480,7 +480,7 @@ pub fn sys_readc() -> u8 {
     ret.u8()
 }
 
-/// [SYS_REMOVE (0x0E)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-remove-0x0e)
+/// [SYS_REMOVE (0x0E)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-remove-0x0e)
 /// (Equivalent to [`fs::remove_file`](crate::fs::remove_file))
 pub fn sys_remove(path: &CStr) -> io::Result<()> {
     let block = [ParamRegR::c_str(path), ParamRegR::c_str_len(path)];
@@ -495,7 +495,7 @@ pub fn sys_remove(path: &CStr) -> io::Result<()> {
     if ret.unsigned() == 0 { Ok(()) } else { Err(from_errno()) }
 }
 
-/// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-rename-0x0f)
+/// [SYS_RENAME (0x0F)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-rename-0x0f)
 /// (Equivalent to [`fs::rename`](crate::fs::rename))
 pub fn sys_rename(from: &CStr, to: &CStr) -> io::Result<()> {
     let block = [
@@ -517,7 +517,7 @@ pub fn sys_rename(from: &CStr, to: &CStr) -> io::Result<()> {
 
 // TODO(arm_compat): resolve safety
 // > The effect of seeking outside the current extent of the file object is undefined.
-/// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-seek-0x0a)
+/// [SYS_SEEK (0x0A)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-seek-0x0a)
 pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> io::Result<()> {
     let block = [ParamRegR::fd(fd), ParamRegR::unsigned(abs_pos)];
     // |                    | on success      | on failure      |                 |
@@ -536,7 +536,7 @@ pub unsafe fn sys_seek(fd: BorrowedFd<'_>, abs_pos: usize) -> io::Result<()> {
     }
 }
 
-/// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-system-0x12)
+/// [SYS_SYSTEM (0x12)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-system-0x12)
 pub fn sys_system(cmd: &CStr) -> usize {
     // On exit, the RETURN REGISTER contains the return status.
     // |                    | always          |                 |
@@ -551,7 +551,7 @@ pub fn sys_system(cmd: &CStr) -> usize {
     ret.unsigned()
 }
 
-/// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-tickfreq-0x31)
+/// [SYS_TICKFREQ (0x31)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-tickfreq-0x31)
 pub fn sys_tickfreq() -> io::Result<usize> {
     // |                    | on success      | on failure      |                 |
     // | ------------------ | --------------- | --------------- | --------------- |
@@ -561,7 +561,7 @@ pub fn sys_tickfreq() -> io::Result<usize> {
     if ret.signed() == -1 { Err(from_errno()) } else { Ok(ret.unsigned()) }
 }
 
-/// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-time-0x11)
+/// [SYS_TIME (0x11)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-time-0x11)
 #[allow(clippy::unnecessary_wraps)] // TODO(semver): change in next breaking release
 pub fn sys_time() -> io::Result<usize> {
     // |                    | always          |                 |
@@ -583,7 +583,7 @@ pub fn sys_time() -> io::Result<usize> {
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     write(fd, buf)
 }
-/// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write-0x05)
+/// [SYS_WRITE (0x05)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-write-0x05)
 pub fn sys_write_orig(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     let len = buf.len();
     let block = [ParamRegR::fd(fd), ParamRegR::buf(buf), ParamRegR::unsigned(len)];
@@ -617,7 +617,7 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     Ok(buf.len() - not_written)
 }
 
-/// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-writec-0x03)
+/// [SYS_WRITEC (0x03)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-writec-0x03)
 pub fn sys_writec(character: u8) {
     // |                    | always          |                 |
     // | ------------------ | --------------- | --------------- |
@@ -629,7 +629,7 @@ pub fn sys_writec(character: u8) {
     }
 }
 
-/// [SYS_WRITE0 (0x04)](https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#sys-write0-0x04)
+/// [SYS_WRITE0 (0x04)](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#sys-write0-0x04)
 pub fn sys_write0(string: &CStr) {
     // |                    | always          |                 |
     // | ------------------ | --------------- | --------------- |

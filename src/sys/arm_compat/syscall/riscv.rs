@@ -5,7 +5,7 @@ use core::arch::asm;
 use super::{OperationNumber, ParamRegR, ParamRegW, RetReg};
 
 // TODO: cast in `number.0 as usize` is probably needless per
-// https://github.com/ARM-software/abi-aa/blob/2025Q1/semihosting/semihosting.rst#the-semihosting-interface
+// https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst#the-semihosting-interface
 // > The operation number is passed in W0 for the 64-bit ABI, which is the
 // > bottom 32 bits of the 64-bit register X0. Semihosting implementations must
 // > not assume that the top 32 bits of X0 are 0.
