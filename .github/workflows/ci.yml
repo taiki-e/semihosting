@@ -66,7 +66,8 @@ jobs:
       contents: write # for creating branch for pr
       pull-requests: write # unused (used in `codegen-automerge: true` case)
       security-events: write # for github/codeql-action/*
-    secrets: inherit
+    secrets:
+      PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64,loongarch64-unknown-linux-gnu
@@ -138,11 +139,12 @@ jobs:
           sudo mv -- qemu-user/bin/qemu-* /usr/local/bin/
           rm -rf -- ./qemu-user
           qemu-arm --version
-          if [[ "${{ matrix.rust }}" == "stable" ]]; then
+          if [[ "${RUST}" == "stable" ]]; then
             retry espup install --targets esp32
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST: ${{ matrix.rust }}
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - run: |
           retry() {
@@ -156,16 +158,18 @@ jobs:
             "$@"
           }
           # Patched QEMU for MIPS semihosting
-          retry curl --proto '=https' --tlsv1.2 -fsSL https://github.com/taiki-e/qemu/releases/download/patched-11.0.0-rc0/qemu-"${{ matrix.os || 'ubuntu-24.04' }}".tar.xz \
+          retry curl --proto '=https' --tlsv1.2 -fsSL https://github.com/taiki-e/qemu/releases/download/patched-11.0.0-rc0/qemu-"${OS}".tar.xz \
             | tar xJf -
           sudo cp -r -- qemu/. /usr/local/
           rm -rf -- ./qemu
           printf '%s\n' "MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/bin" >>"${GITHUB_ENV}"
           # Patched QEMU for LoongArch semihosting
-          retry curl --proto '=https' --tlsv1.2 -fsSL https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.5/qemu-"${{ matrix.os || 'ubuntu-24.04' }}".tar.xz \
+          retry curl --proto '=https' --tlsv1.2 -fsSL https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.5/qemu-"${OS}".tar.xz \
             | tar xJf -
           sudo mv -- qemu /usr/local/qemu-loongarch-semi
           printf '%s\n' "LOONGARCH_QEMU_BIN_DIR=/usr/local/qemu-loongarch-semi/bin" >>"${GITHUB_ENV}"
+        env:
+          OS: ${{ matrix.os || 'ubuntu-24.04' }}
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == '' || startsWith(matrix.os, 'macos')
       - run: |
           C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-ucrt-x86_64-qemu
