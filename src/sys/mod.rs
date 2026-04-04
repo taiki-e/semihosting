@@ -52,6 +52,12 @@ use self::arm_compat as arch;
 )]
 pub mod arm_compat;
 
+#[cfg(target_arch = "hexagon")]
+use self::hexagon as arch;
+#[cfg(any(all(doc, docsrs), target_arch = "hexagon"))]
+#[cfg_attr(docsrs, doc(cfg(target_arch = "hexagon")))]
+pub mod hexagon;
+
 #[cfg(any(
     target_arch = "mips",
     target_arch = "mips32r6",

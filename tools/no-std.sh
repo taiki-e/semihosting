@@ -290,6 +290,13 @@ run() {
           ;;
       esac
       ;;
+    hexagon-*-linux-musl)
+      case "${runner}" in
+        qemu-user)
+          target_rustflags+=" -C panic=abort -C link-arg=-nostartfiles"
+          ;;
+      esac
+      ;;
     mips*)
       case "${runner}" in
         qemu-system)

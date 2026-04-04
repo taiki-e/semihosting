@@ -4,7 +4,7 @@
 #![no_std]
 #![warn(unsafe_op_in_unsafe_fn)]
 
-#[cfg(arm_compat)]
+#[cfg(any(arm_compat, hexagon))]
 use core::ptr;
 use core::str;
 
@@ -12,6 +12,8 @@ use core::str;
 use semihosting::experimental::time::{Duration, Instant, SystemTime};
 #[cfg(arm_compat)]
 use semihosting::sys::arm_compat::*;
+#[cfg(hexagon)]
+use semihosting::sys::hexagon::*;
 #[cfg(mips)]
 use semihosting::sys::mips::*;
 use semihosting::{
@@ -60,7 +62,7 @@ fn run() {
         println!("ok");
     }
 
-    let stdio_is_terminal = option_env!("CI").is_none() || cfg!(mips);
+    let stdio_is_terminal = option_env!("CI").is_none() && !cfg!(hexagon) || cfg!(mips);
     // TODO(time): return result?
     #[cfg(not(mips))]
     let instant_now = Instant::now();
@@ -174,34 +176,37 @@ fn run() {
             assert_eq!(file.metadata().unwrap().len(), 3);
             #[cfg(mips)]
             println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
-            file.write_all(b"c").unwrap();
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(100)).unwrap(), 100);
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            file.write_all(b"cde").unwrap();
-            assert_eq!(file.metadata().unwrap().len(), 5);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            let mut buf = [0; 4];
-            if cfg!(mips) {
-                let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
-                assert!(errno == 22 || errno == 9, "{}", errno);
-            } else {
-                // TODO(arm_compat): if no read permission, Arm semihosting handles it like eof.
-                assert_eq!(file.read(&mut buf[..]).unwrap(), 0);
+            // TODO(hexagon):
+            if !cfg!(hexagon) {
+                assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
+                file.write_all(b"c").unwrap();
+                assert_eq!(file.metadata().unwrap().len(), 3);
+                #[cfg(mips)]
+                println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+                assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
+                assert_eq!(file.metadata().unwrap().len(), 3);
+                #[cfg(mips)]
+                println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+                assert_eq!(file.seek(io::SeekFrom::Start(100)).unwrap(), 100);
+                assert_eq!(file.metadata().unwrap().len(), 3);
+                #[cfg(mips)]
+                println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+                assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
+                assert_eq!(file.metadata().unwrap().len(), 3);
+                #[cfg(mips)]
+                println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+                file.write_all(b"cde").unwrap();
+                assert_eq!(file.metadata().unwrap().len(), 5);
+                #[cfg(mips)]
+                println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+                let mut buf = [0; 4];
+                if cfg!(mips) {
+                    let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
+                    assert!(errno == 22 || errno == 9, "{}", errno);
+                } else {
+                    // TODO(arm_compat,hexagon): if no read permission, Arm semihosting handles it like eof.
+                    assert_eq!(file.read(&mut buf[..]).unwrap(), 0);
+                }
             }
             assert_eq!(
                 file.seek(io::SeekFrom::End(-200)).unwrap_err().kind(),
@@ -217,35 +222,38 @@ fn run() {
             let mut buf = [0; 4];
             let mut file = fs::File::open(path_a).unwrap();
             file.write_all(b"a").unwrap_err(); // no write permission
-            assert_eq!(file.metadata().unwrap().len(), 5);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 4);
-            let s = str::from_utf8(&buf[..n]).unwrap();
-            assert_eq!(s, "abcd");
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 1);
-            assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "e");
-            assert_eq!(file.seek(io::SeekFrom::Start(3)).unwrap(), 3);
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 2);
-            assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "de");
-            assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 4);
-            let s = str::from_utf8(&buf[..n]).unwrap();
-            assert_eq!(s, "abcd");
-            assert_eq!(
-                file.read_exact(&mut buf[..]).unwrap_err().kind(),
-                io::ErrorKind::UnexpectedEof
-            );
-            assert_eq!(buf[0], b'e');
-            assert_eq!(&buf[1..], b"bcd");
-            assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
-            file.read_exact(&mut buf[..]).unwrap();
-            let s = str::from_utf8(&buf).unwrap();
-            assert_eq!(s, "abcd");
+            // TODO(hexagon):
+            if !cfg!(hexagon) {
+                assert_eq!(file.metadata().unwrap().len(), 5);
+                #[cfg(mips)]
+                println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+                let n = file.read(&mut buf[..]).unwrap();
+                assert_eq!(n, 4);
+                let s = str::from_utf8(&buf[..n]).unwrap();
+                assert_eq!(s, "abcd");
+                let n = file.read(&mut buf[..]).unwrap();
+                assert_eq!(n, 1);
+                assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "e");
+                assert_eq!(file.seek(io::SeekFrom::Start(3)).unwrap(), 3);
+                let n = file.read(&mut buf[..]).unwrap();
+                assert_eq!(n, 2);
+                assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "de");
+                assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
+                let n = file.read(&mut buf[..]).unwrap();
+                assert_eq!(n, 4);
+                let s = str::from_utf8(&buf[..n]).unwrap();
+                assert_eq!(s, "abcd");
+                assert_eq!(
+                    file.read_exact(&mut buf[..]).unwrap_err().kind(),
+                    io::ErrorKind::UnexpectedEof
+                );
+                assert_eq!(buf[0], b'e');
+                assert_eq!(&buf[1..], b"bcd");
+                assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
+                file.read_exact(&mut buf[..]).unwrap();
+                let s = str::from_utf8(&buf).unwrap();
+                assert_eq!(s, "abcd");
+            }
             drop(file);
 
             // rename
@@ -260,8 +268,11 @@ fn run() {
                 let mut file = fs::File::open(path_b).unwrap();
                 let mut buf = [0; 8];
                 let n = file.read(&mut buf[..]).unwrap();
-                assert_eq!(n, 5);
-                assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "abcde");
+                // TODO(hexagon):
+                if !cfg!(hexagon) {
+                    assert_eq!(n, 5);
+                    assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "abcde");
+                }
                 drop(file);
                 fs::rename(path_b, path_a).unwrap();
                 fs::File::open(path_a).unwrap();
@@ -306,7 +317,7 @@ fn run() {
     {
         println!("test env::args ... ");
         const BUF_SIZE: usize = 256;
-        #[cfg(arm_compat)]
+        #[cfg(any(arm_compat, hexagon))]
         {
             use core::mem::MaybeUninit;
 
@@ -352,15 +363,17 @@ fn run() {
         }
         println!("ok");
     }
-    #[cfg(arm_compat)]
+    #[cfg(any(arm_compat, hexagon))]
     {
+        #[cfg(arm_compat)]
         println!("test sys::arm_compat ... ");
+        #[cfg(hexagon)]
+        println!("test sys::hexagon ... ");
         println!("sys_clock: {}", sys_clock().unwrap());
         if !qemu_has_read_order_bug {
             println!("sys_elapsed: {}", sys_elapsed().unwrap());
         }
         let HeapInfo { heap_base, heap_limit, stack_base, stack_limit } = sys_heapinfo();
-        // TODO(arm_compat):
         if !qemu_has_read_order_bug {
             assert_eq!(heap_base, ptr::null_mut());
             assert_eq!(heap_limit, ptr::null_mut());
@@ -374,7 +387,7 @@ fn run() {
             assert_eq!(sys_iserror(-4096), true);
             assert_eq!(sys_iserror(isize::MIN), true);
         }
-        // println!("{}", sys_readc() as char); // TODO(arm_compat): only works on qemu-user https://gitlab.com/qemu-project/qemu/-/issues/1963
+        // println!("{}", sys_readc() as char); // TODO(arm_compat,hexagon): only works on qemu-user https://gitlab.com/qemu-project/qemu/-/issues/1963
         if !qemu_has_read_order_bug {
             print!("sys_system: ");
             assert_eq!(sys_system(c!("pwd")), 0);
@@ -384,8 +397,15 @@ fn run() {
         print!("sys_writec: ");
         sys_writec(b'a');
         sys_writec(b'\n');
+        #[cfg(hexagon)]
+        {
+            print!("sys_writecreg: ");
+            sys_writecreg(b'1');
+            sys_writecreg(b'\n');
+        }
         print!("sys_write0: ");
         sys_write0(c!("bc\n"));
+        // TODO(hexagon): OPENDIR/READDIR/CLOSEDIR/STAT/FSTAT/FTRUNC/FTELL/ACCESS/GETCWD
         println!("ok");
     }
     #[cfg(mips)]
