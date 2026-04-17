@@ -91,6 +91,14 @@ cfg_sel!({
         #[doc(hidden)]
         pub use aarch32_rt::{entry as aarch32_rt_entry, *};
     }
+    #[cfg(target_arch = "hexagon")]
+    {
+        #[doc(hidden)]
+        #[no_mangle]
+        pub unsafe fn main() -> ! {
+            unsafe { _start_rust() }
+        }
+    }
     #[cfg(feature = "qemu-user")]
     {
         #[doc(hidden)]

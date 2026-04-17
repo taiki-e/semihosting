@@ -4,13 +4,15 @@ use std::{env, fs, path::PathBuf, time::SystemTime};
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rustc-check-cfg=cfg(mips,arm_compat)");
+    println!("cargo:rustc-check-cfg=cfg(mips,hexagon,arm_compat)");
     println!(r#"cargo:rustc-check-cfg=cfg(host_os,values("windows"))"#);
 
     let target_arch = &*env::var("CARGO_CFG_TARGET_ARCH").expect("CARGO_CFG_TARGET_ARCH not set");
 
     if target_arch.starts_with("mips") {
         println!("cargo:rustc-cfg=mips");
+    } else if target_arch == "hexagon" {
+        println!("cargo:rustc-cfg=hexagon");
     } else {
         println!("cargo:rustc-cfg=arm_compat");
     }
