@@ -159,7 +159,7 @@ rustc_minor_version="${rustc_version#*.}"
 rustc_minor_version="${rustc_minor_version%%.*}"
 llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
 llvm_version="${llvm_version%%.*}"
-target_dir=$(pwd)/target
+target_dir="${PWD}/target"
 nightly=''
 if [[ "${rustc_version}" =~ nightly|dev ]]; then
   nightly=1
@@ -167,7 +167,7 @@ if [[ "${rustc_version}" =~ nightly|dev ]]; then
     retry rustup ${pre_args[@]+"${pre_args[@]}"} component add rust-src &>/dev/null
   fi
 fi
-workspace_root=$(pwd)
+workspace_root="${PWD}"
 qemu_system_bin_dir="${QEMU_SYSTEM_BIN_DIR:+"${QEMU_SYSTEM_BIN_DIR%/}/"}"
 export SEMIHOSTING_DENY_WARNINGS=1
 case "$(uname -s)" in
@@ -195,7 +195,7 @@ run() {
       info "target '${target}' not available on ${rustc_version} (skipped)"
       return 0
     fi
-    local target_flags=(--target "$(pwd)/target-specs/${target}.json")
+    local target_flags=(--target "${PWD}/target-specs/${target}.json")
     if { cargo ${pre_args[@]+"${pre_args[@]}"} -Z help || true; } | grep -Fq json-target-spec; then
       target_flags+=(-Z json-target-spec)
     fi

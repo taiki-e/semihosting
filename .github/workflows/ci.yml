@@ -1,7 +1,6 @@
 name: CI
 
-permissions:
-  contents: read
+permissions: {}
 
 on:
   pull_request:
@@ -35,23 +34,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  miri:
-    uses: taiki-e/github-actions/.github/workflows/miri.yml@dec917193d835117a7238865adf83273d9fcd27a # main
+  tidy:
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
+    permissions:
+      security-events: write # for github/codeql-action/*
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      target: aarch64-unknown-linux-gnu
+      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64,loongarch64-unknown-linux-gnu
       # NB: sync with env.TEST_FEATURES
-      args: --features alloc,stdio,fs,args,time,random
-  msrv:
-    uses: taiki-e/github-actions/.github/workflows/msrv.yml@dec917193d835117a7238865adf83273d9fcd27a # main
-    with:
-      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu
-      # NB: sync with env.TEST_FEATURES
-      args: --features alloc,stdio,fs,args,time,random
+      clippy-args: --features alloc,stdio,fs,args,time,random
+      # TODO: workflow currently always runs doctest with the default target.
+      clippy-doctest: false
+  codegen:
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/gen.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
+    permissions:
+      contents: write # for creating branch for pr
+    secrets:
+      PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
   # We have some platform-independent code, so test them.
   test:
-    uses: taiki-e/github-actions/.github/workflows/test.yml@dec917193d835117a7238865adf83273d9fcd27a # main
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       target: aarch64-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
@@ -60,23 +64,15 @@ jobs:
       optional-deps: ''
       build-args: --depth 2 --exclude-features panic-unwind,backtrace,trap-hlt,openocd-semihosting
       no-std: false # covered by no-std job
-  tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@dec917193d835117a7238865adf83273d9fcd27a # main
-    permissions:
-      contents: write # for creating branch for pr
-      pull-requests: write # unused (used in `codegen-automerge: true` case)
-      security-events: write # for github/codeql-action/*
-    secrets:
-      PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
-    with:
-      # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64,loongarch64-unknown-linux-gnu
+      miri-target: aarch64-unknown-linux-gnu
       # NB: sync with env.TEST_FEATURES
-      clippy-args: --features alloc,stdio,fs,args,time,random
-      # TODO: workflow currently always runs doctest with the default target.
-      clippy-doctest: false
+      miri-args: --features alloc,stdio,fs,args,time,random
+      msrv-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu
+      # NB: sync with env.TEST_FEATURES
+      msrv-args: --features alloc,stdio,fs,args,time,random
 
   no-std:
+    needs: tidy
     strategy:
       fail-fast: false
       matrix:
@@ -99,20 +95,16 @@ jobs:
             os: macos-latest
           - rust: nightly
             os: windows-latest
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.os || 'ubuntu-24.04' }}
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/github-actions/free-device-space@dec917193d835117a7238865adf83273d9fcd27a # main # zizmor: ignore[stale-action-refs]
+      - uses: taiki-e/github-actions/free-device-space@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main # zizmor: ignore[stale-action-refs]
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
-      - uses: taiki-e/github-actions/install-rust@dec917193d835117a7238865adf83273d9fcd27a # main # zizmor: ignore[stale-action-refs]
+      - uses: taiki-e/install-action@c070f87102a1c75b3183910f391c1cb887fe13c8 # v2.77.6
         with:
-          toolchain: ${{ matrix.rust }}
-      - uses: taiki-e/install-action@b8be7f5e140177087325943c4a8e169d01c59b3d # v2.75.3
-        with:
-          tool: espup
+          tool: rust@${{ matrix.rust }}${{ (matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')) && ',espup' || '' }}
           fallback: none
-        if: matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')
       - run: |
           retry() {
             for i in {1..10}; do
@@ -158,16 +150,16 @@ jobs:
             "$@"
           }
           # Patched QEMU for MIPS semihosting
-          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/patched-11.0.0-rc0/qemu-"${OS}".tar.xz \
+          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/patched-11.0.0/qemu-"${OS}".tar.xz \
             | tar xJf -
           sudo cp -r -- qemu/. /usr/local/
           rm -rf -- ./qemu
-          printf '%s\n' "MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/bin" >>"${GITHUB_ENV}"
+          printf 'MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/bin\n' >>"${GITHUB_ENV}"
           # Patched QEMU for LoongArch semihosting
           retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.5/qemu-"${OS}".tar.xz \
             | tar xJf -
           sudo mv -- qemu /usr/local/qemu-loongarch-semi
-          printf '%s\n' "LOONGARCH_QEMU_BIN_DIR=/usr/local/qemu-loongarch-semi/bin" >>"${GITHUB_ENV}"
+          printf 'LOONGARCH_QEMU_BIN_DIR=/usr/local/qemu-loongarch-semi/bin\n' >>"${GITHUB_ENV}"
         env:
           OS: ${{ matrix.os || 'ubuntu-24.04' }}
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == '' || startsWith(matrix.os, 'macos')
