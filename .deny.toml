@@ -41,4 +41,6 @@ unused-allowed-source = "deny"
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
+    # TODO: remove once https://github.com/nbdd0121/unwinding/pull/58 released
+    "https://github.com/taiki-e/unwinding.git",
 ]
