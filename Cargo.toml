@@ -107,7 +107,3 @@ struct_field_names = { level = "allow", priority = 1 }
 too_many_arguments = { level = "allow", priority = 1 }
 too_many_lines = { level = "allow", priority = 1 }
 type_complexity = { level = "allow", priority = 1 }
-
-[patch.crates-io]
-# TODO: remove once https://github.com/nbdd0121/unwinding/pull/58 released
-unwinding = { git = "https://github.com/taiki-e/unwinding.git", rev = "451dade77fad01a627d5efc3a531c231b37286e7" } # https://github.com/nbdd0121/unwinding/pull/53 + fixed https://github.com/nbdd0121/unwinding/pull/24 + https://github.com/nbdd0121/unwinding/pull/50 + https://github.com/nbdd0121/unwinding/pull/58
