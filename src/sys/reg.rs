@@ -165,7 +165,7 @@ impl RetReg {
     }
     #[inline]
     pub fn usize(self) -> usize {
-        self.0 as usize
+        self.0.addr()
     }
     #[allow(clippy::cast_possible_wrap, clippy::cast_sign_loss)]
     #[inline]
