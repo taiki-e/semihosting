@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@34eb31aa6d6db728f30b07fd6eaa37152c2def1b # main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
     permissions:
       security-events: write # for github/codeql-action/*
     with:
@@ -47,7 +47,7 @@ jobs:
       clippy-doctest: false
   codegen:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/gen.yml@34eb31aa6d6db728f30b07fd6eaa37152c2def1b # main
+    uses: taiki-e/github-actions/.github/workflows/gen.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
     permissions:
       contents: write # for creating branch for pr
     secrets:
@@ -55,7 +55,7 @@ jobs:
   # We have some platform-independent code, so test them.
   test:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@34eb31aa6d6db728f30b07fd6eaa37152c2def1b # main
+    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       target: aarch64-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
@@ -99,7 +99,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/github-actions/free-device-space@34eb31aa6d6db728f30b07fd6eaa37152c2def1b # main # zizmor: ignore[stale-action-refs]
+      - uses: taiki-e/github-actions/free-device-space@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - uses: taiki-e/install-action@213ccc1a076163c093f914550b94feb90fab916d # v2.79.2
         with:
