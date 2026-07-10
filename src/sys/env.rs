@@ -136,10 +136,10 @@ cfg_sel!({
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;
             let argc = mips_argc();
-            let mut start = 0;
+            let mut start: usize = 0;
             for i in 0..argc {
-                let len = mips_argnlen(i)? + 1;
-                if start + len > BUF_SIZE {
+                let len = mips_argnlen(i)?.saturating_add(1);
+                if start.saturating_add(len) > BUF_SIZE {
                     return Err(io::ErrorKind::ArgumentListTooLong.into());
                 }
                 // SAFETY: pointer is valid because we got it from a reference,
