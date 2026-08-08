@@ -40,7 +40,8 @@ jobs:
       security-events: write # for github/codeql-action/*
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64,loongarch64-unknown-linux-gnu
+      # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
+      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,loongarch64-unknown-linux-gnu # ,mips64-unknown-linux-gnuabi64
       # NB: sync with env.TEST_FEATURES
       clippy-args: --features alloc,stdio,fs,args,time,random
       # TODO: workflow currently always runs doctest with the default target.
@@ -58,7 +59,8 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/rust-test.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      target: aarch64-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
+      # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
+      target: aarch64-unknown-linux-gnu # ,mips64-unknown-linux-gnuabi64
       # NB: sync with env.TEST_FEATURES
       features: --features alloc,stdio,fs,args,time,random
       optional-deps: ''

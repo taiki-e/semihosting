@@ -92,12 +92,13 @@ default_targets=(
   # mips32r6
   mipsisa32r6-unknown-none   # custom target
   mipsisa32r6el-unknown-none # custom target
-  # mips64r2
-  mips64-unknown-none   # custom target
-  mips64el-unknown-none # custom target
-  # mips64r6
-  mipsisa64r6-unknown-none   # custom target
-  mipsisa64r6el-unknown-none # custom target
+  # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
+  # # mips64r2
+  # mips64-unknown-none   # custom target
+  # mips64el-unknown-none # custom target
+  # # mips64r6
+  # mipsisa64r6-unknown-none   # custom target
+  # mipsisa64r6el-unknown-none # custom target
 )
 
 x() {
