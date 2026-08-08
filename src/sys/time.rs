@@ -173,9 +173,13 @@ cfg_sel!({
         target_arch = "loongarch32",
         target_arch = "loongarch64",
         all(target_arch = "xtensa", feature = "openocd-semihosting"),
+        target_arch = "hexagon",
     ))]
     {
+        #[cfg(not(target_arch = "hexagon"))]
         use crate::sys::arm_compat::{sys_clock, sys_time};
+        #[cfg(target_arch = "hexagon")]
+        use crate::sys::hexagon::{sys_clock, sys_time};
 
         const CENTISECONDS_PER_SEC: u64 = 100;
         const NANOS_PER_CENTI: u32 = 10_000_000;

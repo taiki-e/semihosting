@@ -22,6 +22,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "mips32r6",
             target_arch = "mips64",
             target_arch = "mips64r6",
+            target_arch = "hexagon",
         )))]
         errno::E2BIG => ArgumentListTooLong,
         // errno::EADDRINUSE => AddrInUse,
@@ -37,6 +38,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "loongarch32",
             target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "hexagon",
         )))]
         errno::ECONNRESET => ConnectionReset,
         // errno::EDEADLK => Deadlock,
@@ -60,7 +62,20 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
         errno::ENOENT => NotFound,
         errno::ENOMEM => OutOfMemory,
         errno::ENOSPC => StorageFull,
-        // errno::ENOSYS => Unsupported,
+        #[cfg(not(any(
+            target_arch = "aarch64",
+            target_arch = "arm",
+            target_arch = "riscv32",
+            target_arch = "riscv64",
+            target_arch = "loongarch32",
+            target_arch = "loongarch64",
+            all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+        )))]
+        errno::ENOSYS => Unsupported,
         errno::EMLINK => TooManyLinks,
         #[cfg(not(any(
             target_arch = "aarch64",
@@ -80,6 +95,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "loongarch32",
             target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "hexagon",
         )))]
         errno::ENETDOWN => NetworkDown,
         #[cfg(not(any(
@@ -90,6 +106,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "loongarch32",
             target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "hexagon",
         )))]
         errno::ENETUNREACH => NetworkUnreachable,
         #[cfg(not(any(
@@ -100,6 +117,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "loongarch32",
             target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "hexagon",
         )))]
         errno::ENOTCONN => NotConnected,
         errno::ENOTDIR => NotADirectory,
@@ -116,6 +134,7 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "loongarch32",
             target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "hexagon",
         )))]
         errno::ETIMEDOUT => TimedOut,
         #[cfg(not(any(
@@ -144,8 +163,11 @@ pub(crate) fn decode_error_kind(errno: RawOsError) -> io::ErrorKind {
             target_arch = "loongarch32",
             target_arch = "loongarch64",
             all(target_arch = "xtensa", feature = "openocd-semihosting"),
+            target_arch = "hexagon",
         )))]
         x if x == errno::EAGAIN || x == errno::EWOULDBLOCK => WouldBlock,
+        #[cfg(target_arch = "hexagon")]
+        errno::EAGAIN => WouldBlock,
         _ => Other,
     }
 }

@@ -24,6 +24,7 @@ done
 bin_dir=''
 case "${target}" in
   loongarch*) bin_dir="${LOONGARCH_QEMU_BIN_DIR:+"${LOONGARCH_QEMU_BIN_DIR%/}/"}" ;;
+  hexagon*) bin_dir="${HEXAGON_QEMU_BIN_DIR:+"${HEXAGON_QEMU_BIN_DIR%/}/"}" ;;
 esac
 [[ -n "${bin_dir:-}" ]] || bin_dir="${QEMU_USER_BIN_DIR:+"${QEMU_USER_BIN_DIR%/}/"}"
 
@@ -113,6 +114,10 @@ case "${target}" in
     ;;
   loongarch64*)
     qemu_user loongarch64
+    ;;
+  # Hexagon
+  hexagon-*-linux-musl)
+    qemu_user hexagon -cpu v68 -L "$(dirname -- "${HEXAGON_QEMU_BIN_DIR:+"${HEXAGON_QEMU_BIN_DIR%/}/"}")"/target/hexagon-unknown-linux-musl
     ;;
   # MIPS
   mips*) bail "QEMU doesn't support semihosting for MIPS (${target}) with user-mode" ;;

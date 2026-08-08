@@ -113,10 +113,14 @@ cfg_sel!({
         target_arch = "loongarch32",
         target_arch = "loongarch64",
         all(target_arch = "xtensa", feature = "openocd-semihosting"),
+        target_arch = "hexagon",
     ))]
     {
         pub(crate) use self::next_from_cmdline as next;
+        #[cfg(not(target_arch = "hexagon"))]
         use crate::sys::arm_compat::sys_get_cmdline_uninit;
+        #[cfg(target_arch = "hexagon")]
+        use crate::sys::hexagon::sys_get_cmdline_uninit;
 
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;

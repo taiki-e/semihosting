@@ -67,6 +67,7 @@ impl<'a> ParamRegW<'a> {
     target_arch = "loongarch32",
     target_arch = "loongarch64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
+    target_arch = "hexagon",
 ))]
 impl<'a> ParamRegW<'a> {
     #[inline]
@@ -136,6 +137,7 @@ impl<'a> ParamRegR<'a> {
     target_arch = "loongarch32",
     target_arch = "loongarch64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
+    target_arch = "hexagon",
 ))]
 impl<'a> ParamRegR<'a> {
     #[inline]
@@ -206,6 +208,7 @@ impl RetReg {
     target_arch = "loongarch32",
     target_arch = "loongarch64",
     all(target_arch = "xtensa", feature = "openocd-semihosting"),
+    target_arch = "hexagon",
 ))]
 impl RetReg {
     #[inline]
