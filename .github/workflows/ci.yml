@@ -118,13 +118,15 @@ jobs:
             done
             "$@"
           }
+          apt_packages=(libslirp0)
           llvm_version=$(rustc -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
           llvm_version="${llvm_version%%.*}"
           if [[ "${llvm_version}" -lt 17 ]]; then
             # pre-17 LLD doesn't support big-endian arm
-            retry sudo apt-get -o Acquire::Retries=10 -qq update
-            retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends binutils-arm-none-eabi
+            apt_packages+=(binutils-arm-none-eabi)
           fi
+          retry sudo apt-get -o Acquire::Retries=10 -qq update
+          retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends "${apt_packages[@]}"
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
           retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user
           mkdir -p -- qemu-user

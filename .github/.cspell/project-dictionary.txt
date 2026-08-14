@@ -35,6 +35,7 @@ IWUSR
 IXGRP
 IXOTH
 IXUSR
+libslirp
 lseek
 nlink
 noat
