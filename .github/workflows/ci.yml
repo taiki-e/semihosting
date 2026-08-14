@@ -128,7 +128,8 @@ jobs:
           retry sudo apt-get -o Acquire::Retries=10 -qq update
           retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends "${apt_packages[@]}"
           # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
-          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user
+          # TODO: "Bail out! ERROR:target/arm/cpregs-omap-stub.c:9:define_omap_cp_regs: code should not be reached" error with ti925t
+          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user:11.0
           mkdir -p -- qemu-user
           docker cp -- qemu-user:/usr/bin qemu-user/bin
           docker rm -f -- qemu-user >/dev/null

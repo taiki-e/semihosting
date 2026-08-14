@@ -7,6 +7,7 @@ blksize
 CENTI
 CENTISECONDS
 CMDLINE
+cpregs
 CREAT
 csrwr
 dbcl
@@ -42,6 +43,7 @@ noat
 nondecreasing
 norvc
 nsec
+omap
 openocd
 plog
 pread
@@ -52,6 +54,7 @@ rdev
 RDONLY
 RDWR
 readc
+regs
 rustfilt
 sdbbp
 Seekable
