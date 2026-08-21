@@ -322,7 +322,7 @@ pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
     if ret.unsigned() == 0 {
         debug_assert!(!cmdline.ptr.is_null());
         let size = cmdline.size;
-        debug_assert!(size < len); // len contains trailing nul
+        debug_assert!(size <= len); // whether size covers the trailing nul is implementation-defined
         Ok(())
     } else {
         debug_assert_eq!(ret.signed(), -1);
@@ -345,7 +345,7 @@ pub fn sys_get_cmdline_uninit(buf: &mut [MaybeUninit<u8>]) -> io::Result<&mut [u
     if ret.unsigned() == 0 {
         debug_assert!(!block[0].to_ret().ptr().is_null());
         let size = block[1].to_ret().unsigned();
-        debug_assert!(size < len); // len contains trailing nul
+        debug_assert!(size <= len); // whether size covers the trailing nul is implementation-defined
         Ok(unsafe { slice_assume_init_mut(&mut buf[..size]) })
     } else {
         debug_assert_eq!(ret.signed(), -1);
