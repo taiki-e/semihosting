@@ -27,17 +27,24 @@ impl<const BUF_SIZE: usize> ArgsBytes<BUF_SIZE> {
 pub(crate) fn next_from_cmdline<const BUF_SIZE: usize>(
     args: &ArgsBytes<BUF_SIZE>,
 ) -> Option<&[u8]> {
-    if args.next.get() >= args.size {
-        return None;
-    }
     // SAFETY: safe due to buf's invariant.
     let buf = unsafe { slice_assume_init_ref(args.buf.get_unchecked(..args.size)) };
+    // Implementations disagree on whether the length reported by SYS_GET_CMDLINE
+    // covers the trailing nul. The command line is nul-terminated either way, so
+    // strip the terminator when covered.
+    let buf = match buf.split_last() {
+        Some((&NUL, buf)) => buf,
+        _ => buf,
+    };
+    if args.next.get() >= buf.len() {
+        return None;
+    }
     let mut start = args.next.get();
     let mut end = None;
     let is_blank = |b: u8| b == b' ' || b == b'\t';
     let mut delim = NUL;
     let mut in_argument = false;
-    while args.next.get() < args.size {
+    while args.next.get() < buf.len() {
         let b = buf[args.next.get()];
         if !in_argument {
             if is_blank(b) {
@@ -169,3 +176,71 @@ cfg_sel!({
         }
     }
 });
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn args_bytes<const BUF_SIZE: usize>(cmdline: &[u8]) -> ArgsBytes<BUF_SIZE> {
+        let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;
+        for (dst, &src) in buf.iter_mut().zip(cmdline) {
+            dst.write(src);
+        }
+        ArgsBytes {
+            buf,
+            next: Cell::new(0),
+            size: cmdline.len(),
+            #[cfg(any(
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "mips64",
+                target_arch = "mips64r6",
+            ))]
+            next_fn: next_from_cmdline,
+        }
+    }
+
+    #[test]
+    fn test_next_from_cmdline_length_excludes_nul() {
+        let args = args_bytes::<64>(b"");
+        assert_eq!(next_from_cmdline(&args), None);
+
+        let args = args_bytes::<64>(b"prog");
+        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(&args), None);
+
+        let args = args_bytes::<64>(b"prog arg1 arg2");
+        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg1"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg2"[..]));
+        assert_eq!(next_from_cmdline(&args), None);
+
+        let args = args_bytes::<64>(b"prog 'arg 1' \"arg 2\"");
+        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg 1"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg 2"[..]));
+        assert_eq!(next_from_cmdline(&args), None);
+    }
+
+    #[test]
+    fn test_next_from_cmdline_length_includes_nul() {
+        let args = args_bytes::<64>(b"\0");
+        assert_eq!(next_from_cmdline(&args), None);
+
+        let args = args_bytes::<64>(b"prog\0");
+        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(&args), None);
+
+        let args = args_bytes::<64>(b"prog arg1 arg2\0");
+        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg1"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg2"[..]));
+        assert_eq!(next_from_cmdline(&args), None);
+
+        let args = args_bytes::<64>(b"prog 'arg 1' \"arg 2\"\0");
+        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg 1"[..]));
+        assert_eq!(next_from_cmdline(&args), Some(&b"arg 2"[..]));
+        assert_eq!(next_from_cmdline(&args), None);
+    }
+}
