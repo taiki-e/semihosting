@@ -60,9 +60,13 @@ pub struct ArgsIn<'a>(sys::ArgsBytesRef<'a>);
 ///
 /// let mut buf = [MaybeUninit::uninit(); 64];
 /// let args = semihosting::experimental::env::args_in(&mut buf)?;
+/// let mut verbose = false;
 /// for arg in &args {
-///     let _: &str = arg?;
+///     if let Ok("-v") = arg {
+///         verbose = true;
+///     }
 /// }
+/// # let _ = verbose;
 /// # Ok::<(), semihosting::io::Error>(())
 /// ```
 pub fn args_in(buf: &mut [MaybeUninit<u8>]) -> io::Result<ArgsIn<'_>> {
