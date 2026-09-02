@@ -350,6 +350,17 @@ fn run() {
             assert_eq!((&args).next().unwrap().unwrap(), "c d");
             assert_eq!((&args).next(), None);
         }
+
+        let mut buf = [core::mem::MaybeUninit::uninit(); BUF_SIZE];
+        let args = env::args_in(&mut buf).unwrap();
+        let program = (&args).next().unwrap().unwrap();
+        if !qemu_has_read_order_bug {
+            assert_eq!(&program[program.len() - EXPECTED_BIN_PATH.len()..], EXPECTED_BIN_PATH);
+            assert_eq!((&args).next().unwrap().unwrap(), "a");
+            assert_eq!((&args).next().unwrap().unwrap(), "");
+            assert_eq!((&args).next().unwrap().unwrap(), "c d");
+            assert_eq!((&args).next(), None);
+        }
         println!("ok");
     }
     #[cfg(arm_compat)]

@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Add `experimental::env::args_in`, which reads the arguments into a buffer provided by the caller. Unlike `args`, it never copies the buffer, so the peak stack use is the buffer rather than twice it.
+
 ## [0.1.25] - 2026-03-08
 
 - Improve LoongArch32 support for old nightly. ([07f2579](https://github.com/taiki-e/semihosting/commit/07f2579f8a53f8b22b90491f44425b66025c963e))
