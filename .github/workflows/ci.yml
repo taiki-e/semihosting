@@ -48,7 +48,7 @@ jobs:
       clippy-doctest: false
   codegen:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/gen.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
+    uses: taiki-e/github-actions/.github/workflows/gen.yml@04a42ca09aaeb9b6c0bce43c23fb9e13eb197d85 # 2026.9.9
     permissions:
       contents: write # for creating branch for pr
     secrets:
