@@ -77,6 +77,26 @@ use self::mips as arch;
 )]
 pub mod mips;
 
+cfg_sel!({
+    #[cfg(not(any(
+        target_arch = "aarch64",
+        target_arch = "arm",
+        target_arch = "riscv32",
+        target_arch = "riscv64",
+        target_arch = "loongarch32",
+        target_arch = "loongarch64",
+        target_arch = "xtensa",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    )))]
+    {
+        use self::unsupported as arch;
+        mod unsupported;
+    }
+});
+
 #[cfg(feature = "args")]
 pub(crate) mod env;
 mod errno;
