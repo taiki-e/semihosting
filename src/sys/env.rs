@@ -17,18 +17,34 @@ pub(crate) struct ArgsBytes<const BUF_SIZE: usize> {
         target_arch = "mips64",
         target_arch = "mips64r6",
     ))]
-    next_fn: for<'a> fn(&'a ArgsBytes<BUF_SIZE>) -> Option<&'a [u8]>,
+    next_fn: for<'a> fn(&'a [u8], &Cell<usize>) -> Option<&'a [u8]>,
 }
 
 impl<const BUF_SIZE: usize> ArgsBytes<BUF_SIZE> {
     const UNINIT_BUF: [MaybeUninit<u8>; BUF_SIZE] = [MaybeUninit::uninit(); BUF_SIZE];
+    fn init(&self) -> &[u8] {
+        // SAFETY: safe due to buf's invariant.
+        unsafe { slice_assume_init_ref(self.buf.get_unchecked(..self.size)) }
+    }
 }
 
-pub(crate) fn next_from_cmdline<const BUF_SIZE: usize>(
-    args: &ArgsBytes<BUF_SIZE>,
-) -> Option<&[u8]> {
-    // SAFETY: safe due to buf's invariant.
-    let buf = unsafe { slice_assume_init_ref(args.buf.get_unchecked(..args.size)) };
+/// Arguments read into a buffer owned by the caller.
+///
+/// Unlike [`ArgsBytes`], this never copies the buffer, so the peak stack use is
+/// the buffer itself rather than twice it.
+pub(crate) struct ArgsBytesRef<'a> {
+    buf: &'a [u8],
+    next: Cell<usize>,
+    #[cfg(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    ))]
+    next_fn: for<'b> fn(&'b [u8], &Cell<usize>) -> Option<&'b [u8]>,
+}
+
+pub(crate) fn next_from_cmdline<'a>(buf: &'a [u8], next: &Cell<usize>) -> Option<&'a [u8]> {
     // Implementations disagree on whether the length reported by SYS_GET_CMDLINE
     // covers the trailing nul. The command line is nul-terminated either way, so
     // strip the terminator when covered.
@@ -36,20 +52,20 @@ pub(crate) fn next_from_cmdline<const BUF_SIZE: usize>(
         Some((&NUL, buf)) => buf,
         _ => buf,
     };
-    if args.next.get() >= buf.len() {
+    if next.get() >= buf.len() {
         return None;
     }
-    let mut start = args.next.get();
+    let mut start = next.get();
     let mut end = None;
     let is_blank = |b: u8| b == b' ' || b == b'\t';
     let mut delim = NUL;
     let mut in_argument = false;
-    while args.next.get() < buf.len() {
-        let b = buf[args.next.get()];
+    while next.get() < buf.len() {
+        let b = buf[next.get()];
         if !in_argument {
             if is_blank(b) {
-                end = Some(args.next.get());
-                args.next.set(args.next.get() + 1);
+                end = Some(next.get());
+                next.set(next.get() + 1);
                 break;
             }
             if b == b'"' || b == b'\'' {
@@ -59,19 +75,19 @@ pub(crate) fn next_from_cmdline<const BUF_SIZE: usize>(
             in_argument = true;
         } else if delim != NUL {
             if b == delim {
-                end = Some(args.next.get());
-                args.next.set(args.next.get() + 2);
+                end = Some(next.get());
+                next.set(next.get() + 2);
                 break;
             }
         } else if is_blank(b) {
-            end = Some(args.next.get());
-            args.next.set(args.next.get() + 1);
+            end = Some(next.get());
+            next.set(next.get() + 1);
             break;
         }
 
-        args.next.set(args.next.get() + 1);
+        next.set(next.get() + 1);
     }
-    Some(&buf[start..end.unwrap_or_else(|| args.next.get())])
+    Some(&buf[start..end.unwrap_or_else(|| next.get())])
 }
 
 #[cfg(any(
@@ -82,24 +98,22 @@ pub(crate) fn next_from_cmdline<const BUF_SIZE: usize>(
     target_arch = "mips64r6",
 ))]
 #[cfg_attr(test, allow(dead_code))] // TODO(env): unit test
-fn next_from_args<const BUF_SIZE: usize>(args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
-    if args.next.get() >= args.size {
+fn next_from_args<'a>(buf: &'a [u8], next: &Cell<usize>) -> Option<&'a [u8]> {
+    if next.get() >= buf.len() {
         return None;
     }
-    // SAFETY: safe due to buf's invariant.
-    let buf = unsafe { slice_assume_init_ref(args.buf.get_unchecked(..args.size)) };
-    let start = args.next.get();
+    let start = next.get();
     let mut end = None;
-    while args.next.get() < args.size {
-        let b = buf[args.next.get()];
+    while next.get() < buf.len() {
+        let b = buf[next.get()];
         if b == NUL {
-            end = Some(args.next.get());
-            args.next.set(args.next.get() + 1);
+            end = Some(next.get());
+            next.set(next.get() + 1);
             break;
         }
-        args.next.set(args.next.get() + 1);
+        next.set(next.get() + 1);
     }
-    let end = end.unwrap_or_else(|| args.next.get());
+    let end = end.unwrap_or_else(|| next.get());
     let last = end.saturating_sub(1);
     if start != last {
         let start_b = buf[start];
@@ -122,13 +136,22 @@ cfg_sel!({
         all(target_arch = "xtensa", feature = "openocd-semihosting"),
     ))]
     {
-        pub(crate) use self::next_from_cmdline as next;
         use crate::sys::arm_compat::sys_get_cmdline_uninit;
 
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;
             let size = sys_get_cmdline_uninit(&mut buf)?.len();
             Ok(ArgsBytes { buf, next: Cell::new(0), size })
+        }
+        pub(crate) fn args_bytes_in(buf: &mut [MaybeUninit<u8>]) -> io::Result<ArgsBytesRef<'_>> {
+            let buf = sys_get_cmdline_uninit(buf)?;
+            Ok(ArgsBytesRef { buf, next: Cell::new(0) })
+        }
+        pub(crate) fn next<const BUF_SIZE: usize>(args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
+            next_from_cmdline(args.init(), &args.next)
+        }
+        pub(crate) fn next_ref<'a>(args: &ArgsBytesRef<'a>) -> Option<&'a [u8]> {
+            next_from_cmdline(args.buf, &args.next)
         }
     }
     #[cfg(any(
@@ -140,13 +163,14 @@ cfg_sel!({
     {
         use crate::sys::mips::{mips_argc, mips_argn, mips_argnlen};
 
-        pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
-            let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;
+        /// Reads every argument into `buf`, returning the argument count and the
+        /// number of bytes written.
+        fn read_args(buf: &mut [MaybeUninit<u8>]) -> io::Result<(usize, usize)> {
             let argc = mips_argc();
             let mut start: usize = 0;
             for i in 0..argc {
                 let len = mips_argnlen(i)?.saturating_add(1);
-                if start.saturating_add(len) > BUF_SIZE {
+                if start.saturating_add(len) > buf.len() {
                     return Err(io::ErrorKind::ArgumentListTooLong.into());
                 }
                 // SAFETY: pointer is valid because we got it from a reference,
@@ -154,16 +178,35 @@ cfg_sel!({
                 unsafe { mips_argn(i, buf.as_mut_ptr().add(start).cast::<u8>())? }
                 start += len;
             }
+            Ok((argc, start))
+        }
+        pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
+            let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;
+            let (argc, size) = read_args(&mut buf)?;
             Ok(ArgsBytes {
                 buf,
                 next: Cell::new(0),
-                size: start,
+                size,
+                next_fn: if argc == 1 { next_from_cmdline } else { next_from_args },
+            })
+        }
+        pub(crate) fn args_bytes_in(buf: &mut [MaybeUninit<u8>]) -> io::Result<ArgsBytesRef<'_>> {
+            let (argc, size) = read_args(buf)?;
+            // SAFETY: read_args initialized buf[..size].
+            let buf = unsafe { slice_assume_init_ref(buf.get_unchecked(..size)) };
+            Ok(ArgsBytesRef {
+                buf,
+                next: Cell::new(0),
                 next_fn: if argc == 1 { next_from_cmdline } else { next_from_args },
             })
         }
         #[inline]
         pub(crate) fn next<const BUF_SIZE: usize>(args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
-            (args.next_fn)(args)
+            (args.next_fn)(args.init(), &args.next)
+        }
+        #[inline]
+        pub(crate) fn next_ref<'a>(args: &ArgsBytesRef<'a>) -> Option<&'a [u8]> {
+            (args.next_fn)(args.buf, &args.next)
         }
     }
     #[cfg(else)]
@@ -171,7 +214,13 @@ cfg_sel!({
         pub(crate) fn args_bytes<const BUF_SIZE: usize>() -> io::Result<ArgsBytes<BUF_SIZE>> {
             Err(io::ErrorKind::Unsupported.into())
         }
+        pub(crate) fn args_bytes_in(_buf: &mut [MaybeUninit<u8>]) -> io::Result<ArgsBytesRef<'_>> {
+            Err(io::ErrorKind::Unsupported.into())
+        }
         pub(crate) fn next<const BUF_SIZE: usize>(_args: &ArgsBytes<BUF_SIZE>) -> Option<&[u8]> {
+            unreachable!()
+        }
+        pub(crate) fn next_ref<'a>(_args: &ArgsBytesRef<'a>) -> Option<&'a [u8]> {
             unreachable!()
         }
     }
@@ -181,66 +230,47 @@ cfg_sel!({
 mod tests {
     use super::*;
 
-    fn args_bytes<const BUF_SIZE: usize>(cmdline: &[u8]) -> ArgsBytes<BUF_SIZE> {
-        let mut buf = ArgsBytes::<BUF_SIZE>::UNINIT_BUF;
-        for (dst, &src) in buf.iter_mut().zip(cmdline) {
-            dst.write(src);
-        }
-        ArgsBytes {
-            buf,
-            next: Cell::new(0),
-            size: cmdline.len(),
-            #[cfg(any(
-                target_arch = "mips",
-                target_arch = "mips32r6",
-                target_arch = "mips64",
-                target_arch = "mips64r6",
-            ))]
-            next_fn: next_from_cmdline,
-        }
-    }
-
     #[test]
     fn test_next_from_cmdline_length_excludes_nul() {
-        let args = args_bytes::<64>(b"");
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b""[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), None);
 
-        let args = args_bytes::<64>(b"prog");
-        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"prog"[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), None);
 
-        let args = args_bytes::<64>(b"prog arg1 arg2");
-        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg1"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg2"[..]));
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"prog arg1 arg2"[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg1"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg2"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), None);
 
-        let args = args_bytes::<64>(b"prog 'arg 1' \"arg 2\"");
-        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg 1"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg 2"[..]));
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"prog 'arg 1' \"arg 2\""[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg 1"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg 2"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), None);
     }
 
     #[test]
     fn test_next_from_cmdline_length_includes_nul() {
-        let args = args_bytes::<64>(b"\0");
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"\0"[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), None);
 
-        let args = args_bytes::<64>(b"prog\0");
-        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"prog\0"[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), None);
 
-        let args = args_bytes::<64>(b"prog arg1 arg2\0");
-        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg1"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg2"[..]));
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"prog arg1 arg2\0"[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg1"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg2"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), None);
 
-        let args = args_bytes::<64>(b"prog 'arg 1' \"arg 2\"\0");
-        assert_eq!(next_from_cmdline(&args), Some(&b"prog"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg 1"[..]));
-        assert_eq!(next_from_cmdline(&args), Some(&b"arg 2"[..]));
-        assert_eq!(next_from_cmdline(&args), None);
+        let (buf, next) = (&b"prog 'arg 1' \"arg 2\"\0"[..], Cell::new(0));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"prog"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg 1"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), Some(&b"arg 2"[..]));
+        assert_eq!(next_from_cmdline(buf, &next), None);
     }
 }
