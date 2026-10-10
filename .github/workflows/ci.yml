@@ -46,6 +46,7 @@ jobs:
       clippy-args: --features alloc,stdio,fs,args,time,random
       # TODO: workflow currently always runs doctest with the default target.
       clippy-doctest: false
+      check-external-types: false # TODO: remove once new version of https://github.com/awslabs/cargo-check-external-types with latest rustdoc-types released
   codegen:
     needs: tidy
     uses: taiki-e/github-actions/.github/workflows/gen.yml@04a42ca09aaeb9b6c0bce43c23fb9e13eb197d85 # 2026.9.9
