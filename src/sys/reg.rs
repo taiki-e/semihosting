@@ -1,6 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![allow(missing_docs)]
+#![cfg_attr(
+    not(any(
+        target_arch = "aarch64",
+        target_arch = "arm",
+        target_arch = "riscv32",
+        target_arch = "riscv64",
+        target_arch = "loongarch32",
+        target_arch = "loongarch64",
+        target_arch = "xtensa",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+    )),
+    allow(dead_code, unreachable_pub)
+)]
 
 use core::{
     ffi::{CStr, c_int, c_void},
