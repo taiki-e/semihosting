@@ -308,7 +308,7 @@ pub fn sys_flen(fd: BorrowedFd<'_>) -> io::Result<usize> {
 /// # Safety
 ///
 /// CommandLine::ptr must be valid for at least the size specified in CommandLine::size.
-#[deprecated(note = "use safer [`sys_get_cmdline_uninit`] instead")] // TODO(semver): Remove
+#[deprecated(note = "use safer [`sys_get_cmdline_uninit`] instead", since = "0.1.23")] // TODO(semver): Remove
 pub unsafe fn sys_get_cmdline(cmdline: &mut CommandLine) -> io::Result<()> {
     let len = cmdline.size;
     // |                    | on success      | on failure      |                 |
@@ -430,7 +430,8 @@ pub fn sys_open(path: &CStr, mode: OpenMode) -> io::Result<OwnedFd> {
 ///
 /// This function may be changed to behave as [`sys_read_orig`] in a future breaking release.
 #[deprecated(
-    note = "use [`sys::read`](crate::sys::read), [`sys::read_uninit`](crate::sys::read_uninit), or [`sys_read_orig`] instead"
+    note = "use [`sys::read`](crate::sys::read), [`sys::read_uninit`](crate::sys::read_uninit), or [`sys_read_orig`] instead",
+    since = "0.1.23"
 )] // TODO(semver)
 pub fn sys_read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     Ok(read_uninit(fd, buf)?.0.len())
@@ -579,7 +580,10 @@ pub fn sys_time() -> io::Result<usize> {
 /// - If you want the SYS_WRITE's original behavior, use [`sys_write_orig`] instead.
 ///
 /// This function may be changed to behave as [`sys_write_orig`] in a future breaking release.
-#[deprecated(note = "use [`sys::write`](crate::sys::write) or [`sys_write_orig`] instead")] // TODO(semver)
+#[deprecated(
+    note = "use [`sys::write`](crate::sys::write) or [`sys_write_orig`] instead",
+    since = "0.1.23"
+)] // TODO(semver)
 pub fn sys_write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     write(fd, buf)
 }
