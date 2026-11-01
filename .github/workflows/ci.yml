@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@04a42ca09aaeb9b6c0bce43c23fb9e13eb197d85 # 2026.9.9
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@07c8b42e7ad077d40127201ac62770c6eb31893e # 2026.11.1
     permissions:
       security-events: write # for github/codeql-action/*
     with:
@@ -49,15 +49,16 @@ jobs:
       check-external-types: false # TODO: remove once new version of https://github.com/awslabs/cargo-check-external-types with latest rustdoc-types released
   codegen:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/gen.yml@04a42ca09aaeb9b6c0bce43c23fb9e13eb197d85 # 2026.9.9
+    uses: taiki-e/github-actions/.github/workflows/gen.yml@07c8b42e7ad077d40127201ac62770c6eb31893e # 2026.11.1
     permissions:
       contents: write # for creating branch for pr
+      pull-requests: read # for gh pr list
     secrets:
       PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
   # We have some platform-independent code, so test them.
   test:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@dc24bff2366e8ddeea5e0e4168df3d6f4b93f596 # 2026.8.8
+    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@07c8b42e7ad077d40127201ac62770c6eb31893e # 2026.11.1
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
       # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
@@ -102,7 +103,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/github-actions/free-device-space@04a42ca09aaeb9b6c0bce43c23fb9e13eb197d85 # 2026.9.9
+      - uses: taiki-e/github-actions/free-device-space@07c8b42e7ad077d40127201ac62770c6eb31893e # 2026.11.1
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
       - uses: taiki-e/install-action@76c2e6406e52637deed7160d77bded76bd83e06e # v2.87.14
         with:
