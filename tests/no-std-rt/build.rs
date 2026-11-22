@@ -77,7 +77,8 @@ fn setup_for_qemu_system(manifest_dir: &Path) {
                     "riscv64" => "0x80200000",
                     // https://github.com/qemu/qemu/blob/v10.2.0/tests/tcg/loongarch64/system/kernel.ld#L5
                     _ if is_loongarch => "0x200000",
-                    _ if is_mips => "0x80000",
+                    "mips" | "mips32r6" => "0x80080000",
+                    "mips64" | "mips64r6" => "0xffffffff80080000",
                     _ => unreachable!(),
                 };
                 fs::copy(

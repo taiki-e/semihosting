@@ -9,7 +9,6 @@ cd -- "$(dirname -- "$0")"/..
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
-#    MIPS_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    LOONGARCH_QEMU_BIN_DIR=/path/to/qemu-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user QEMU_USER_BIN_DIR=/path/to/qemu-user-bin-dir ./tools/no-std.sh [+toolchain] [target]...
@@ -300,13 +299,6 @@ run() {
     mips*)
       case "${runner}" in
         qemu-system)
-          # TODO: The patched QEMU needed on QEMU 8.0+ (see README.md for details).
-          if [[ -z "${MIPS_QEMU_SYSTEM_BIN_DIR:-}" ]]; then
-            if "${qemu_system_bin_dir}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
-              info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
-              return 0
-            fi
-          fi
           linker=link.x
           # Allow linker_messages to work around https://github.com/llvm/llvm-project/issues/56192.
           target_rustflags+=" -C link-arg=-T${linker} -A linker_messages"

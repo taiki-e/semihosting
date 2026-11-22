@@ -156,12 +156,10 @@ jobs:
             done
             "$@"
           }
-          # Patched QEMU for MIPS semihosting
           retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/patched-11.0.0/qemu-"${OS}".tar.xz \
             | tar xJf -
           sudo cp -r -- qemu/. /usr/local/
           rm -rf -- ./qemu
-          printf 'MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/bin\n' >>"${GITHUB_ENV}"
           # Patched QEMU for LoongArch semihosting
           retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.5/qemu-"${OS}".tar.xz \
             | tar xJf -
