@@ -260,7 +260,7 @@ run() {
               ;;
           esac
           case "${target}" in
-            armebv7r*)
+            armeb*)
               # Workaround for https://github.com/taiki-e/semihosting/issues/18.
               target_rustflags+=" -C link-arg=--be8"
               ;;

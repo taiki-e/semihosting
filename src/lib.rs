@@ -63,7 +63,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `{arm,thumb}v7r-none-eabi{,hf}`           | ✓                | ✓              |           |
 | `armebv7r-none-eabi{,hf}`                 | ✓                | ✓              | \[1]      |
 | `{arm,thumb}v8r-none-eabihf`              | ✓                | ✓              |           |
-| `armebv8r-none-eabihf`                    | *                | ✓              | \[1]      |
+| `armebv8r-none-eabihf`                    | ✓                | ✓              | \[1]      |
 | `thumbv6m-none-eabi`                      | ✓                | ✓              |           |
 | `thumbv7m-none-eabi`                      | ✓                | ✓              |           |
 | `thumbv7em-none-eabi{,hf}`                | ✓                | ✓              |           |
