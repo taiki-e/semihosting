@@ -259,6 +259,12 @@ run() {
               fi
               ;;
           esac
+          case "${target}" in
+            armebv7r*)
+              # Workaround for https://github.com/taiki-e/semihosting/issues/18.
+              target_rustflags+=" -C link-arg=--be8"
+              ;;
+          esac
           linker=link.x
           target_rustflags+=" -C link-arg=-T${linker}"
           ;;

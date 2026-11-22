@@ -42,7 +42,8 @@ use run as run_main;
 fn run() {
     // TODO: https://github.com/taiki-e/semihosting/issues/18
     let qemu_has_read_order_bug =
-        cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system");
+        cfg!(all(target_arch = "arm", target_endian = "big", target_feature = "v8"))
+            && cfg!(feature = "qemu-system");
 
     #[cfg(feature = "panic-unwind")]
     {
