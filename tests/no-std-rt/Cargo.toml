@@ -49,21 +49,21 @@ aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", 
 aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "8b1e01f356a2cf31616061607f5f0d3e00a147cf" }
 # Armv6-M
 [target.thumbv6m-none-eabi.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 # Armv7-M
 [target.thumbv7m-none-eabi.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 [target.thumbv7em-none-eabi.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 [target.thumbv7em-none-eabihf.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 # Armv8-M
 [target.'thumbv8m.base-none-eabi'.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 [target.'thumbv8m.main-none-eabi'.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 [target.'thumbv8m.main-none-eabihf'.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
+cortex-m-rt = { optional = true, version = "=0.7.0" }
 
 [workspace]
 resolver = "2"
