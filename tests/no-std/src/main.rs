@@ -311,14 +311,17 @@ fn run() {
         {
             use core::mem::MaybeUninit;
 
-            let mut buf = [MaybeUninit::uninit(); BUF_SIZE];
+            let mut buf = [MaybeUninit::new(u8::MAX); BUF_SIZE];
             let cmd = sys_get_cmdline_uninit(&mut buf).unwrap();
-            println!("sys_get_cmdline_uninit.size: '{}'", cmd.len());
+            let cmd_len = cmd.len();
+            println!("sys_get_cmdline_uninit.size: '{cmd_len}'");
             assert!(!cmd.is_empty());
-            assert!(cmd.len() < BUF_SIZE);
+            assert!(cmd_len <= BUF_SIZE);
             println!("sys_get_cmdline_uninit: '{}'", str::from_utf8(cmd).unwrap());
-            if !qemu_has_read_order_bug {
-                assert_eq!(unsafe { buf[cmd.len()].assume_init() }, 0);
+            let terminator_is_included = cmd.last() == Some(&0);
+            if !qemu_has_read_order_bug && !terminator_is_included {
+                assert!(cmd_len < BUF_SIZE);
+                assert_eq!(unsafe { buf[cmd_len].assume_init() }, 0);
             }
 
             // let now = Instant::now();
