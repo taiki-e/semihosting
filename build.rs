@@ -4,7 +4,7 @@
 
 #[path = "src/gen/build.rs"]
 mod generated;
-#[path = "version.rs"]
+#[path = "src/build/version.rs"]
 mod version;
 
 use std::env;

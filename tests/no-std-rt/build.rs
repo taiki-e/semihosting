@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-// version.rs is shared with portable-atomic's build script, and portable-atomic-util only uses a part of it.
+// version.rs is shared with semihosting's build script, and no-std-rt only uses a part of it.
 #[allow(dead_code)]
-#[path = "version.rs"]
+#[path = "src/build/version.rs"]
 mod version;
 
 use std::{

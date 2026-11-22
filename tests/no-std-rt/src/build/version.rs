@@ -1,0 +1,1 @@
+../../../../src/build/version.rs
