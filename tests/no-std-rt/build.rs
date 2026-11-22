@@ -44,10 +44,10 @@ fn setup_for_qemu_system(manifest_dir: &Path) {
             let mut subarch =
                 target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
             subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
-            subarch = subarch.split('-').next().unwrap(); // ignore vender/os/env
-            subarch = subarch.split('.').next().unwrap(); // ignore .base/.main suffix
+            subarch = subarch.split_once('-').unwrap_or((subarch, "")).0; // ignore vender/os/env
+            let (subarch, _suffix) = subarch.rsplit_once('.').unwrap_or((subarch, "")); // .base/.main suffix
             match subarch {
-                "v6m" | "v7em" | "v7m" | "v8m" => {
+                "v6m" | "v7em" | "v7m" | "v8m" | "v8.1m" => {
                     println!("cargo:rustc-cfg=cortex_m_rt");
                     fs::copy(manifest_dir.join("arm-mclass-memory.x"), out_dir.join("memory.x"))
                         .unwrap();
