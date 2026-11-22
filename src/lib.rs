@@ -61,9 +61,9 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `thumbv6-none-eabi`                       | ✓                | ✓              |           |
 | `{arm,thumb}v7a-none-eabi{,hf}`           | ✓                | ✓              |           |
 | `{arm,thumb}v7r-none-eabi{,hf}`           | ✓                | ✓              |           |
-| `armebv7r-none-eabi{,hf}`                 | *                | ✓              | \[1]      |
+| `armebv7r-none-eabi{,hf}`                 | ✓                | ✓              | \[1]      |
 | `{arm,thumb}v8r-none-eabihf`              | ✓                | ✓              |           |
-| `armebv8r-none-eabihf`                    | *                | ✓              | \[1]      |
+| `armebv8r-none-eabihf`                    | ✓                | ✓              | \[1]      |
 | `thumbv6m-none-eabi`                      | ✓                | ✓              |           |
 | `thumbv7m-none-eabi`                      | ✓                | ✓              |           |
 | `thumbv7em-none-eabi{,hf}`                | ✓                | ✓              |           |
@@ -79,7 +79,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `mipsisa32r6{,el}-unknown-none`           | ✓                | N/A            | \[2] \[4] |
 | `mipsisa64r6{,el}-unknown-none`           | ✓                | N/A            | \[2] \[4] |
 
-\[1] Due to [qemu-system bug about big-endian Arm](https://github.com/taiki-e/semihosting/issues/18), operations that contains reading/writing of strings such as file open (`stdio`, `fs`, `random`), `args`, and `SYS_SYSTEM` don't work.<br>
+\[1] Due to [qemu-system bug about big-endian Arm](https://github.com/taiki-e/semihosting/issues/18), you may need to pass `--be8` to LLD (`RUSTFLAGS=-C link-arg=--be8`).<br>
 \[2] Tested with patched QEMU ([loongarch](https://lore.kernel.org/qemu-devel/20241222-semihosting-v1-1-8a770df60e9c@flygoat.com/), [mips](https://github.com/taiki-e/qemu/commit/c2d1c8dbc5cb878fbcce824180aa812213785124)). QEMU binaries that we are using for test are available on our QEMU fork ([mips](https://github.com/taiki-e/qemu/releases/tag/patched-11.0.0), [loongarch](https://github.com/taiki-e/qemu/releases/tag/loongarch-semi-10.1.5)).<br>
 \[3] Requires Rust 1.91+.<br>
 \[4] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
