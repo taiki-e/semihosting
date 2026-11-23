@@ -169,7 +169,6 @@ jobs:
             # TODO: "Bail out! ERROR:target/arm/cpregs-omap-stub.c:9:define_omap_cp_regs: code should not be reached" error with ti925t
             rm -- qemu-user/bin/qemu-arm
             retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user:11.0
-            mkdir -p -- qemu-user
             docker cp -- qemu-user:/usr/bin/qemu-arm qemu-user/bin/qemu-arm
             docker rm -f -- qemu-user >/dev/null
             sudo mv -- qemu-user/bin/qemu-* "${qemu_dir}"/bin/
