@@ -40,10 +40,6 @@ fn run_main() -> process::ExitCode {
 use run as run_main;
 
 fn run() {
-    // TODO: https://github.com/taiki-e/semihosting/issues/18
-    let qemu_has_read_order_bug =
-        cfg!(all(target_arch = "arm", target_endian = "big")) && cfg!(feature = "qemu-system");
-
     #[cfg(feature = "panic-unwind")]
     {
         print!("test panic ... ");
@@ -80,207 +76,193 @@ fn run() {
     }
     {
         print!("test io::stdio ... ");
-        if qemu_has_read_order_bug {
-            println!("this message does not print...");
-            io::stdout().unwrap_err();
-            io::stderr().unwrap_err();
+        let mut stdout1 = io::stdout().unwrap();
+        let mut stdout2 = io::stdout().unwrap();
+        let mut stderr1 = io::stderr().unwrap();
+        let mut stderr2 = io::stderr().unwrap();
+        if cfg!(mips) {
+            assert_eq!(stdout1.as_fd().as_raw_fd(), 1);
+            assert_eq!(stdout2.as_fd().as_raw_fd(), 1);
+            assert_eq!(stderr1.as_fd().as_raw_fd(), 2);
+            assert_eq!(stderr2.as_fd().as_raw_fd(), 2);
         } else {
-            let mut stdout1 = io::stdout().unwrap();
-            let mut stdout2 = io::stdout().unwrap();
-            let mut stderr1 = io::stderr().unwrap();
-            let mut stderr2 = io::stderr().unwrap();
-            if cfg!(mips) {
-                assert_eq!(stdout1.as_fd().as_raw_fd(), 1);
-                assert_eq!(stdout2.as_fd().as_raw_fd(), 1);
-                assert_eq!(stderr1.as_fd().as_raw_fd(), 2);
-                assert_eq!(stderr2.as_fd().as_raw_fd(), 2);
-            } else {
-                println!("stdout1: {}", stdout1.as_fd().as_raw_fd());
-                println!("stdout2: {}", stdout2.as_fd().as_raw_fd());
-                println!("stderr1: {}", stderr1.as_fd().as_raw_fd());
-                println!("stderr2: {}", stderr2.as_fd().as_raw_fd());
-                assert_ne!(stdout1.as_fd().as_raw_fd(), stdout2.as_fd().as_raw_fd());
-                assert_ne!(stderr1.as_fd().as_raw_fd(), stderr2.as_fd().as_raw_fd());
-            }
-            #[cfg(mips)]
-            {
-                assert_eq!(
-                    mips_open(c!("/dev/stdout"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
-                    1
-                );
-                assert_eq!(
-                    mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
-                    2
-                );
-                assert_eq!(
-                    mips_open(c!("/dev/stdout"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
-                    mips_open(c!("/dev/stdout"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
-                );
-                assert_eq!(
-                    mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
-                    mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
-                );
-            }
-            assert_eq!(stdout1.is_terminal(), stdio_is_terminal);
-            assert_eq!(stderr1.is_terminal(), stdio_is_terminal);
-            stdout1.write_all(b"hello\n").unwrap();
-            stdout2.write_all(b"hello\n").unwrap();
-            stderr1.write_all(b"world\n").unwrap();
-            stderr2.write_all(b"world\n").unwrap();
-            drop(stdout1);
-            drop(stdout2);
-            drop(stderr1);
-            drop(stderr2);
-            let f1 = io::stdout().unwrap().as_fd().as_raw_fd();
-            assert_eq!(io::stdout().unwrap().as_fd().as_raw_fd(), f1);
+            println!("stdout1: {}", stdout1.as_fd().as_raw_fd());
+            println!("stdout2: {}", stdout2.as_fd().as_raw_fd());
+            println!("stderr1: {}", stderr1.as_fd().as_raw_fd());
+            println!("stderr2: {}", stderr2.as_fd().as_raw_fd());
+            assert_ne!(stdout1.as_fd().as_raw_fd(), stdout2.as_fd().as_raw_fd());
+            assert_ne!(stderr1.as_fd().as_raw_fd(), stderr2.as_fd().as_raw_fd());
+        }
+        #[cfg(mips)]
+        {
+            assert_eq!(
+                mips_open(c!("/dev/stdout"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
+                1
+            );
+            assert_eq!(
+                mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
+                2
+            );
+            assert_eq!(
+                mips_open(c!("/dev/stdout"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
+                mips_open(c!("/dev/stdout"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
+            );
+            assert_eq!(
+                mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
+                mips_open(c!("/dev/stderr"), O_WRONLY, 0o666).unwrap().as_fd().as_raw_fd(),
+            );
+        }
+        assert_eq!(stdout1.is_terminal(), stdio_is_terminal);
+        assert_eq!(stderr1.is_terminal(), stdio_is_terminal);
+        stdout1.write_all(b"hello\n").unwrap();
+        stdout2.write_all(b"hello\n").unwrap();
+        stderr1.write_all(b"world\n").unwrap();
+        stderr2.write_all(b"world\n").unwrap();
+        drop(stdout1);
+        drop(stdout2);
+        drop(stderr1);
+        drop(stderr2);
+        let f1 = io::stdout().unwrap().as_fd().as_raw_fd();
+        assert_eq!(io::stdout().unwrap().as_fd().as_raw_fd(), f1);
 
-            let mut stdin = io::stdin().unwrap();
-            if cfg!(mips) {
-                assert_eq!(stdin.as_fd().as_raw_fd(), 0);
-                assert_eq!(stdin.is_terminal(), true);
-            } else {
-                // in tests, we use <<< to input stdin, so stdin is not tty.
-                // assert_eq!(stdin.is_terminal(), stdio_is_terminal);
-                assert_eq!(stdin.is_terminal(), false);
-            }
-            if cfg!(not(mips)) {
-                // TODO(mips): Hang
-                let mut buf = [0; 3];
-                let n = stdin.read(&mut buf[..]).unwrap();
-                assert_eq!(n, 3);
-                let s = str::from_utf8(&buf[..n]).unwrap();
-                assert_eq!(s, "std");
-                let n = stdin.read(&mut buf[..]).unwrap();
-                assert_eq!(n, 3);
-                let s = str::from_utf8(&buf[..n]).unwrap();
-                assert_eq!(s, "in\n");
-            }
+        let mut stdin = io::stdin().unwrap();
+        if cfg!(mips) {
+            assert_eq!(stdin.as_fd().as_raw_fd(), 0);
+            assert_eq!(stdin.is_terminal(), true);
+        } else {
+            // in tests, we use <<< to input stdin, so stdin is not tty.
+            // assert_eq!(stdin.is_terminal(), stdio_is_terminal);
+            assert_eq!(stdin.is_terminal(), false);
+        }
+        if cfg!(not(mips)) {
+            // TODO(mips): Hang
+            let mut buf = [0; 3];
+            let n = stdin.read(&mut buf[..]).unwrap();
+            assert_eq!(n, 3);
+            let s = str::from_utf8(&buf[..n]).unwrap();
+            assert_eq!(s, "std");
+            let n = stdin.read(&mut buf[..]).unwrap();
+            assert_eq!(n, 3);
+            let s = str::from_utf8(&buf[..n]).unwrap();
+            assert_eq!(s, "in\n");
         }
         dbg!(());
         println!("ok");
     }
     {
         print!("test fs ... ");
-        if !qemu_has_read_order_bug {
-            let path_a = c!("a.txt");
-            let path_b = c!("b.txt");
-            // create/write/seek
-            let mut file = fs::File::create(path_a).unwrap();
-            assert_eq!(file.is_terminal(), false);
-            assert_eq!(file.metadata().unwrap().len(), 0);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            file.write_all(b"abb").unwrap();
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
-            file.write_all(b"c").unwrap();
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(100)).unwrap(), 100);
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
-            assert_eq!(file.metadata().unwrap().len(), 3);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            file.write_all(b"cde").unwrap();
-            assert_eq!(file.metadata().unwrap().len(), 5);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            let mut buf = [0; 4];
-            if cfg!(mips) {
-                let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
-                assert!(errno == 22 || errno == 9, "{}", errno);
-            } else {
-                // TODO(arm_compat): if no read permission, Arm semihosting handles it like eof.
-                assert_eq!(file.read(&mut buf[..]).unwrap(), 0);
-            }
-            assert_eq!(
-                file.seek(io::SeekFrom::End(-200)).unwrap_err().kind(),
-                io::ErrorKind::InvalidInput
-            );
-            assert_eq!(
-                file.seek(io::SeekFrom::Start(usize::MAX as u64)).unwrap_err().kind(),
-                io::ErrorKind::InvalidInput
-            );
-            drop(file);
-
-            // open/read/seek
-            let mut buf = [0; 4];
-            let mut file = fs::File::open(path_a).unwrap();
-            file.write_all(b"a").unwrap_err(); // no write permission
-            assert_eq!(file.metadata().unwrap().len(), 5);
-            #[cfg(mips)]
-            println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 4);
-            let s = str::from_utf8(&buf[..n]).unwrap();
-            assert_eq!(s, "abcd");
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 1);
-            assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "e");
-            assert_eq!(file.seek(io::SeekFrom::Start(3)).unwrap(), 3);
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 2);
-            assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "de");
-            assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
-            let n = file.read(&mut buf[..]).unwrap();
-            assert_eq!(n, 4);
-            let s = str::from_utf8(&buf[..n]).unwrap();
-            assert_eq!(s, "abcd");
-            assert_eq!(
-                file.read_exact(&mut buf[..]).unwrap_err().kind(),
-                io::ErrorKind::UnexpectedEof
-            );
-            assert_eq!(buf[0], b'e');
-            assert_eq!(&buf[1..], b"bcd");
-            assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
-            file.read_exact(&mut buf[..]).unwrap();
-            let s = str::from_utf8(&buf).unwrap();
-            assert_eq!(s, "abcd");
-            drop(file);
-
-            // rename
-            if cfg!(mips) {
-                assert_eq!(
-                    fs::rename(path_a, path_b).unwrap_err().kind(),
-                    io::ErrorKind::Unsupported
-                );
-            } else {
-                fs::rename(path_a, path_b).unwrap();
-                assert_eq!(fs::File::open(path_a).unwrap_err().kind(), io::ErrorKind::NotFound);
-                let mut file = fs::File::open(path_b).unwrap();
-                let mut buf = [0; 8];
-                let n = file.read(&mut buf[..]).unwrap();
-                assert_eq!(n, 5);
-                assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "abcde");
-                drop(file);
-                fs::rename(path_b, path_a).unwrap();
-                fs::File::open(path_a).unwrap();
-                assert_eq!(fs::File::open(path_b).unwrap_err().kind(), io::ErrorKind::NotFound);
-            }
-
-            fs::remove_file(path_a).unwrap();
-            assert_eq!(fs::File::open(path_a).unwrap_err().kind(), io::ErrorKind::NotFound);
+        let path_a = c!("a.txt");
+        let path_b = c!("b.txt");
+        // create/write/seek
+        let mut file = fs::File::create(path_a).unwrap();
+        assert_eq!(file.is_terminal(), false);
+        assert_eq!(file.metadata().unwrap().len(), 0);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        file.write_all(b"abb").unwrap();
+        assert_eq!(file.metadata().unwrap().len(), 3);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
+        file.write_all(b"c").unwrap();
+        assert_eq!(file.metadata().unwrap().len(), 3);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
+        assert_eq!(file.metadata().unwrap().len(), 3);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        assert_eq!(file.seek(io::SeekFrom::Start(100)).unwrap(), 100);
+        assert_eq!(file.metadata().unwrap().len(), 3);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        assert_eq!(file.seek(io::SeekFrom::Start(2)).unwrap(), 2);
+        assert_eq!(file.metadata().unwrap().len(), 3);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        file.write_all(b"cde").unwrap();
+        assert_eq!(file.metadata().unwrap().len(), 5);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        let mut buf = [0; 4];
+        if cfg!(mips) {
+            let errno = file.read(&mut buf[..]).unwrap_err().raw_os_error().unwrap();
+            assert!(errno == 22 || errno == 9, "{}", errno);
+        } else {
+            // TODO(arm_compat): if no read permission, Arm semihosting handles it like eof.
+            assert_eq!(file.read(&mut buf[..]).unwrap(), 0);
         }
+        assert_eq!(
+            file.seek(io::SeekFrom::End(-200)).unwrap_err().kind(),
+            io::ErrorKind::InvalidInput
+        );
+        assert_eq!(
+            file.seek(io::SeekFrom::Start(usize::MAX as u64)).unwrap_err().kind(),
+            io::ErrorKind::InvalidInput
+        );
+        drop(file);
+
+        // open/read/seek
+        let mut buf = [0; 4];
+        let mut file = fs::File::open(path_a).unwrap();
+        file.write_all(b"a").unwrap_err(); // no write permission
+        assert_eq!(file.metadata().unwrap().len(), 5);
+        #[cfg(mips)]
+        println!("mips_fstat: {:?}", mips_fstat(file.as_fd()).unwrap());
+        let n = file.read(&mut buf[..]).unwrap();
+        assert_eq!(n, 4);
+        let s = str::from_utf8(&buf[..n]).unwrap();
+        assert_eq!(s, "abcd");
+        let n = file.read(&mut buf[..]).unwrap();
+        assert_eq!(n, 1);
+        assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "e");
+        assert_eq!(file.seek(io::SeekFrom::Start(3)).unwrap(), 3);
+        let n = file.read(&mut buf[..]).unwrap();
+        assert_eq!(n, 2);
+        assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "de");
+        assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
+        let n = file.read(&mut buf[..]).unwrap();
+        assert_eq!(n, 4);
+        let s = str::from_utf8(&buf[..n]).unwrap();
+        assert_eq!(s, "abcd");
+        assert_eq!(file.read_exact(&mut buf[..]).unwrap_err().kind(), io::ErrorKind::UnexpectedEof);
+        assert_eq!(buf[0], b'e');
+        assert_eq!(&buf[1..], b"bcd");
+        assert_eq!(file.seek(io::SeekFrom::Start(0)).unwrap(), 0);
+        file.read_exact(&mut buf[..]).unwrap();
+        let s = str::from_utf8(&buf).unwrap();
+        assert_eq!(s, "abcd");
+        drop(file);
+
+        // rename
+        if cfg!(mips) {
+            assert_eq!(fs::rename(path_a, path_b).unwrap_err().kind(), io::ErrorKind::Unsupported);
+        } else {
+            fs::rename(path_a, path_b).unwrap();
+            assert_eq!(fs::File::open(path_a).unwrap_err().kind(), io::ErrorKind::NotFound);
+            let mut file = fs::File::open(path_b).unwrap();
+            let mut buf = [0; 8];
+            let n = file.read(&mut buf[..]).unwrap();
+            assert_eq!(n, 5);
+            assert_eq!(str::from_utf8(&buf[..n]).unwrap(), "abcde");
+            drop(file);
+            fs::rename(path_b, path_a).unwrap();
+            fs::File::open(path_a).unwrap();
+            assert_eq!(fs::File::open(path_b).unwrap_err().kind(), io::ErrorKind::NotFound);
+        }
+
+        fs::remove_file(path_a).unwrap();
+        assert_eq!(fs::File::open(path_a).unwrap_err().kind(), io::ErrorKind::NotFound);
         println!("ok");
     }
     {
         println!("test random ... ");
         // Windows has no /dev/urandom
-        let fail_expected = cfg!(host_os = "windows") || qemu_has_read_order_bug;
+        let fail_expected = cfg!(host_os = "windows");
         let mut buf = [0; 64];
         if let Err(e) = random::fill_bytes(&mut buf) {
             assert!(fail_expected);
-            if cfg!(host_os = "windows") && !qemu_has_read_order_bug {
+            if cfg!(host_os = "windows") {
                 assert_eq!(e.kind(), io::ErrorKind::NotFound);
             }
         } else {
@@ -310,14 +292,17 @@ fn run() {
         {
             use core::mem::MaybeUninit;
 
-            let mut buf = [MaybeUninit::uninit(); BUF_SIZE];
+            let mut buf = [MaybeUninit::new(u8::MAX); BUF_SIZE];
             let cmd = sys_get_cmdline_uninit(&mut buf).unwrap();
-            println!("sys_get_cmdline_uninit.size: '{}'", cmd.len());
+            let cmd_len = cmd.len();
+            println!("sys_get_cmdline_uninit.size: '{cmd_len}'");
             assert!(!cmd.is_empty());
-            assert!(cmd.len() < BUF_SIZE);
+            assert!(cmd_len <= BUF_SIZE);
             println!("sys_get_cmdline_uninit: '{}'", str::from_utf8(cmd).unwrap());
-            if !qemu_has_read_order_bug {
-                assert_eq!(unsafe { buf[cmd.len()].assume_init() }, 0);
+            let terminator_is_included = cmd.last() == Some(&0);
+            if !terminator_is_included {
+                assert!(cmd_len < BUF_SIZE);
+                assert_eq!(unsafe { buf[cmd_len].assume_init() }, 0);
             }
 
             // let now = Instant::now();
@@ -343,53 +328,43 @@ fn run() {
         }
         let args = env::args::<BUF_SIZE>().unwrap();
         let program = (&args).next().unwrap().unwrap();
-        if !qemu_has_read_order_bug {
-            assert_eq!(&program[program.len() - EXPECTED_BIN_PATH.len()..], EXPECTED_BIN_PATH);
-            assert_eq!((&args).next().unwrap().unwrap(), "a");
-            assert_eq!((&args).next().unwrap().unwrap(), "");
-            assert_eq!((&args).next().unwrap().unwrap(), "c d");
-            assert_eq!((&args).next(), None);
-        }
+        assert_eq!(&program[program.len() - EXPECTED_BIN_PATH.len()..], EXPECTED_BIN_PATH);
+        assert_eq!((&args).next().unwrap().unwrap(), "a");
+        assert_eq!((&args).next().unwrap().unwrap(), "");
+        assert_eq!((&args).next().unwrap().unwrap(), "c d");
+        assert_eq!((&args).next(), None);
 
         let mut buf = [core::mem::MaybeUninit::uninit(); BUF_SIZE];
         let mut args = env::args_in(&mut buf).unwrap();
         let program = args.next().unwrap().unwrap();
-        if !qemu_has_read_order_bug {
-            assert_eq!(&program[program.len() - EXPECTED_BIN_PATH.len()..], EXPECTED_BIN_PATH);
-            assert_eq!(args.next().unwrap().unwrap(), "a");
-            assert_eq!(args.next().unwrap().unwrap(), "");
-            assert_eq!(args.next().unwrap().unwrap(), "c d");
-            assert_eq!(args.next(), None);
-        }
+        assert_eq!(&program[program.len() - EXPECTED_BIN_PATH.len()..], EXPECTED_BIN_PATH);
+        assert_eq!(args.next().unwrap().unwrap(), "a");
+        assert_eq!(args.next().unwrap().unwrap(), "");
+        assert_eq!(args.next().unwrap().unwrap(), "c d");
+        assert_eq!(args.next(), None);
         println!("ok");
     }
     #[cfg(arm_compat)]
     {
         println!("test sys::arm_compat ... ");
         println!("sys_clock: {}", sys_clock().unwrap());
-        if !qemu_has_read_order_bug {
-            println!("sys_elapsed: {}", sys_elapsed().unwrap());
-        }
+        println!("sys_elapsed: {}", sys_elapsed().unwrap());
         let HeapInfo { heap_base, heap_limit, stack_base, stack_limit } = sys_heapinfo();
         // TODO(arm_compat):
-        if !qemu_has_read_order_bug {
-            assert_eq!(heap_base, ptr::null_mut());
-            assert_eq!(heap_limit, ptr::null_mut());
-            assert_eq!(stack_base, ptr::null_mut());
-            assert_eq!(stack_limit, ptr::null_mut());
-            assert_eq!(sys_iserror(isize::MAX), false);
-            assert_eq!(sys_iserror(1), false);
-            assert_eq!(sys_iserror(0), false);
-            assert_eq!(sys_iserror(-1), true);
-            assert_eq!(sys_iserror(-4095), true);
-            assert_eq!(sys_iserror(-4096), true);
-            assert_eq!(sys_iserror(isize::MIN), true);
-        }
+        assert_eq!(heap_base, ptr::null_mut());
+        assert_eq!(heap_limit, ptr::null_mut());
+        assert_eq!(stack_base, ptr::null_mut());
+        assert_eq!(stack_limit, ptr::null_mut());
+        assert_eq!(sys_iserror(isize::MAX), false);
+        assert_eq!(sys_iserror(1), false);
+        assert_eq!(sys_iserror(0), false);
+        assert_eq!(sys_iserror(-1), true);
+        assert_eq!(sys_iserror(-4095), true);
+        assert_eq!(sys_iserror(-4096), true);
+        assert_eq!(sys_iserror(isize::MIN), true);
         // println!("{}", sys_readc() as char); // TODO(arm_compat): only works on qemu-user https://gitlab.com/qemu-project/qemu/-/issues/1963
-        if !qemu_has_read_order_bug {
-            print!("sys_system: ");
-            assert_eq!(sys_system(c!("pwd")), 0);
-        }
+        print!("sys_system: ");
+        assert_eq!(sys_system(c!("pwd")), 0);
         println!("sys_tickfreq: {}", sys_tickfreq().unwrap());
         println!("sys_time: {}", sys_time().unwrap());
         print!("sys_writec: ");

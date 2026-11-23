@@ -4,12 +4,17 @@
 
 #[path = "src/gen/build.rs"]
 mod generated;
-#[path = "version.rs"]
+#[path = "src/build/rustflags.rs"]
+mod rustflags;
+#[path = "src/build/version.rs"]
 mod version;
 
 use std::env;
 
-use self::version::{Version, rustc_version};
+use self::{
+    rustflags::Rustflags,
+    version::{Version, rustc_version},
+};
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -37,8 +42,8 @@ fn main() {
         println!(
             "cargo:rustc-check-cfg=cfg(semihosting_no_asm,semihosting_no_duration_checked_float,semihosting_no_error_in_core,semihosting_no_strict_provenance,semihosting_target_feature)"
         );
-        // TODO: handle multi-line target_feature_fallback
-        // grep -F 'target_feature_fallback("' build.rs | grep -Ev '^ *//' | sed -E 's/^.*target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ',' | sed -E 's/,$/\n/'
+        // TODO: handle multi-line emit_target_feature_fallback
+        // grep -F 'emit_target_feature_fallback("' build.rs | grep -Ev '^ *//' | sed -E 's/^.*emit_target_feature_fallback\(//; s/",.*$/"/' | LC_ALL=C sort -u | tr '\n' ',' | sed -E 's/,$/\n/'
         println!(
             r#"cargo:rustc-check-cfg=cfg(semihosting_target_feature,values("mclass","thumb-mode"))"#
         );
@@ -81,24 +86,39 @@ fn main() {
                 println!("cargo:rerun-if-env-changed=CARGO_TARGET_{target_upper}_RUSTFLAGS");
             }
 
-            if needs_target_feature_fallback(&version) {
+            if needs_target_feature_fallback(&version, None) {
                 // See https://github.com/taiki-e/atomic-maybe-uninit/blob/HEAD/build.rs for details
-                let mut subarch =
-                    target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb")).unwrap();
-                subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
-                subarch = subarch.split('-').next().unwrap(); // ignore vender/os/env
-                subarch = subarch.split('.').next().unwrap(); // ignore .base/.main suffix
+                let rustflags = env::var_os("CARGO_ENCODED_RUSTFLAGS").unwrap_or_default();
+                let rustflags = rustflags.to_string_lossy();
+                let rustflags = Rustflags::new(&rustflags);
                 let mut mclass = false;
-                match subarch {
-                    "v6m" | "v7em" | "v7m" | "v8m" => mclass = true,
-                    _ => {}
+                if let Some(mut subarch) =
+                    target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb"))
+                {
+                    subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
+                    subarch = subarch.split_once('-').unwrap_or((subarch, "")).0; // ignore vendor/os/env
+                    let (subarch, _suffix) = subarch.rsplit_once('.').unwrap_or((subarch, "")); // .base/.main suffix
+                    match subarch {
+                        "v6m" | "v7em" | "v7m" | "v8m" | "v8.1m" => mclass = true,
+                        _ => {}
+                    }
                 }
-                target_feature_fallback("mclass", mclass);
                 // All builtin targets that start with "thumb" enable thumb-mode, and
                 // some builtin targets that start with "arm" are also enable thumb-mode.
-                let thumb_mode =
+                let mut thumb_mode =
                     target.starts_with("thumb") || generated::ARM_BUT_THUMB_MODE.contains(&target);
-                target_feature_fallback("thumb-mode", thumb_mode);
+                // TODO: Handles cases where a specific target cpu
+                // implicitly enables target feature.
+                for &(enabled, name) in &rustflags.target_feature {
+                    // https://github.com/rust-lang/rust/blob/1.100.0/compiler/rustc_target/src/target_features.rs#L160
+                    match name {
+                        b"mclass" => mclass = enabled,
+                        b"thumb-mode" => thumb_mode = enabled,
+                        _ => {}
+                    }
+                }
+                emit_target_feature_fallback("mclass", mclass);
+                emit_target_feature_fallback("thumb-mode", thumb_mode);
             }
         }
         "loongarch32" => {
@@ -120,32 +140,18 @@ fn main() {
 // As mentioned in the [RFC2045], unstable target features are also passed to LLVM
 // (e.g., https://godbolt.org/z/4rr7rMcfG), so this hack works properly on stable.
 //
+// Note that fallback doesn't catch the target feature enabled via target spec.
+//
 // [RFC2045]: https://rust-lang.github.io/rfcs/2045-target-feature.html#backend-compilation-options
-fn needs_target_feature_fallback(version: &Version) -> bool {
-    if version.nightly {
-        // In this case, cfg(target_feature = "...") would work, so skip emitting our own fallback target_feature cfg.
-        false
-    } else {
-        true
+fn needs_target_feature_fallback(version: &Version, stable: Option<u32>) -> bool {
+    match stable {
+        // In these cases, cfg(target_feature = "...") would work, so skip emitting our own fallback target_feature cfg.
+        _ if version.nightly => false,
+        Some(stabilized) if version.minor >= stabilized => false,
+        _ => true,
     }
 }
-fn target_feature_fallback(name: &str, mut has_target_feature: bool) {
-    if let Some(rustflags) = env::var_os("CARGO_ENCODED_RUSTFLAGS") {
-        for mut flag in rustflags.to_string_lossy().split('\x1f') {
-            flag = flag.strip_prefix("-C").unwrap_or(flag);
-            if let Some(flag) = flag.strip_prefix("target-feature=") {
-                for s in flag.split(',') {
-                    // TODO: Handles cases where a specific target feature
-                    // implicitly enables another target feature.
-                    match (s.as_bytes().first(), s.as_bytes().get(1..)) {
-                        (Some(b'+'), Some(f)) if f == name.as_bytes() => has_target_feature = true,
-                        (Some(b'-'), Some(f)) if f == name.as_bytes() => has_target_feature = false,
-                        _ => {}
-                    }
-                }
-            }
-        }
-    }
+fn emit_target_feature_fallback(name: &str, has_target_feature: bool) {
     if has_target_feature {
         println!("cargo:rustc-cfg=semihosting_target_feature=\"{name}\"");
     }

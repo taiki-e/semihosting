@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use std::{env, iter, process::Command, str};
+// rustc version parsing used in the build script.
+//
+// Adapted from https://github.com/taiki-e/atomic-maybe-uninit
+
+use std::{env, ffi::OsString, iter, process::Command, str};
 
 pub(crate) fn rustc_version() -> Option<Version> {
     let rustc = env::var_os("RUSTC")?;
@@ -14,35 +18,37 @@ pub(crate) fn rustc_version() -> Option<Version> {
     // -vV is also matched with that cargo internally uses: https://github.com/rust-lang/cargo/blob/0.80.0/src/cargo/util/rustc.rs#L65
     let output = cmd.arg("-vV").output().ok()?;
     let verbose_version = str::from_utf8(&output.stdout).ok()?;
-    Version::parse(verbose_version)
+    Version::parse(verbose_version, env::var_os("RUSTC_BOOTSTRAP").as_ref())
 }
 
 pub(crate) struct Version {
     pub(crate) minor: u32,
     pub(crate) nightly: bool,
-    commit_date: Date,
+    commit_date: Option<Date>,
 }
 
 impl Version {
     // The known latest stable version. If we unable to determine
     // the rustc version, we assume this is the current version.
     // It is no problem if this is older than the actual latest stable.
-    pub(crate) const LATEST: Self = Self::stable(98);
+    pub(crate) const LATEST: Self = Self::stable(100);
 
-    const fn stable(minor: u32) -> Self {
-        Self { minor, nightly: false, commit_date: Date::UNKNOWN }
+    const fn stable(rustc_minor: u32) -> Self {
+        Self { minor: rustc_minor, nightly: false, commit_date: None }
     }
 
     pub(crate) fn probe(&self, minor: u32, year: u16, month: u8, day: u8) -> bool {
-        if self.nightly {
-            self.minor > minor
-                || self.minor == minor && self.commit_date >= Date::new(year, month, day)
+        if self.minor != minor {
+            return self.minor > minor;
+        }
+        if let Some(commit_date) = &self.commit_date {
+            *commit_date >= Date::new(year, month, day)
         } else {
-            self.minor >= minor
+            true
         }
     }
 
-    pub(crate) fn parse(verbose_version: &str) -> Option<Self> {
+    fn parse(verbose_version: &str, rustc_bootstrap: Option<&OsString>) -> Option<Self> {
         let mut release = verbose_version
             .lines()
             .find(|line| line.starts_with("release: "))
@@ -57,15 +63,19 @@ impl Version {
         }
         let minor = digits.next()?.parse::<u32>().ok()?;
         let _patch = digits.next().unwrap_or("0").parse::<u32>().ok()?;
-        let nightly = match env::var_os("RUSTC_BOOTSTRAP") {
+        let nightly = channel == "nightly" || channel == "dev";
+        // We don't refer commit date on stable/beta, but refer it even if RUSTC_BOOTSTRAP=-1 is set.
+        let refer_commit_date = nightly;
+        let nightly = match rustc_bootstrap {
             // When -1 is passed rustc works like stable, e.g., cfg(target_feature = "unstable_target_feature") will never be set. https://github.com/rust-lang/rust/pull/132993
             Some(v) if v == "-1" => false,
-            // When 1 is passed stable rustc works like nightly, but we ignore it for now.
-            _ => channel == "nightly" || channel == "dev",
+            // When 1 or this crate name is passed stable rustc works like nightly, but we ignore it
+            // since there is no guarantee that this will continue to work in the future.
+            // https://doc.rust-lang.org/nightly/unstable-book/compiler-environment-variables/RUSTC_BOOTSTRAP.html
+            _ => nightly,
         };
 
-        // we don't refer commit date on stable/beta.
-        if nightly {
+        if refer_commit_date {
             let commit_date = (|| {
                 let mut commit_date = verbose_version
                     .lines()
@@ -80,7 +90,7 @@ impl Version {
                 }
                 Some(Date::new(year, month, day))
             })();
-            Some(Self { minor, nightly, commit_date: commit_date.unwrap_or(Date::UNKNOWN) })
+            Some(Self { minor, nightly, commit_date: Some(commit_date.unwrap_or(Date::UNKNOWN)) })
         } else {
             Some(Self::stable(minor))
         }

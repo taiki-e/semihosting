@@ -9,7 +9,6 @@ cd -- "$(dirname -- "$0")"/..
 # USAGE:
 #    ./tools/no-std.sh [+toolchain] [target]...
 #    QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
-#    MIPS_QEMU_SYSTEM_BIN_DIR=/path/to/qemu-system-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    LOONGARCH_QEMU_BIN_DIR=/path/to/qemu-bin-dir ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user ./tools/no-std.sh [+toolchain] [target]...
 #    TEST_RUNNER=qemu-user QEMU_USER_BIN_DIR=/path/to/qemu-user-bin-dir ./tools/no-std.sh [+toolchain] [target]...
@@ -92,13 +91,12 @@ default_targets=(
   # mips32r6
   mipsisa32r6-unknown-none   # custom target
   mipsisa32r6el-unknown-none # custom target
-  # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
-  # # mips64r2
-  # mips64-unknown-none   # custom target
-  # mips64el-unknown-none # custom target
-  # # mips64r6
-  # mipsisa64r6-unknown-none   # custom target
-  # mipsisa64r6el-unknown-none # custom target
+  # mips64r2
+  mips64-unknown-none   # custom target
+  mips64el-unknown-none # custom target
+  # mips64r6
+  mipsisa64r6-unknown-none   # custom target
+  mipsisa64r6el-unknown-none # custom target
 )
 
 x() {
@@ -156,8 +154,6 @@ if [[ -z "${is_custom_toolchain}" ]]; then
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | grep -E '^release:' | cut -d' ' -f2)
-rustc_minor_version="${rustc_version#*.}"
-rustc_minor_version="${rustc_minor_version%%.*}"
 llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
 llvm_version="${llvm_version%%.*}"
 target_dir="${PWD}/target"
@@ -225,6 +221,14 @@ run() {
   case "${target}" in
     armv7a* | thumbv7a*) ;;
     aarch64* | arm* | thumb* | riscv* | loongarch*)
+      case "${target}" in
+        armebv7r*)
+          if [[ "${llvm_version}" -lt 17 ]]; then
+            # pre-17 LLD doesn't support big-endian Arm
+            target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+          fi
+          ;;
+      esac
       case "${runner}" in
         qemu-system)
           case "${target}" in
@@ -232,13 +236,6 @@ run() {
               # broken on pre-11.0 QEMU.
               if "${qemu_system_bin_dir}qemu-system-aarch64" --version | grep -Eq "QEMU emulator version ([0-9]\.|10\.([01]\.|2\.[^9]))"; then
                 info "pre-11.0 QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
-                return 0
-              fi
-              ;;
-            armv7r* | armebv7r*)
-              # aarch32-rt requires Rust 1.83.
-              if [[ "${rustc_minor_version}" -lt 83 ]]; then
-                info "testing ${target} on ${rustc_version} is not supported (skipped)"
                 return 0
               fi
               ;;
@@ -261,17 +258,17 @@ run() {
               fi
               ;;
           esac
+          case "${target}" in
+            armeb*)
+              # Workaround for https://github.com/taiki-e/semihosting/issues/18.
+              target_rustflags+=" -C link-arg=--be8"
+              ;;
+          esac
           linker=link.x
           target_rustflags+=" -C link-arg=-T${linker}"
           ;;
         qemu-user)
           case "${target}" in
-            armebv7r*)
-              if [[ "${llvm_version}" -lt 17 ]]; then
-                # pre-17 LLD doesn't support big-endian Arm
-                target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
-              fi
-              ;;
             loongarch32*)
               info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
               return 0
@@ -294,13 +291,6 @@ run() {
     mips*)
       case "${runner}" in
         qemu-system)
-          # TODO: The patched QEMU needed on QEMU 8.0+ (see README.md for details).
-          if [[ -z "${MIPS_QEMU_SYSTEM_BIN_DIR:-}" ]]; then
-            if "${qemu_system_bin_dir}qemu-system-mips" --version | grep -Eq "QEMU emulator version ([8-9]|[1-9][0-9])\."; then
-              info "QEMU doesn't support semihosting for MIPS (${target}) on QEMU 8.0+ (skipped)"
-              return 0
-            fi
-          fi
           linker=link.x
           # Allow linker_messages to work around https://github.com/llvm/llvm-project/issues/56192.
           target_rustflags+=" -C link-arg=-T${linker} -A linker_messages"

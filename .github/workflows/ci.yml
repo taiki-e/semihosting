@@ -9,7 +9,7 @@ on:
       - main
       - dev
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 2 * * 5'
   workflow_dispatch:
 
 env:
@@ -35,32 +35,34 @@ concurrency:
 
 jobs:
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@af422d7af8ef63e0ea0d84510aff17254fef31c2 # 2026.11.23
     permissions:
       security-events: write # for github/codeql-action/*
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
-      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,loongarch64-unknown-linux-gnu # ,mips64-unknown-linux-gnuabi64
+      clippy-target: aarch64-unknown-linux-gnu,armv7-unknown-linux-gnueabihf,riscv64gc-unknown-linux-gnu,mips64-unknown-linux-gnuabi64,loongarch64-unknown-linux-gnu
       # NB: sync with env.TEST_FEATURES
       clippy-args: --features alloc,stdio,fs,args,time,random
       # TODO: workflow currently always runs doctest with the default target.
       clippy-doctest: false
+      check-external-types: false # TODO: remove once new version of https://github.com/awslabs/cargo-check-external-types with latest rustdoc-types released
   codegen:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/gen.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
+    uses: taiki-e/github-actions/.github/workflows/gen.yml@af422d7af8ef63e0ea0d84510aff17254fef31c2 # 2026.11.23
     permissions:
       contents: write # for creating branch for pr
+      pull-requests: read # for gh pr list
     secrets:
       PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
   # We have some platform-independent code, so test them.
   test:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
+    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@af422d7af8ef63e0ea0d84510aff17254fef31c2 # 2026.11.23
+    permissions:
+      security-events: write # for github/codeql-action/*
     with:
       # We don't support x86_64, so use aarch64-unknown-linux-gnu instead.
-      # TODO(mips): LLVM 23 bug https://github.com/llvm/llvm-project/issues/112010
-      target: aarch64-unknown-linux-gnu # ,mips64-unknown-linux-gnuabi64
+      target: aarch64-unknown-linux-gnu,mips64-unknown-linux-gnuabi64
       # NB: sync with env.TEST_FEATURES
       features: --features alloc,stdio,fs,args,time,random
       optional-deps: ''
@@ -101,9 +103,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/github-actions/free-device-space@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
+      - uses: taiki-e/github-actions/free-device-space@af422d7af8ef63e0ea0d84510aff17254fef31c2 # 2026.11.23
         if: startsWith(matrix.os, 'ubuntu') || matrix.os == ''
-      - uses: taiki-e/install-action@07b4745e0c39a41822af610387492e3e53aa222b # v2.83.4
+      - uses: taiki-e/install-action@76c2e6406e52637deed7160d77bded76bd83e06e # v2.87.14
         with:
           tool: rust@${{ matrix.rust }}${{ (matrix.rust == 'stable' && (startsWith(matrix.os, 'ubuntu') || matrix.os == '')) && ',espup' || '' }}
           fallback: none
@@ -118,24 +120,6 @@ jobs:
             done
             "$@"
           }
-          apt_packages=(libslirp0)
-          llvm_version=$(rustc -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
-          llvm_version="${llvm_version%%.*}"
-          if [[ "${llvm_version}" -lt 17 ]]; then
-            # pre-17 LLD doesn't support big-endian arm
-            apt_packages+=(binutils-arm-none-eabi)
-          fi
-          retry sudo apt-get -o Acquire::Retries=10 -qq update
-          retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends "${apt_packages[@]}"
-          # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
-          # TODO: "Bail out! ERROR:target/arm/cpregs-omap-stub.c:9:define_omap_cp_regs: code should not be reached" error with ti925t
-          retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user:11.0
-          mkdir -p -- qemu-user
-          docker cp -- qemu-user:/usr/bin qemu-user/bin
-          docker rm -f -- qemu-user >/dev/null
-          sudo mv -- qemu-user/bin/qemu-* /usr/local/bin/
-          rm -rf -- ./qemu-user
-          qemu-arm --version
           if [[ "${RUST}" == "stable" ]]; then
             retry espup install --targets esp32
           fi
@@ -154,41 +138,59 @@ jobs:
             done
             "$@"
           }
-          # Patched QEMU for MIPS semihosting
-          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/patched-11.0.0/qemu-"${OS}".tar.xz \
-            | tar xJf -
-          sudo cp -r -- qemu/. /usr/local/
+          qemu_version=11.1.3
+          qemu_dir="${RUNNER_TEMP}"/qemu
+          mkdir -p -- "${qemu_dir}/bin"
+          printf '%s/bin\n' "${qemu_dir}" >>"${GITHUB_PATH}"
+          case "${OS}" in
+            macos*)
+              host=aarch64-macos
+              brew install libslirp
+              ;;
+            windows*)
+              host=x86_64-windows
+              sudo() { "$@"; }
+              ;;
+            *-arm) host=aarch64-linux ;;
+            *) host=x86_64-linux ;;
+          esac
+          if [[ "${host}" == *'-linux' ]]; then
+            llvm_version=$(rustc -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
+            llvm_version="${llvm_version%%.*}"
+            if [[ "${llvm_version}" -lt 17 ]]; then
+              # pre-17 LLD doesn't support big-endian Arm
+              apt_packages=(binutils-arm-none-eabi)
+              retry sudo apt-get -o Acquire::Retries=10 -qq update
+              retry sudo apt-get -o Acquire::Retries=10 -o Dpkg::Use-Pty=0 install -y --no-install-recommends "${apt_packages[@]}"
+            fi
+            retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 "https://github.com/taiki-e/qemu/releases/download/patched-${qemu_version}/qemu-user-${host}.tar.zst" \
+              | tar xf - --zstd
+            # https://github.com/taiki-e/dockerfiles/pkgs/container/qemu-user
+            # TODO: "Bail out! ERROR:target/arm/cpregs-omap-stub.c:9:define_omap_cp_regs: code should not be reached" error with ti925t
+            rm -- qemu-user/bin/qemu-arm
+            retry docker create --name qemu-user ghcr.io/taiki-e/qemu-user:11.0
+            mkdir -p -- qemu-user
+            docker cp -- qemu-user:/usr/bin/qemu-arm qemu-user/bin/qemu-arm
+            docker rm -f -- qemu-user >/dev/null
+            sudo mv -- qemu-user/bin/qemu-* "${qemu_dir}"/bin/
+            rm -rf -- ./qemu-user
+            # Patched QEMU for LoongArch semihosting
+            # TODO: patched-11.1.3 hang on la32
+            retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.5/qemu-"${OS}".tar.xz \
+              | tar xJf -
+            sudo mv -- qemu /usr/local/qemu-loongarch-semi
+            printf 'LOONGARCH_QEMU_BIN_DIR=/usr/local/qemu-loongarch-semi/bin\n' >>"${GITHUB_ENV}"
+          fi
+          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 "https://github.com/taiki-e/qemu/releases/download/patched-${qemu_version}/qemu-system-${host}.tar.zst" \
+            | tar xf - --zstd
+          sudo cp -r -- qemu/. "${qemu_dir}"/
           rm -rf -- ./qemu
-          printf 'MIPS_QEMU_SYSTEM_BIN_DIR=/usr/local/bin\n' >>"${GITHUB_ENV}"
-          # Patched QEMU for LoongArch semihosting
-          retry curl --proto '=https' --tlsv1.2 -fsSL --retry 10 https://github.com/taiki-e/qemu/releases/download/loongarch-semi-10.1.5/qemu-"${OS}".tar.xz \
-            | tar xJf -
-          sudo mv -- qemu /usr/local/qemu-loongarch-semi
-          printf 'LOONGARCH_QEMU_BIN_DIR=/usr/local/qemu-loongarch-semi/bin\n' >>"${GITHUB_ENV}"
         env:
           OS: ${{ matrix.os || 'ubuntu-24.04' }}
-        if: startsWith(matrix.os, 'ubuntu') || matrix.os == '' || startsWith(matrix.os, 'macos')
-      - run: |
-          C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-ucrt-x86_64-qemu
-          printf '%s\n' 'C:\msys64\ucrt64\bin' >>"${GITHUB_PATH}"
-          C:/msys64/ucrt64/bin/qemu-system-arm --version
-        if: startsWith(matrix.os, 'windows')
       # Avoid needless git fetch
       - run: sed -Ei '/^unwinding = .*/d' Cargo.toml
         working-directory: tests/no-std
         if: matrix.rust != 'nightly'
-      # syn 2.0.107 & quote 1.0.42 & proc-macro2 1.0.104 requires Rust 1.68.
-      # unicode-ident 1.0.23 requires Rust 1.71.
-      # cortex-m-rt 0.7.6 requires Rust 1.85.
-      - run: |
-          cargo generate-lockfile
-          cargo update -p proc-macro2 --precise 1.0.103
-          cargo update -p quote --precise 1.0.41
-          cargo update -p syn@2.0.119 --precise 2.0.106
-          cargo update -p unicode-ident --precise 1.0.22
-          cargo update -p cortex-m-rt --precise 0.7.5
-        working-directory: tests/no-std
-        if: startsWith(matrix.rust, '1.6') || startsWith(matrix.rust, '1.7') || startsWith(matrix.rust, '1.8')
       - run: tools/no-std.sh
         env:
           ALL_TARGETS_MUST_BE_AVAILABLE: ${{ matrix.rust == 'nightly' || '' }}
