@@ -5,65 +5,9 @@ edition = "2021"
 publish = false
 
 [features]
-qemu-system = ["dep:aarch32-rt", "dep:cortex-m-rt"]
+qemu-system = []
 qemu-user = []
 disable-link-check = []
-
-# cfg(target_feature = "mclass") is not available on stable/beta.
-# Armv4T
-[target.'armv4t-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'thumbv4t-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-# Armv5TE
-[target.'armv5te-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'thumbv5te-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-# Armv6
-[target.'armv6-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'armv6-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'thumbv6-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-# Armv7-R
-[target.'armv7r-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'armv7r-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'armebv7r-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'armebv7r-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'thumbv7r-none-eabi'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'thumbv7r-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-# Armv8-R
-[target.'armv8r-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'armebv8r-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-[target.'thumbv8r-none-eabihf'.dependencies]
-aarch32-rt = { optional = true, git = "https://github.com/taiki-e/aarch32.git", rev = "a643c726538e7e6e0a8d5f4fb731693aaf70ce50" }
-# Armv6-M
-[target.thumbv6m-none-eabi.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
-# Armv7-M
-[target.thumbv7m-none-eabi.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
-[target.thumbv7em-none-eabi.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
-[target.thumbv7em-none-eabihf.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
-# Armv8-M
-[target.'thumbv8m.base-none-eabi'.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
-[target.'thumbv8m.main-none-eabi'.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
-[target.'thumbv8m.main-none-eabihf'.dependencies]
-cortex-m-rt = { optional = true, version = "0.7" }
 
 [workspace]
 resolver = "2"

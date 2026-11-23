@@ -154,8 +154,6 @@ if [[ -z "${is_custom_toolchain}" ]]; then
 fi
 rustc_target_list=$(rustc ${pre_args[@]+"${pre_args[@]}"} --print target-list)
 rustc_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | grep -E '^release:' | cut -d' ' -f2)
-rustc_minor_version="${rustc_version#*.}"
-rustc_minor_version="${rustc_minor_version%%.*}"
 llvm_version=$(rustc ${pre_args[@]+"${pre_args[@]}"} -vV | { grep -E '^LLVM version:' || true; } | cut -d' ' -f3)
 llvm_version="${llvm_version%%.*}"
 target_dir="${PWD}/target"
@@ -223,6 +221,14 @@ run() {
   case "${target}" in
     armv7a* | thumbv7a*) ;;
     aarch64* | arm* | thumb* | riscv* | loongarch*)
+      case "${target}" in
+        armebv7r*)
+          if [[ "${llvm_version}" -lt 17 ]]; then
+            # pre-17 LLD doesn't support big-endian Arm
+            target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
+          fi
+          ;;
+      esac
       case "${runner}" in
         qemu-system)
           case "${target}" in
@@ -230,13 +236,6 @@ run() {
               # broken on pre-11.0 QEMU.
               if "${qemu_system_bin_dir}qemu-system-aarch64" --version | grep -Eq "QEMU emulator version ([0-9]\.|10\.([01]\.|2\.[^9]))"; then
                 info "pre-11.0 QEMU bug on aarch64_be (${target}) with system-mode (skipped)"
-                return 0
-              fi
-              ;;
-            armv7r* | armebv7r*)
-              # aarch32-rt requires Rust 1.83.
-              if [[ "${rustc_minor_version}" -lt 83 ]]; then
-                info "testing ${target} on ${rustc_version} is not supported (skipped)"
                 return 0
               fi
               ;;
@@ -270,12 +269,6 @@ run() {
           ;;
         qemu-user)
           case "${target}" in
-            armebv7r*)
-              if [[ "${llvm_version}" -lt 17 ]]; then
-                # pre-17 LLD doesn't support big-endian Arm
-                target_rustflags+=" -C linker=arm-none-eabi-ld -C link-arg=-EB"
-              fi
-              ;;
             loongarch32*)
               info "LoongArch semihosting support hasn't been merged upstream yet (skipped)"
               return 0

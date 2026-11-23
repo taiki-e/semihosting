@@ -40,31 +40,6 @@ macro_rules! cfg_sel {
     };
 }
 
-// Note: cannot use cfg_sel together with #[macro_export] macros.
-#[cfg(cortex_m_rt)]
-#[macro_export]
-macro_rules! entry {
-    ($entry_fn:ident) => {
-        extern crate semihosting_no_std_test_rt as cortex_m_rt;
-        #[::semihosting_no_std_test_rt::cortex_m_rt_entry]
-        fn main() -> ! {
-            ::semihosting::process::Termination::report($entry_fn()).exit_process()
-        }
-    };
-}
-#[cfg(aarch32_rt)]
-#[macro_export]
-macro_rules! entry {
-    ($entry_fn:ident) => {
-        extern crate semihosting_no_std_test_rt as aarch32_rt;
-        #[::semihosting_no_std_test_rt::aarch32_rt_entry]
-        fn main() -> ! {
-            ::semihosting::process::Termination::report($entry_fn()).exit_process()
-        }
-    };
-}
-#[cfg(not(cortex_m_rt))]
-#[cfg(not(aarch32_rt))]
 #[macro_export]
 macro_rules! entry {
     ($entry_fn:ident) => {
@@ -74,23 +49,21 @@ macro_rules! entry {
         }
     };
 }
-#[cfg(not(cortex_m_rt))]
-#[cfg(not(aarch32_rt))]
 extern "C" {
     fn _start_rust() -> !;
 }
 
+#[cfg(any(arm_m, arm_ar))]
+macro_rules! arm_start {
+    ($file:literal $(, $setting:literal)?) => {
+        #[cfg(arm_hard_float)]
+        core::arch::global_asm!(".set .Larm_hard_float, 1", $($setting,)? include_str!($file));
+        #[cfg(not(arm_hard_float))]
+        core::arch::global_asm!($($setting,)? include_str!($file));
+    };
+}
+
 cfg_sel!({
-    #[cfg(cortex_m_rt)]
-    {
-        #[doc(hidden)]
-        pub use cortex_m_rt::{entry as cortex_m_rt_entry, *};
-    }
-    #[cfg(aarch32_rt)]
-    {
-        #[doc(hidden)]
-        pub use aarch32_rt::{entry as aarch32_rt_entry, *};
-    }
     #[cfg(feature = "qemu-user")]
     {
         #[doc(hidden)]
@@ -98,6 +71,19 @@ cfg_sel!({
         pub unsafe fn _start() -> ! {
             unsafe { _start_rust() }
         }
+    }
+    #[cfg(arm_m)]
+    {
+        arm_start!("arm-m.s");
+    }
+    #[cfg(arm_ar)]
+    {
+        #[cfg(arm_v6)]
+        arm_start!("arm-ar.s", ".set .Larm_v6, 1");
+        #[cfg(arm_v8r)]
+        arm_start!("arm-ar.s", ".set .Larm_v8r, 1");
+        #[cfg(not(any(arm_v6, arm_v8r)))]
+        arm_start!("arm-ar.s");
     }
     #[cfg(target_arch = "aarch64")]
     {

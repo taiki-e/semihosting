@@ -37,6 +37,7 @@ IWUSR
 IXGRP
 IXOTH
 IXUSR
+Larm
 libslirp
 lseek
 nlink
@@ -49,6 +50,7 @@ openocd
 plog
 pread
 pwrite
+QSPI
 ramrange
 raspi
 rdev
@@ -69,7 +71,6 @@ tickfreq
 ucrt
 unseekable
 urandom
-versatileab
 versatilepb
 virt
 writec
