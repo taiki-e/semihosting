@@ -68,7 +68,6 @@ subarch
 syscall
 Tensilica
 tickfreq
-ucrt
 unseekable
 urandom
 versatilepb
