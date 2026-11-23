@@ -46,14 +46,6 @@ jobs:
       # TODO: workflow currently always runs doctest with the default target.
       clippy-doctest: false
       check-external-types: false # TODO: remove once new version of https://github.com/awslabs/cargo-check-external-types with latest rustdoc-types released
-  codegen:
-    needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/gen.yml@af422d7af8ef63e0ea0d84510aff17254fef31c2 # 2026.11.23
-    permissions:
-      contents: write # for creating branch for pr
-      pull-requests: read # for gh pr list
-    secrets:
-      PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
   # We have some platform-independent code, so test them.
   test:
     needs: tidy
