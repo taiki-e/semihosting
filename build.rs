@@ -96,7 +96,7 @@ fn main() {
                     target.strip_prefix("arm").or_else(|| target.strip_prefix("thumb"))
                 {
                     subarch = subarch.strip_prefix("eb").unwrap_or(subarch); // ignore endianness
-                    subarch = subarch.split_once('-').unwrap_or((subarch, "")).0; // ignore vender/os/env
+                    subarch = subarch.split_once('-').unwrap_or((subarch, "")).0; // ignore vendor/os/env
                     let (subarch, _suffix) = subarch.rsplit_once('.').unwrap_or((subarch, "")); // .base/.main suffix
                     match subarch {
                         "v6m" | "v7em" | "v7m" | "v8m" | "v8.1m" => mclass = true,
