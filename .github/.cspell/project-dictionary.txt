@@ -8,7 +8,6 @@ blksize
 CENTI
 CENTISECONDS
 CMDLINE
-cpregs
 CREAT
 csrwr
 dbcl
@@ -38,14 +37,12 @@ IXGRP
 IXOTH
 IXUSR
 Larm
-libslirp
 lseek
 nlink
 noat
 nondecreasing
 norvc
 nsec
-omap
 openocd
 plog
 pread
@@ -57,7 +54,6 @@ rdev
 RDONLY
 RDWR
 readc
-regs
 rustfilt
 sdbbp
 Seekable

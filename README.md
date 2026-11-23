@@ -83,7 +83,7 @@ The following targets have been tested on CI. (qemu-system has been tested on Li
 | `mipsisa64r6{,el}-unknown-none`           | ✓                | N/A            | \[4]      |
 
 \[1] Due to [qemu-system bug about big-endian Arm](https://github.com/taiki-e/semihosting/issues/18), operations that contains reading/writing of strings such as file open (`stdio`, `fs`, `random`), `args`, and `SYS_SYSTEM` don't work by default.<br>
-\[2] Tested with patched QEMU ([loongarch](https://lore.kernel.org/qemu-devel/20241222-semihosting-v1-1-8a770df60e9c@flygoat.com/)). QEMU binaries that we are using for test are available on our QEMU fork ([loongarch](https://github.com/taiki-e/qemu/releases/tag/loongarch-semi-10.1.5)).<br>
+\[2] Tested with patched QEMU ([loongarch](https://lore.kernel.org/qemu-devel/20241222-semihosting-v1-1-8a770df60e9c@flygoat.com/)). QEMU binaries that we are using for test are available on our QEMU fork ([loongarch](https://github.com/taiki-e/qemu/releases/tag/v11.1.3-patched.0)).<br>
 \[3] Requires Rust 1.91+.<br>
 \[4] Requires nightly due to `#![feature(asm_experimental_arch)]`.<br>
 
